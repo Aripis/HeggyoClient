@@ -1,0 +1,34 @@
+{
+    "name": "heggyoclient",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "dev": "next dev",
+        "build": "next build",
+        "start": "next start"
+    },
+    "dependencies": {
+        "@material-ui/core": "latest",
+        "@material-ui/icons": "^4.9.1",
+        "clsx": "latest",
+        "next": "9.5.5",
+        "react": "16.14.0",
+        "react-dom": "16.14.0"
+    },
+    "devDependencies": {
+        "@types/node": "latest",
+        "@types/react": "latest",
+        "@types/react-dom": "latest",
+        "@typescript-eslint/eslint-plugin": "^3.3.0",
+        "@typescript-eslint/parser": "^3.3.0",
+        "eslint": "^7.3.0",
+        "eslint-config-prettier": "^6.11.0",
+        "eslint-plugin-jsx-a11y": "^6.3.1",
+        "eslint-plugin-prettier": "^3.1.4",
+        "eslint-plugin-react": "^7.20.0",
+        "eslint-plugin-react-hooks": "^4.0.4",
+        "prettier": "^2.0.5",
+        "sass": "^1.26.8",
+        "typescript": "latest"
+    }
+}
