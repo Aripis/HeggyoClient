@@ -9,11 +9,11 @@
     },
     "dependencies": {
         "@material-ui/core": "latest",
-        "@material-ui/icons": "^4.9.1",
+        "@material-ui/icons": "latest",
         "clsx": "latest",
-        "next": "9.5.5",
-        "react": "16.14.0",
-        "react-dom": "16.14.0"
+        "next": "latest",
+        "react": "latest",
+        "react-dom": "latest"
     },
     "devDependencies": {
         "@types/node": "latest",
