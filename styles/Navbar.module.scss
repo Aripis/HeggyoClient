@@ -1,0 +1,60 @@
+@import 'variables';
+
+.navbar {
+    background-color: #fff7f5;
+    width: auto;
+
+    .title {
+        font-size: 28px;
+        margin-right: 20px;
+    }
+
+    .links {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+
+        .link {
+            margin: 0 8px;
+        }
+
+        button {
+            width: max-content;
+            padding: 8px 16px;
+            color: $dark-color;
+        }
+
+        :global(.MuiButton-containedPrimary) {
+            color: white;
+        }
+
+        .separator {
+            display: block;
+            width: 100%;
+        }
+    }
+
+    .drawer-toggle {
+        display: none;
+        margin-right: 13px;
+        color: $dark-color;
+    }
+}
+
+@media only screen and (max-width: 768px) {
+    .navbar {
+        .drawer-toggle {
+            display: block;
+        }
+
+        .links {
+            display: none;
+        }
+    }
+}
+
+@media only screen and (max-width: 320px) {
+    .navbar {
+        padding: 0 10px;
+    }
+}

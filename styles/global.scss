@@ -1,3 +1,5 @@
+@import 'variables';
+
 *,
 *::before,
 *::after {
@@ -22,5 +24,47 @@ a {
 .MuiButton-root {
     text-transform: none;
     border-radius: 10px;
-    transition: 0.1s;
+    transition: 0.2s;
+}
+
+.drawer {
+    .MuiDrawer-paper {
+        display: flex;
+        align-items: center;
+        background: $light-color;
+        color: black;
+        width: 200px;
+
+        .active {
+            width: 100%;
+        }
+        .drawer-title {
+            text-align: left;
+            font-size: 30px;
+            width: 100%;
+            padding: 12px 0 12px 25px;
+
+            span {
+                font-family: 'Helvetica', 'Arial', sans-serif;
+                font-size: 25px;
+                color: black;
+            }
+        }
+
+        [class*='Navbar_link'] {
+            width: 100%;
+        }
+
+        .MuiButton-containedPrimary {
+            color: white;
+        }
+
+        button {
+            padding: 10px 0 10px 25px;
+            justify-content: flex-start;
+            width: 100%;
+            border-radius: 0;
+            color: $dark-color;
+        }
+    }
 }

@@ -1,19 +1,18 @@
-import { useEffect } from 'react';
-import { Container, Typography } from '@material-ui/core';
+import { FunctionComponent, useState } from 'react';
+import Head from 'next/head';
+import Navbar from 'components/Navbar';
+import { Container } from '@material-ui/core';
 import styles from 'styles/Index.module.scss';
 
-const Index = () => {
-    useEffect(() => {
-        fetch(process.env.NEXT_PUBLIC_API_URL)
-            .then((response) => response.json())
-            .then((data) => console.log(data));
-    }, []);
-
+const Index: FunctionComponent = () => {
     return (
-        <Container maxWidth='sm' className={styles.content}>
-            <Typography variant='h4' component='h1' gutterBottom>
-                Next.js with TypeScript example
-            </Typography>
+        <Container maxWidth={false} disableGutters>
+            <Head>
+                <title>Heggyo - Училищен асистент</title>
+            </Head>
+            <Navbar />
+            {/* <Container className={styles.content} disableGutters></Container> */}
+            {/* <Footer /> */}
         </Container>
     );
 };
