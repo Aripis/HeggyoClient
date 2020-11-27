@@ -10,10 +10,14 @@
     "dependencies": {
         "@material-ui/core": "latest",
         "@material-ui/icons": "latest",
+        "@material-ui/lab": "^4.0.0-alpha.56",
         "clsx": "latest",
+        "graphql": "^15.4.0",
+        "graphql-request": "^3.3.0",
         "next": "latest",
         "react": "latest",
-        "react-dom": "latest"
+        "react-dom": "latest",
+        "swr": "^0.3.9"
     },
     "devDependencies": {
         "@types/node": "latest",

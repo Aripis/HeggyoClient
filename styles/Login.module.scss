@@ -1,0 +1,65 @@
+@import 'variables';
+
+.content {
+    height: 100vh;
+    background-color: $light-color;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .title {
+        font-size: 45px;
+        margin: 100px 0 40px;
+        color: $dark-color;
+    }
+
+    .form {
+        width: 450px;
+        box-shadow: $s-shadow;
+        padding: 20px 50px;
+
+        .input-container {
+            display: flex;
+            flex-direction: column;
+            margin: 25px 0;
+            color: $dark-color;
+
+            .sub-title {
+                font-size: 22px;
+                color: $dark-color;
+            }
+
+            .textfield {
+                margin: 10px 0;
+                input {
+                    color: $dark-color;
+                }
+            }
+
+            .submit {
+                padding: 12px 16px;
+                border-radius: 4px;
+            }
+
+            .text {
+                align-self: center;
+            }
+        }
+    }
+
+    .register {
+        color: $dark-color;
+
+        margin-top: 50px;
+    }
+}
+
+@media only screen and (max-width: 450px) {
+    .content {
+        .form {
+            box-shadow: none;
+            width: 100%;
+            padding: 20px 30px;
+        }
+    }
+}

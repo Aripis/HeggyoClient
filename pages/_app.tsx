@@ -5,6 +5,16 @@ import { ThemeProvider, StylesProvider } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import theme from 'components/theme';
 import 'styles/global.scss';
+import { GraphQLClient } from 'graphql-request';
+import { SWRConfig } from 'swr';
+
+export const graphQLClient = new GraphQLClient(
+    `${process.env.NEXT_PUBLIC_API_URL}/graphql`,
+    {
+        mode: 'cors',
+        credentials: 'include',
+    }
+);
 
 export default function MyApp(props: AppProps) {
     const { Component, pageProps } = props;
@@ -29,7 +39,14 @@ export default function MyApp(props: AppProps) {
             <ThemeProvider theme={theme}>
                 <CssBaseline />
                 <StylesProvider injectFirst>
-                    <Component {...pageProps} />
+                    <SWRConfig
+                        value={{
+                            fetcher: (query: string, variables?: any) =>
+                                graphQLClient.rawRequest(query, variables),
+                        }}
+                    >
+                        <Component {...pageProps} />
+                    </SWRConfig>
                 </StylesProvider>
             </ThemeProvider>
         </React.Fragment>

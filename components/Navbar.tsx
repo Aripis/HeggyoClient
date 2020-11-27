@@ -10,9 +10,16 @@ import MenuIcon from '@material-ui/icons/Menu';
 import Link from './Link';
 import { FunctionComponent, useState } from 'react';
 import styles from 'styles/Navbar.module.scss';
+import { gql } from 'graphql-request';
+import useSWR from 'swr';
 
 const Navbar: FunctionComponent = () => {
     const [open, setOpen] = useState(false);
+    const { data } = useSWR(gql`
+        query {
+            checkRefreshToken
+        }
+    `);
 
     const navbarLinks = () => (
         <>
@@ -30,11 +37,17 @@ const Navbar: FunctionComponent = () => {
                 <Button>Тест 4</Button>
             </Link>
             <Button className={styles.link}>Излез</Button>
-            <Link underline='none' className={styles.link} href='/'>
-                <Button disableElevation color='primary' variant='contained'>
-                    Влез
-                </Button>
-            </Link>
+            {data && !data.data.checkRefreshToken && (
+                <Link underline='none' className={styles.link} href='/login'>
+                    <Button
+                        disableElevation
+                        color='primary'
+                        variant='contained'
+                    >
+                        Влез
+                    </Button>
+                </Link>
+            )}
         </>
     );
 
