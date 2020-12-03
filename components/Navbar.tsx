@@ -10,16 +10,16 @@ import MenuIcon from '@material-ui/icons/Menu';
 import Link from './Link';
 import { FunctionComponent, useState } from 'react';
 import styles from 'styles/Navbar.module.scss';
-import { gql } from 'graphql-request';
-import useSWR from 'swr';
+import useUser from 'utils/useUser';
+import Loader from 'components/Loader';
 
 const Navbar: FunctionComponent = () => {
     const [open, setOpen] = useState(false);
-    const { data } = useSWR(gql`
-        query {
-            checkRefreshToken
-        }
-    `);
+    const { user, status } = useUser();
+
+    if (status === 'FETCHING') {
+        return <Loader />;
+    }
 
     const navbarLinks = () => (
         <>
@@ -36,8 +36,7 @@ const Navbar: FunctionComponent = () => {
             <Link underline='none' className={styles.link} href='/'>
                 <Button>Тест 4</Button>
             </Link>
-            <Button className={styles.link}>Излез</Button>
-            {data && !data.data.checkRefreshToken && (
+            {!user ? (
                 <Link underline='none' className={styles.link} href='/login'>
                     <Button
                         disableElevation
@@ -47,6 +46,17 @@ const Navbar: FunctionComponent = () => {
                         Влез
                     </Button>
                 </Link>
+            ) : (
+                <>
+                    <Link
+                        underline='none'
+                        className={styles.link}
+                        href='/profile'
+                    >
+                        <Button>Профил</Button>
+                    </Link>
+                    <Button className={styles.link}>Излез</Button>
+                </>
             )}
         </>
     );

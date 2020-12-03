@@ -5,16 +5,8 @@ import { ThemeProvider, StylesProvider } from '@material-ui/core/styles';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import theme from 'components/theme';
 import 'styles/global.scss';
-import { GraphQLClient } from 'graphql-request';
+import graphQLClient from 'utils/graphqlclient';
 import { SWRConfig } from 'swr';
-
-export const graphQLClient = new GraphQLClient(
-    `${process.env.NEXT_PUBLIC_API_URL}/graphql`,
-    {
-        mode: 'cors',
-        credentials: 'include',
-    }
-);
 
 export default function MyApp(props: AppProps) {
     const { Component, pageProps } = props;

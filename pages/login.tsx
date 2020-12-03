@@ -1,4 +1,4 @@
-import { useState, FormEvent, FunctionComponent } from 'react';
+import { useState, useEffect, FormEvent, FunctionComponent } from 'react';
 import Head from 'next/head';
 import {
     Container,
@@ -13,12 +13,14 @@ import Alert from '@material-ui/lab/Alert';
 import styles from 'styles/Login.module.scss';
 import { useRouter } from 'next/router';
 import Link from 'components/Link';
-import { GetServerSideProps } from 'next';
 import { gql } from 'graphql-request';
-import { graphQLClient } from 'pages/_app';
+import graphQLClient from 'utils/graphqlclient';
+import useUser from 'utils/useUser';
+import Loader from 'components/Loader';
 
 const Login: FunctionComponent = () => {
     const router = useRouter();
+    const { user, status } = useUser();
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -26,14 +28,20 @@ const Login: FunctionComponent = () => {
     const [error, setError] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
 
+    useEffect(() => {
+        if (status === 'DONE') {
+            router.push('/');
+        }
+    }, [user, status]);
+
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         try {
-            const res = await graphQLClient.rawRequest(
+            await graphQLClient.rawRequest(
                 gql`
                     query($email: String!, $password: String!) {
                         login(
-                            loginData: { email: $email, password: $password }
+                            loginInput: { email: $email, password: $password }
                         ) {
                             id
                         }
@@ -41,18 +49,23 @@ const Login: FunctionComponent = () => {
                 `,
                 { email, password }
             );
-            graphQLClient.setHeader(
-                'Authorization',
-                res.headers.get('Authorization') || ''
-            );
             router.push('/');
         } catch ({ response }) {
             if (response.errors[0].message.includes('User not found')) {
                 setError(true);
-                setErrorMessage('Невалиден имейл или парола');
+                setErrorMessage('Невалиден имейл');
+            } else if (
+                response.errors[0].message.includes('Invalid password')
+            ) {
+                setError(true);
+                setErrorMessage('Невалиден парола');
             }
         }
     };
+
+    if (user) {
+        return <Loader />;
+    }
 
     return (
         <>
@@ -147,29 +160,6 @@ const Login: FunctionComponent = () => {
             </Container>
         </>
     );
-};
-
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
-    graphQLClient.setHeader('Cookie', ctx.req.headers.cookie || '');
-    const data = await graphQLClient.request(
-        gql`
-            query {
-                checkRefreshToken
-            }
-        `,
-        {}
-    );
-    if (data.checkRefreshToken) {
-        return {
-            redirect: {
-                destination: '/',
-                permanent: false,
-            },
-        };
-    }
-    return {
-        props: {}, // will be passed to the page component as props
-    };
 };
 
 export default Login;
