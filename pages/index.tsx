@@ -6,14 +6,20 @@ import { Container } from '@material-ui/core';
 
 const Index: FunctionComponent = () => {
     return (
-        <Container maxWidth={false} disableGutters>
+        <>
             <Head>
                 <title>Heggyo - Училищен асистент</title>
             </Head>
-            <Navbar />
+            <Container
+                className='main-container'
+                maxWidth={false}
+                disableGutters
+            >
+                <Navbar title='Heggyo' />
+            </Container>
             {/* <Container className={styles.content} disableGutters></Container> */}
             {/* <Footer /> */}
-        </Container>
+        </>
     );
 };
 

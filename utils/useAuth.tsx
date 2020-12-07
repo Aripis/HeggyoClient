@@ -1,9 +1,28 @@
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import graphQLClient from 'utils/graphqlclient';
 import { gql } from 'graphql-request';
+import { User } from './interfaces';
 
-const useUser = () => {
+interface Auth {
+    user: User | null;
+    status: string | null;
+    logout: () => void;
+}
+
+export const useAuth = (): Auth => {
+    const router = useRouter();
     const [user, setUser] = useState([null, 'FETCHING']);
+
+    const logout = async () => {
+        await graphQLClient.request(gql`
+            query {
+                logout
+            }
+        `);
+        setUser([null, 'REDIRECT']);
+        router.push('/');
+    };
 
     useEffect(() => {
         (async () => {
@@ -57,7 +76,5 @@ const useUser = () => {
         })();
     }, []);
 
-    return { user: user[0], status: user[1] };
+    return { user: user[0] as User, status: user[1], logout };
 };
-
-export default useUser;

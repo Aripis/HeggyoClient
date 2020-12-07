@@ -1,0 +1,52 @@
+@import 'variables';
+
+.content {
+    background-color: white;
+    padding: 25px;
+    margin-right: 25px;
+    margin-top: 15px;
+    box-shadow: $card-shadow;
+    border-radius: 10px;
+
+    .profile-container {
+        display: flex;
+        flex-direction: row;
+        margin-bottom: 25px;
+
+        .avatar {
+            width: 200px;
+            height: 200px;
+        }
+
+        .profile-info {
+            margin-left: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-around;
+
+            .info {
+                .details {
+                    .additional-info {
+                        margin-top: 5px;
+
+                        .additional-text {
+                            display: flex;
+
+                            svg {
+                                margin-right: 5px;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@media screen and (max-width: 730px) {
+    .content {
+        margin-right: 0;
+        box-shadow: none;
+        padding: 25px 10px;
+    }
+}

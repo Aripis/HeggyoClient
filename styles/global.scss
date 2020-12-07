@@ -21,6 +21,16 @@ body {
 #__next {
     min-height: 100vh;
     overflow: auto;
+    display: flex;
+    flex-direction: row;
+
+    & > * {
+        padding-top: 20px;
+    }
+}
+
+.main-container {
+    flex: 1;
 }
 
 ::selection {
@@ -39,44 +49,28 @@ a {
     transition: 0.2s;
 }
 
-.drawer {
-    .MuiDrawer-paper {
-        display: flex;
-        align-items: center;
-        background: $light-color;
-        color: black;
-        width: 200px;
+.MuiTab-root {
+    text-transform: none;
+    min-width: 0;
+    margin-left: 10px;
+    margin-right: 10px;
 
-        .active {
-            width: 100%;
-        }
-        .drawer-title {
-            text-align: left;
-            font-size: 30px;
-            width: 100%;
-            padding: 12px 0 12px 25px;
-
-            span {
-                font-family: 'Helvetica', 'Arial', sans-serif;
-                font-size: 25px;
-                color: black;
-            }
-        }
-
-        [class*='Navbar_link'] {
-            width: 100%;
-        }
-
-        .MuiButton-containedPrimary {
-            color: white;
-        }
-
-        button {
-            padding: 10px 0 10px 25px;
-            justify-content: flex-start;
-            width: 100%;
-            border-radius: 0;
-            color: $dark-color;
-        }
+    &:first-child {
+        margin-left: 0;
     }
+
+    &:last-child {
+        margin-right: 0;
+    }
+}
+
+.MuiTabs-indicator {
+    border-radius: 50em 50em 0 0;
+    height: 3.5px;
+}
+
+.MuiToolbar-root {
+    min-height: 64px;
+    padding-left: 24px;
+    padding-right: 24px;
 }

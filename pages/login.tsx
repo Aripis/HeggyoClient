@@ -15,12 +15,12 @@ import { useRouter } from 'next/router';
 import Link from 'components/Link';
 import { gql } from 'graphql-request';
 import graphQLClient from 'utils/graphqlclient';
-import useUser from 'utils/useUser';
+import { useAuth } from 'utils/useAuth';
 import Loader from 'components/Loader';
 
 const Login: FunctionComponent = () => {
     const router = useRouter();
-    const { user, status } = useUser();
+    const { user, status } = useAuth();
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');

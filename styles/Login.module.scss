@@ -2,7 +2,7 @@
 
 .content {
     height: 100vh;
-    background-color: $light-color;
+    background-color: white;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -15,7 +15,8 @@
 
     .form {
         width: 450px;
-        box-shadow: $s-shadow;
+        box-shadow: $card-shadow;
+        border-radius: 10px;
         padding: 20px 50px;
 
         .input-container {

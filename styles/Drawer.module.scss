@@ -1,0 +1,156 @@
+@import 'variables';
+
+.backdrop {
+    display: none;
+}
+
+.drawer-container {
+    width: auto;
+    background-color: white;
+
+    .upper-drawer {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        padding: 10px 0 0 15px;
+
+        .drawer-toggle {
+            width: 35px;
+            height: 35px;
+
+            :global(.MuiIconButton-label) {
+                display: flex;
+                flex-direction: column;
+
+                .toggle-line {
+                    display: inline-block;
+                    background-color: $dark-color;
+                    width: 18px;
+                    height: 2px;
+                    margin: 1.5px 0;
+                    transition: 0.2s;
+                    border-radius: 50em;
+
+                    &.toggled:first-child {
+                        transform: translateY(5px) rotate(45deg);
+                    }
+
+                    &.toggled:nth-child(2) {
+                        opacity: 0;
+                    }
+
+                    &.toggled:last-child {
+                        transform: translateY(-5px) rotate(-45deg);
+                    }
+                }
+            }
+        }
+        .title {
+            .text {
+                font-weight: 600;
+                margin-left: 10px;
+                transition: 0.3s;
+                width: 115px;
+            }
+        }
+    }
+
+    .drawer {
+        width: 250px;
+        transition: width 0.3s;
+        margin-top: 40px;
+
+        :global(.MuiDrawer-paper) {
+            background-color: transparent;
+            border: 0;
+            overflow: hidden;
+            position: static;
+            padding-right: 25px;
+
+            .link {
+                margin: 10px 0;
+
+                button {
+                    padding: 10px 0 10px 20px;
+                    color: rgba($dark-color, 0.7);
+                    transition: 0.2s;
+                    width: 100%;
+                    border-radius: 0 10px 10px 0;
+                    justify-content: flex-start;
+                    white-space: nowrap;
+
+                    &:hover {
+                        color: white;
+                        background-color: $dark-color;
+                    }
+
+                    svg {
+                        margin-right: 16px;
+                    }
+                }
+            }
+        }
+    }
+
+    &.closed {
+        .drawer {
+            width: 60px;
+        }
+
+        .upper-drawer {
+            .title {
+                pointer-events: none;
+
+                .text {
+                    width: 0;
+                    opacity: 0;
+                }
+            }
+        }
+    }
+}
+
+@media only screen and (max-width: 730px) {
+    .backdrop {
+        &.opened {
+            display: block;
+            z-index: 998;
+            width: 100vw;
+            height: 100vh;
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+    }
+
+    .drawer-container {
+        position: absolute;
+        z-index: 999;
+        height: 100%;
+        transition: 0.3s;
+        width: 250px;
+
+        .upper-drawer {
+            padding: 10px 0 0 5px;
+        }
+
+        .drawer {
+            :global(.MuiDrawer-paper) {
+                padding-right: 0;
+
+                .link {
+                    .button {
+                        padding: 10px 0 10px 10px;
+                    }
+                }
+            }
+        }
+
+        &.closed {
+            width: 0px;
+
+            .drawer {
+                width: 0;
+            }
+        }
+    }
+}

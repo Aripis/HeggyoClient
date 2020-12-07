@@ -1,98 +1,61 @@
-import {
-    AppBar,
-    Toolbar,
-    IconButton,
-    Typography,
-    Button,
-    SwipeableDrawer,
-} from '@material-ui/core';
-import MenuIcon from '@material-ui/icons/Menu';
+import { AppBar, Toolbar, Typography, Button } from '@material-ui/core';
 import Link from './Link';
-import { FunctionComponent, useState } from 'react';
+import { FunctionComponent } from 'react';
 import styles from 'styles/Navbar.module.scss';
-import useUser from 'utils/useUser';
+import { useAuth } from 'utils/useAuth';
 import Loader from 'components/Loader';
 
-const Navbar: FunctionComponent = () => {
-    const [open, setOpen] = useState(false);
-    const { user, status } = useUser();
+interface NavbarProps {
+    title?: string;
+}
+
+const Navbar: FunctionComponent<NavbarProps> = (props) => {
+    const { user, status, logout } = useAuth();
 
     if (status === 'FETCHING') {
         return <Loader />;
     }
 
-    const navbarLinks = () => (
-        <>
-            <span className={styles.separator}></span>
-            <Link underline='none' className={styles.link} href='/'>
-                <Button>Тест</Button>
-            </Link>
-            <Link underline='none' className={styles.link} href='/'>
-                <Button>Тест 2</Button>
-            </Link>
-            <Link underline='none' className={styles.link} href='/'>
-                <Button>Тест 3</Button>
-            </Link>
-            <Link underline='none' className={styles.link} href='/'>
-                <Button>Тест 4</Button>
-            </Link>
-            {!user ? (
-                <Link underline='none' className={styles.link} href='/login'>
-                    <Button
-                        disableElevation
-                        color='primary'
-                        variant='contained'
-                    >
-                        Влез
-                    </Button>
-                </Link>
-            ) : (
-                <>
-                    <Link
-                        underline='none'
-                        className={styles.link}
-                        href='/profile'
-                    >
-                        <Button>Профил</Button>
-                    </Link>
-                    <Button className={styles.link}>Излез</Button>
-                </>
-            )}
-        </>
-    );
-
     return (
         <AppBar elevation={0} className={styles.navbar} position='static'>
             <Toolbar>
-                <IconButton
-                    size='small'
-                    className={styles['drawer-toggle']}
-                    color='inherit'
-                    aria-label='menu'
-                    onClick={() => setOpen(!open)}
-                >
-                    <MenuIcon />
-                </IconButton>
-                <Link underline='none' className={styles.link} href='/'>
-                    <Typography className={styles.title} variant='h1'>
-                        Heggyo
-                    </Typography>
-                </Link>
-                <div className={styles.links}>{navbarLinks()}</div>
-                <SwipeableDrawer
-                    anchor='left'
-                    className='drawer'
-                    open={open}
-                    onClose={() => setOpen(false)}
-                    onOpen={() => setOpen(true)}
-                >
-                    <Link underline='none' href='/'>
-                        <Typography className='drawer-title' variant='h2'>
-                            Heggyo
-                        </Typography>
-                    </Link>
-                    {navbarLinks()}
-                </SwipeableDrawer>
+                <Typography className={styles.title} variant='h1'>
+                    {props.title}
+                </Typography>
+                <div className={styles.links}>
+                    <span className={styles.separator}></span>
+                    {!user ? (
+                        <Link
+                            underline='none'
+                            className={styles.link}
+                            href='/login'
+                        >
+                            <Button
+                                disableElevation
+                                color='primary'
+                                variant='contained'
+                            >
+                                Влез
+                            </Button>
+                        </Link>
+                    ) : (
+                        <>
+                            <Link
+                                underline='none'
+                                className={styles.link}
+                                href='/profile'
+                            >
+                                <Button>Профил</Button>
+                            </Link>
+                            <Button
+                                onClick={() => logout()}
+                                className={styles.link}
+                            >
+                                Излез
+                            </Button>
+                        </>
+                    )}
+                </div>
             </Toolbar>
         </AppBar>
     );

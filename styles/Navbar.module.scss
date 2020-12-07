@@ -1,12 +1,15 @@
 @import 'variables';
 
 .navbar {
-    background-color: #fff7f5;
+    background-color: white;
     width: auto;
 
     .title {
         font-size: 28px;
         margin-right: 20px;
+        font-weight: 500;
+        cursor: pointer;
+        color: $dark-color;
     }
 
     .links {
@@ -35,26 +38,15 @@
     }
 
     .drawer-toggle {
-        display: none;
         margin-right: 13px;
         color: $dark-color;
     }
 }
 
-@media only screen and (max-width: 768px) {
+@media only screen and (max-width: 730px) {
     .navbar {
-        .drawer-toggle {
-            display: block;
+        .title {
+            margin-left: 26px;
         }
-
-        .links {
-            display: none;
-        }
-    }
-}
-
-@media only screen and (max-width: 320px) {
-    .navbar {
-        padding: 0 10px;
     }
 }
