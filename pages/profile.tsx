@@ -17,12 +17,7 @@ import Navbar from 'components/Navbar';
 import Drawer from 'components/Drawer';
 import { useAuth } from 'utils/useAuth';
 import Loader from 'components/Loader';
-import {
-    EmailOutlined,
-    PersonOutlineOutlined,
-    SchoolOutlined,
-    EditOutlined,
-} from '@material-ui/icons';
+import { PersonOutlineOutlined, EditOutlined } from '@material-ui/icons';
 import { UserRoles } from 'utils/enums';
 
 interface TabPanelProps {
@@ -102,22 +97,10 @@ const Profile: FunctionComponent<User> = () => {
                                     <Typography
                                         className={styles['name']}
                                         variant='h4'
-                                    >{`${
-                                        user.firstName
-                                    } ${user.middleName?.charAt(0)}. ${
-                                        user.lastName
-                                    }`}</Typography>
-                                    {/* <Breadcrumbs
+                                    >{`${user.firstName} ${user.lastName}`}</Typography>
+                                    <Breadcrumbs
                                         className={styles['additional-info']}
                                     >
-                                        <Typography
-                                            className={
-                                                styles['additional-text']
-                                            }
-                                        >
-                                            <EmailOutlined />
-                                            {user.email}
-                                        </Typography>
                                         <Typography
                                             className={
                                                 styles['additional-text']
@@ -126,22 +109,7 @@ const Profile: FunctionComponent<User> = () => {
                                             <PersonOutlineOutlined />
                                             {getRole(user.userRole)}
                                         </Typography>
-                                        {user.institution?.map(
-                                            (institution) => (
-                                                <Typography
-                                                    className={
-                                                        styles[
-                                                            'additional-text'
-                                                        ]
-                                                    }
-                                                    key={institution.id}
-                                                >
-                                                    <SchoolOutlined />
-                                                    {institution.name}
-                                                </Typography>
-                                            )
-                                        )}
-                                    </Breadcrumbs> */}
+                                    </Breadcrumbs>
                                 </div>
                             </div>
                             <div className={styles['actions']}>
@@ -160,7 +128,7 @@ const Profile: FunctionComponent<User> = () => {
                         <Tabs
                             indicatorColor='primary'
                             value={value}
-                            onChange={(e, newValue) => setValue(newValue)}
+                            onChange={(_e, newValue) => setValue(newValue)}
                         >
                             <Tab disableRipple label='За потребителя' />
                             <Tab disableRipple label='Item Two' />

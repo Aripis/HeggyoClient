@@ -3,6 +3,7 @@ import {
     EducationStage,
     UserStatus,
     UserRoles,
+    ContractType,
 } from './enums';
 
 export interface Institution {
@@ -25,4 +26,35 @@ export interface User {
     userRole?: UserRoles;
     status?: UserStatus;
     institution?: Institution[];
+}
+
+export interface Subject {
+    id?: string;
+    startYear?: number;
+    endYear?: number;
+    name?: string;
+    description?: string;
+    institution?: Institution;
+    teachers?: Teacher[];
+    class?: Class;
+}
+
+export interface Teacher {
+    id?: string;
+    user?: User;
+    education?: string;
+    yearsExperience?: number;
+    contractType?: ContractType;
+    subjects?: Subject[];
+}
+
+export interface Class {
+    id?: string;
+    institution?: Institution;
+    startYear?: number;
+    endYear?: number;
+    totalStudentCount?: number;
+    classTeacher?: Teacher;
+    classLetter?: string;
+    classNumber?: number;
 }

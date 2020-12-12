@@ -34,7 +34,7 @@ export default function MyApp(props: AppProps) {
                     <SWRConfig
                         value={{
                             fetcher: (query: string, variables?: any) =>
-                                graphQLClient.rawRequest(query, variables),
+                                graphQLClient.request(query, variables),
                         }}
                     >
                         <Component {...pageProps} />

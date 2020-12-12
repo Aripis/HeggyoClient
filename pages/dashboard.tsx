@@ -1,42 +1,43 @@
 import { useEffect, FunctionComponent } from 'react';
 import Head from 'next/head';
-import Navbar from 'components/Navbar';
 import { Container } from '@material-ui/core';
+import styles from 'styles/Dashboard.module.scss';
+import Navbar from 'components/Navbar';
+import Drawer from 'components/Drawer';
 import { useAuth } from 'utils/useAuth';
 import { useRouter } from 'next/router';
 import Loader from 'components/Loader';
-// import styles from 'styles/Index.module.scss';
 
-const Index: FunctionComponent = () => {
+const Dashboard: FunctionComponent = () => {
     const router = useRouter();
     const { user, status } = useAuth();
 
     useEffect(() => {
-        if (status === 'DONE') {
-            router.push('/dashboard');
+        if (status === 'REDIRECT') {
+            router.push('/login');
         }
     }, [user, status]);
 
-    if (user) {
+    if (!user) {
         return <Loader />;
     }
 
     return (
         <>
             <Head>
-                <title>Heggyo - Училищен асистент</title>
+                <title>Табло &#8226; Heggyo</title>
             </Head>
+            <Drawer />
             <Container
                 className='main-container'
                 maxWidth={false}
                 disableGutters
             >
-                <Navbar title='Heggyo' />
+                <Navbar title='Табло' />
+                <div className={styles.content}>dashboard :)</div>
             </Container>
-            {/* <Container className={styles.content} disableGutters></Container> */}
-            {/* <Footer /> */}
         </>
     );
 };
 
-export default Index;
+export default Dashboard;

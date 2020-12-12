@@ -49,7 +49,7 @@ const Login: FunctionComponent = () => {
                 `,
                 { email, password }
             );
-            router.push('/');
+            router.push('/dashboard');
         } catch ({ response }) {
             if (response.errors[0].message.includes('User not found')) {
                 setError(true);

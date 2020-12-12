@@ -25,9 +25,14 @@ export enum UserStatus {
 }
 
 export enum UserRoles {
-    ADMIN,
-    PARENT,
-    STUDENT,
-    TEACHER,
-    VIEWER,
+    ADMIN = 'admin',
+    PARENT = 'parent',
+    STUDENT = 'student',
+    TEACHER = 'teacher',
+    VIEWER = 'viewer',
+}
+
+export enum ContractType {
+    PART_TIME = 'part_time',
+    FULL_TIME = 'full_time',
 }

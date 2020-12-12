@@ -8,19 +8,19 @@ import {
 import Link from './Link';
 import {
     SettingsOutlined,
-    DescriptionOutlined,
+    MeetingRoomOutlined,
     DashboardOutlined,
-    AddCircleOutlineOutlined,
+    DescriptionOutlined,
+    CollectionsBookmarkOutlined,
+    PeopleAltOutlined,
 } from '@material-ui/icons';
-import { useEffect, FunctionComponent, useState } from 'react';
+import { FunctionComponent, useState } from 'react';
 import styles from 'styles/Drawer.module.scss';
 
 const Drawer: FunctionComponent = () => {
-    const [open, setOpen] = useState(true);
-
-    useEffect(() => {
-        setOpen(!window.matchMedia('(max-width: 730px)').matches);
-    }, []);
+    const [open, setOpen] = useState(
+        !window.matchMedia('(max-width: 730px)').matches
+    );
 
     return (
         <>
@@ -57,7 +57,11 @@ const Drawer: FunctionComponent = () => {
                             }`}
                         ></span>
                     </IconButton>
-                    <Link className={styles.title} underline='none' href='/'>
+                    <Link
+                        className={styles.title}
+                        underline='none'
+                        href='/dashboard'
+                    >
                         <Typography className={styles.text} variant='h4'>
                             Heggyo
                         </Typography>
@@ -71,27 +75,46 @@ const Drawer: FunctionComponent = () => {
                     onClose={() => setOpen(false)}
                     onOpen={() => setOpen(true)}
                 >
-                    <Link underline='none' className={styles.link} href='/'>
+                    <Link
+                        underline='none'
+                        className={styles.link}
+                        href='/dashboard'
+                    >
                         <Button>
-                            <AddCircleOutlineOutlined /> Test 1
+                            <DashboardOutlined /> Табло
                         </Button>
                     </Link>
                     <Link underline='none' className={styles.link} href='/'>
                         <Button>
-                            <DashboardOutlined />
-                            Test 2
+                            <PeopleAltOutlined /> Потребители
+                        </Button>
+                    </Link>
+                    <Link
+                        underline='none'
+                        className={styles.link}
+                        href='/subjects'
+                    >
+                        <Button>
+                            <CollectionsBookmarkOutlined />
+                            Предмети
+                        </Button>
+                    </Link>
+                    <Link underline='none' className={styles.link} href='/'>
+                        <Button>
+                            <MeetingRoomOutlined />
+                            Класове
                         </Button>
                     </Link>
                     <Link underline='none' className={styles.link} href='/'>
                         <Button>
                             <DescriptionOutlined />
-                            Test 3
+                            Учебни програми
                         </Button>
                     </Link>
                     <Link underline='none' className={styles.link} href='/'>
                         <Button>
                             <SettingsOutlined />
-                            Settings
+                            Настройки
                         </Button>
                     </Link>
                 </SwipeableDrawer>
