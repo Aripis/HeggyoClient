@@ -84,7 +84,11 @@ const Drawer: FunctionComponent = () => {
                             <DashboardOutlined /> Табло
                         </Button>
                     </Link>
-                    <Link underline='none' className={styles.link} href='/'>
+                    <Link
+                        underline='none'
+                        className={styles.link}
+                        href='/users'
+                    >
                         <Button>
                             <PeopleAltOutlined /> Потребители
                         </Button>

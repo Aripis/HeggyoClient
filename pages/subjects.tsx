@@ -73,7 +73,7 @@ const Subjects: FunctionComponent = () => {
     return (
         <>
             <Head>
-                <title>Heggyo - Училищен асистент</title>
+                <title>Предмети &#8226; Heggyo</title>
             </Head>
             <Drawer />
             <Container

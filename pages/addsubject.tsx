@@ -80,7 +80,8 @@ const AddSubject: FunctionComponent = () => {
             );
             router.push('/subjects');
         } catch (error) {
-            console.log(error);
+            setError(true);
+            setErrorMessage('Неизвестна грешка');
         }
     };
 
@@ -91,7 +92,7 @@ const AddSubject: FunctionComponent = () => {
     return (
         <>
             <Head>
-                <title>Heggyo - Училищен асистент</title>
+                <title>Добави предмет &#8226; Heggyo</title>
             </Head>
             <Drawer />
             <Container
@@ -151,8 +152,9 @@ const AddSubject: FunctionComponent = () => {
                                 value={classUUID}
                                 onChange={(e) => setClassUUID(e.target.value)}
                             >
-                                {data.classes &&
-                                    data.classes.map(
+                                {data &&
+                                    data?.classes &&
+                                    data?.classes?.map(
                                         (currClass: Class, i: number) => (
                                             <MenuItem
                                                 key={i}
