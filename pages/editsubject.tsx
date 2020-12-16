@@ -25,14 +25,14 @@ import { DoneOutlined, CloseOutlined } from '@material-ui/icons';
 import { useAuth } from 'utils/useAuth';
 import { useRouter } from 'next/router';
 import Loader from 'components/Loader';
-import styles from 'styles/Addsubject.module.scss';
+import styles from 'styles/Editsubject.module.scss';
 import graphQLClient from 'utils/graphqlclient';
 import useSWR from 'swr';
 import { gql } from 'graphql-request';
 import Alert from '@material-ui/lab/Alert';
 import { Class, Teacher } from 'utils/interfaces';
 
-const AddSubject: FunctionComponent = () => {
+const EditSubject: FunctionComponent = () => {
     const router = useRouter();
     const { user, status } = useAuth();
 
@@ -72,14 +72,59 @@ const AddSubject: FunctionComponent = () => {
         if (user && (user?.userRole as string) !== 'ADMIN') {
             router.back();
         }
+        (async () => {
+            try {
+                const sunjectData = await graphQLClient.request(
+                    gql`
+                        query($id: String!) {
+                            subject(id: $id) {
+                                id
+                                startYear
+                                endYear
+                                name
+                                description
+                                teachers {
+                                    id
+                                    user {
+                                        firstName
+                                        lastName
+                                    }
+                                }
+                                class {
+                                    id
+                                    classNumber
+                                    classLetter
+                                }
+                            }
+                        }
+                    `,
+                    {
+                        id: router.query.id,
+                    }
+                );
+                setName(sunjectData.subject.name);
+                setDescription(sunjectData.subject.description);
+                setStartYear(sunjectData.subject.startYear);
+                setEndYear(sunjectData.subject.endYear);
+                setClassUUID(sunjectData.subject.class.id);
+                setTeachersUUIDs(
+                    sunjectData.subject.teachers.map(
+                        (teacher: Teacher) => teacher.id
+                    )
+                );
+            } catch (error) {
+                setError('Неизвестна грешка');
+            }
+        })();
     }, [user, status]);
 
-    const addSubject = async (e: FormEvent) => {
+    const editSubject = async (e: FormEvent) => {
         e.preventDefault();
         try {
             await graphQLClient.request(
                 gql`
                     mutation(
+                        $id: String!
                         $startYear: Int!
                         $endYear: Int!
                         $name: String!
@@ -87,8 +132,9 @@ const AddSubject: FunctionComponent = () => {
                         $classUUID: String!
                         $teachersUUIDs: [String!]
                     ) {
-                        createSubject(
+                        updateSubject(
                             subjectData: {
+                                id: $id
                                 startYear: $startYear
                                 endYear: $endYear
                                 name: $name
@@ -102,6 +148,7 @@ const AddSubject: FunctionComponent = () => {
                     }
                 `,
                 {
+                    id: router.query.id,
                     startYear,
                     endYear,
                     name,
@@ -112,6 +159,7 @@ const AddSubject: FunctionComponent = () => {
             );
             router.push('/subjects');
         } catch (error) {
+            console.log(error);
             setError('Неизвестна грешка');
         }
     };
@@ -123,7 +171,7 @@ const AddSubject: FunctionComponent = () => {
     return (
         <>
             <Head>
-                <title>Добави предмет &#8226; Heggyo</title>
+                <title>Редактирай предмет &#8226; Heggyo</title>
             </Head>
             <Drawer />
             <Container
@@ -131,7 +179,7 @@ const AddSubject: FunctionComponent = () => {
                 maxWidth={false}
                 disableGutters
             >
-                <Navbar title='Добави предмет' />
+                <Navbar title='Редактирай предмет' />
                 <div className={styles.content}>
                     <div className={styles['actions-container']}>
                         <Button
@@ -139,7 +187,7 @@ const AddSubject: FunctionComponent = () => {
                             disableElevation
                             variant='contained'
                             color='primary'
-                            form='addSubject'
+                            form='editSubject'
                             type='submit'
                             endIcon={<DoneOutlined />}
                         >
@@ -161,9 +209,9 @@ const AddSubject: FunctionComponent = () => {
                         </Link>
                     </div>
                     <form
-                        id='addSubject'
-                        className={styles['addsubject-container']}
-                        onSubmit={addSubject}
+                        id='editSubject'
+                        className={styles['editsubject-container']}
+                        onSubmit={editSubject}
                     >
                         <div className={styles['input-container']}>
                             <TextField
@@ -329,4 +377,4 @@ const AddSubject: FunctionComponent = () => {
     );
 };
 
-export default AddSubject;
+export default EditSubject;

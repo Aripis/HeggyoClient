@@ -25,8 +25,7 @@ const Login: FunctionComponent = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [revealPassword, setRevealPassword] = useState(false);
-    const [error, setError] = useState(false);
-    const [errorMessage, setErrorMessage] = useState('');
+    const [error, setError] = useState('');
 
     useEffect(() => {
         if (status === 'DONE') {
@@ -52,13 +51,11 @@ const Login: FunctionComponent = () => {
             router.push('/dashboard');
         } catch ({ response }) {
             if (response.errors[0].message.includes('User not found')) {
-                setError(true);
-                setErrorMessage('Невалиден имейл');
+                setError('Невалиден имейл');
             } else if (
                 response.errors[0].message.includes('Invalid password')
             ) {
-                setError(true);
-                setErrorMessage('Невалиден парола');
+                setError('Невалиден парола');
             }
         }
     };
@@ -144,17 +141,17 @@ const Login: FunctionComponent = () => {
                     <Link href='/'>Регистрирайте</Link>
                 </div>
                 <Snackbar
-                    open={error}
+                    open={Boolean(error)}
                     autoHideDuration={6000}
-                    onClose={() => setError(false)}
+                    onClose={() => setError('')}
                 >
                     <Alert
                         elevation={6}
                         variant='filled'
-                        onClose={() => setError(false)}
+                        onClose={() => setError('')}
                         severity='error'
                     >
-                        {errorMessage}
+                        {error}
                     </Alert>
                 </Snackbar>
             </Container>

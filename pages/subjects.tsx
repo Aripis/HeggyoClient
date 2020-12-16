@@ -1,4 +1,4 @@
-import { useEffect, FunctionComponent } from 'react';
+import { useEffect, useState, FunctionComponent } from 'react';
 import Head from 'next/head';
 import Navbar from 'components/Navbar';
 import Drawer from 'components/Drawer';
@@ -10,6 +10,8 @@ import {
     CardHeader,
     Avatar,
     Typography,
+    Menu,
+    MenuItem,
 } from '@material-ui/core';
 import { AddOutlined, MoreHorizOutlined } from '@material-ui/icons';
 import { useAuth } from 'utils/useAuth';
@@ -22,6 +24,7 @@ import { gql } from 'graphql-request';
 import { Subject } from 'utils/interfaces';
 
 interface SubjectCardProps {
+    id?: string;
     name?: string;
     description?: string;
     startYear?: number;
@@ -29,19 +32,40 @@ interface SubjectCardProps {
 }
 
 const SubjectCard: FunctionComponent<SubjectCardProps> = (props) => {
+    const [menu, setMenu] = useState<null | HTMLElement>(null);
+
     return (
         <Card className={styles['card']}>
             <CardHeader
                 className={styles['card-header']}
                 avatar={<Avatar>{props.name?.charAt(0)}</Avatar>}
                 action={
-                    <IconButton>
+                    <IconButton onClick={(e) => setMenu(e.currentTarget)}>
                         <MoreHorizOutlined />
                     </IconButton>
                 }
                 title={props.name}
                 subheader={`${props.startYear} - ${props.endYear}`}
             />
+            <Menu
+                anchorEl={menu}
+                keepMounted
+                open={Boolean(menu)}
+                onClose={() => setMenu(null)}
+            >
+                <MenuItem onClick={() => setMenu(null)}>
+                    <Link
+                        color='textPrimary'
+                        underline='none'
+                        href={{
+                            pathname: '/editsubject',
+                            query: { id: props.id },
+                        }}
+                    >
+                        Редактирай
+                    </Link>
+                </MenuItem>
+            </Menu>
         </Card>
     );
 };
@@ -52,6 +76,7 @@ const Subjects: FunctionComponent = () => {
     const { data } = useSWR(gql`
         query {
             subjects {
+                id
                 name
                 description
                 startYear

@@ -36,8 +36,7 @@ const Users: FunctionComponent = () => {
     const [role, setRole] = useState('');
     const [token, setToken] = useState('');
     const [classUUID, setClassUUID] = useState('');
-    const [error, setError] = useState(false);
-    const [errorMessage, setErrorMessage] = useState('');
+    const [error, setError] = useState('');
 
     useEffect(() => {
         if (status === 'REDIRECT') {
@@ -75,8 +74,7 @@ const Users: FunctionComponent = () => {
             );
             setToken(data.generateUserToken.userRoleToken);
         } catch (error) {
-            setError(true);
-            setErrorMessage('Неизвестна грешка');
+            setError('Неизвестна грешка');
         }
     };
 
@@ -183,17 +181,17 @@ const Users: FunctionComponent = () => {
                     </form>
                 </div>
                 <Snackbar
-                    open={error}
+                    open={Boolean(error)}
                     autoHideDuration={6000}
-                    onClose={() => setError(false)}
+                    onClose={() => setError('')}
                 >
                     <Alert
                         elevation={6}
                         variant='filled'
-                        onClose={() => setError(false)}
+                        onClose={() => setError('')}
                         severity='error'
                     >
-                        {errorMessage}
+                        {error}
                     </Alert>
                 </Snackbar>
             </Container>

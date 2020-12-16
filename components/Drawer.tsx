@@ -109,7 +109,11 @@ const Drawer: FunctionComponent = () => {
                             Класове
                         </Button>
                     </Link>
-                    <Link underline='none' className={styles.link} href='/'>
+                    <Link
+                        underline='none'
+                        className={styles.link}
+                        href='/schedule'
+                    >
                         <Button>
                             <DescriptionOutlined />
                             Учебни програми

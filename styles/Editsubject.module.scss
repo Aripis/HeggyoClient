@@ -27,7 +27,7 @@
         }
     }
 
-    .addsubject-container {
+    .editsubject-container {
         padding: 25px;
         box-shadow: $card-shadow;
         background-color: white;
@@ -82,7 +82,7 @@
             }
         }
 
-        .addsubject-container {
+        .editsubject-container {
             .input-container {
                 flex-direction: column;
 
@@ -106,7 +106,7 @@
 
 @media screen and (max-width: 410px) {
     .content {
-        .addsubject-container {
+        .editsubject-container {
             .input-container {
                 flex-direction: column;
 
