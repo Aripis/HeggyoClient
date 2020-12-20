@@ -36,3 +36,13 @@ export enum ContractType {
     PART_TIME = 'part_time',
     FULL_TIME = 'full_time',
 }
+
+export enum WeekDays {
+    MONDAY = 'monday',
+    TUESDAY = 'tuesday',
+    WEDNESDAY = 'wednesday',
+    THURSDAY = 'thursday',
+    FRIDAY = 'friday',
+    SATURDAY = 'saturday',
+    SUNDAY = 'sunday',
+}

@@ -43,18 +43,13 @@ const EditSubject: FunctionComponent = () => {
     const [error, setError] = useState('');
     const [classUUID, setClassUUID] = useState('');
     const [teachersUUIDs, setTeachersUUIDs] = useState<string[]>([]);
-    const { data: clsData } = useSWR(gql`
+    const { data } = useSWR(gql`
         query {
             classes {
                 id
                 classNumber
                 classLetter
             }
-        }
-    `);
-
-    const { data: teachersData } = useSWR(gql`
-        query {
             teachers {
                 id
                 user {
@@ -246,7 +241,7 @@ const EditSubject: FunctionComponent = () => {
                                             (selected as string[])
                                                 .map(
                                                     (selection) =>
-                                                        teachersData.teachers.find(
+                                                        data.teachers.find(
                                                             (
                                                                 teacher: Teacher
                                                             ) =>
@@ -261,9 +256,9 @@ const EditSubject: FunctionComponent = () => {
                                                 .join(', ')
                                         }
                                     >
-                                        {teachersData &&
-                                            teachersData?.teachers &&
-                                            teachersData?.teachers.map(
+                                        {data &&
+                                            data?.teachers &&
+                                            data?.teachers.map(
                                                 (
                                                     teacher: Teacher,
                                                     i: number
@@ -299,9 +294,9 @@ const EditSubject: FunctionComponent = () => {
                                         setClassUUID(e.target.value)
                                     }
                                 >
-                                    {clsData &&
-                                        clsData?.classes &&
-                                        clsData?.classes?.map(
+                                    {data &&
+                                        data?.classes &&
+                                        data?.classes?.map(
                                             (currClass: Class, i: number) => (
                                                 <MenuItem
                                                     key={i}

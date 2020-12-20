@@ -1,37 +1,19 @@
-import { useEffect, useState, FunctionComponent, FormEvent } from 'react';
+import { useEffect, useState, FunctionComponent } from 'react';
 import Head from 'next/head';
 import Navbar from 'components/Navbar';
 import Drawer from 'components/Drawer';
-import {
-    Container,
-    Button,
-    Snackbar,
-    TextField,
-    MenuItem,
-} from '@material-ui/core';
+import { Container, Button, Snackbar } from '@material-ui/core';
+import Link from 'components/Link';
 import Alert from '@material-ui/lab/Alert';
-import { LoopOutlined } from '@material-ui/icons';
+import { AddOutlined } from '@material-ui/icons';
 import { useAuth } from 'utils/useAuth';
 import { useRouter } from 'next/router';
 import Loader from 'components/Loader';
-import styles from 'styles/Schedule.module.scss';
-import { gql } from 'graphql-request';
-import { Class } from 'utils/interfaces';
-import graphQLClient from 'utils/graphqlclient';
-import useSWR from 'swr';
+import styles from 'styles/Schedules.module.scss';
 
 const Schedule: FunctionComponent = () => {
     const router = useRouter();
     const { user, status } = useAuth();
-    const { data: clsData } = useSWR(gql`
-        query {
-            classes {
-                id
-                classNumber
-                classLetter
-            }
-        }
-    `);
 
     const [error, setError] = useState('');
 
@@ -44,10 +26,6 @@ const Schedule: FunctionComponent = () => {
         }
     }, [user, status]);
 
-    const addSchedule = (e: FormEvent) => {
-        e.preventDefault();
-    };
-
     if (!user) {
         return <Loader />;
     }
@@ -55,7 +33,7 @@ const Schedule: FunctionComponent = () => {
     return (
         <>
             <Head>
-                <title>Потребители &#8226; Heggyo</title>
+                <title>Учебни програми &#8226; Heggyo</title>
             </Head>
             <Drawer />
             <Container
@@ -63,26 +41,25 @@ const Schedule: FunctionComponent = () => {
                 maxWidth={false}
                 disableGutters
             >
-                <Navbar title='Потребители' />
+                <Navbar title='Учебни програми' />
                 <div className={styles.content}>
                     <div className={styles['actions-container']}>
-                        <Button
-                            className={`${styles['confirm']} ${styles['generate-button']}`}
-                            disableElevation
-                            variant='contained'
-                            color='primary'
-                            form='generateToken'
-                            type='submit'
-                            endIcon={<LoopOutlined />}
+                        <Link
+                            className={styles['schedule-add']}
+                            underline='none'
+                            href='/addschedule'
                         >
-                            Генерирай код
-                        </Button>
+                            <Button
+                                disableElevation
+                                variant='contained'
+                                color='primary'
+                                endIcon={<AddOutlined />}
+                            >
+                                Добави програма
+                            </Button>
+                        </Link>
                     </div>
-                    <form
-                        id='addSchedule'
-                        className={styles['generatetoken-container']}
-                        onSubmit={addSchedule}
-                    ></form>
+                    <div className={styles['schedules-container']}></div>
                 </div>
                 <Snackbar
                     open={Boolean(error)}

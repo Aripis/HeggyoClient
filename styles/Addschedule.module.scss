@@ -1,0 +1,144 @@
+@import 'variables';
+
+.content {
+    margin: {
+        top: 15px;
+        right: 25px;
+    }
+    display: flex;
+    flex-direction: column;
+
+    .actions-container {
+        margin-bottom: 10px;
+
+        .button-link {
+            margin: 0 5px;
+
+            &:first-child {
+                margin-left: 0;
+            }
+
+            &:last-child {
+                margin-right: 0;
+            }
+        }
+        .confirm {
+            box-shadow: $button-shadow;
+        }
+    }
+
+    .addschedule-container {
+        padding: 25px;
+        box-shadow: $card-shadow;
+        background-color: white;
+        border-radius: 10px;
+
+        .input-container {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+
+            .remove-subject:not(:disabled) {
+                border: 1px solid rgba(#d32f2f, 0.56);
+                color: #d32f2f;
+
+                &:hover {
+                    background-color: #d32f2f;
+                    color: white;
+                }
+            }
+
+            &:first-child {
+                margin-top: 0;
+            }
+
+            .class-select {
+                min-width: 180px;
+            }
+
+            .day-select {
+                min-width: 200px;
+            }
+
+            .time-container {
+                display: flex;
+                flex-direction: row;
+
+                .time {
+                    width: 180px;
+                    min-width: 180px;
+
+                    &:first-child {
+                        margin-right: 5px;
+                    }
+
+                    &:last-child {
+                        margin-left: 5px;
+                    }
+                }
+            }
+
+            .subject-select {
+                min-width: 220px;
+                max-width: 260px;
+            }
+
+            .teachers-select {
+                min-width: 180px;
+                max-width: 260px;
+            }
+
+            & > * {
+                &:first-child {
+                    margin-left: 0;
+                }
+
+                margin-left: 20px;
+            }
+        }
+    }
+}
+
+@media screen and (max-width: 1200px) {
+    .content {
+        padding: 20px;
+        margin: {
+            top: 25px;
+            right: 0;
+        }
+        flex-direction: column-reverse;
+
+        .actions-container {
+            margin: {
+                bottom: 0;
+                top: 10px;
+            }
+        }
+
+        .addschedule-container {
+            .input-container {
+                flex-direction: column;
+
+                .class-select {
+                    width: 100%;
+                }
+            }
+        }
+    }
+}
+
+@media screen and (max-width: 410px) {
+    .content {
+        .addschedule-container {
+            .input-container {
+                flex-direction: column;
+
+                .class-select {
+                    width: 100%;
+                    margin-top: 20px;
+                }
+            }
+        }
+    }
+}

@@ -112,7 +112,7 @@ const Drawer: FunctionComponent = () => {
                     <Link
                         underline='none'
                         className={styles.link}
-                        href='/schedule'
+                        href='/schedules'
                     >
                         <Button>
                             <DescriptionOutlined />

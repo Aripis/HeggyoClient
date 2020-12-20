@@ -1,0 +1,68 @@
+@import 'variables';
+
+.content {
+    margin: {
+        top: 15px;
+        right: 25px;
+    }
+    display: flex;
+    flex-direction: column;
+
+    .actions-container {
+        margin-bottom: 10px;
+
+        .schedule-add {
+            margin: 0 5px;
+
+            &:first-child {
+                margin-left: 0;
+            }
+
+            &:last-child {
+                margin-right: 0;
+            }
+
+            button {
+                box-shadow: $button-shadow;
+            }
+        }
+    }
+
+    .schedules-container {
+        padding: 25px;
+        box-shadow: $card-shadow;
+        background-color: white;
+        border-radius: 10px;
+    }
+}
+
+@media screen and (max-width: 730px) {
+    .content {
+        padding: 20px;
+        margin: {
+            top: 25px;
+            right: 0;
+        }
+        flex-direction: column-reverse;
+
+        .actions-container {
+            margin-bottom: 10px;
+
+            .subject-add {
+                margin: 0 5px;
+
+                &:first-child {
+                    margin-left: 0;
+                }
+
+                &:last-child {
+                    margin-right: 0;
+                }
+
+                button {
+                    box-shadow: $button-shadow;
+                }
+            }
+        }
+    }
+}

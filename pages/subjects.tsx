@@ -22,6 +22,7 @@ import Link from 'components/Link';
 import useSWR from 'swr';
 import { gql } from 'graphql-request';
 import { Subject } from 'utils/interfaces';
+import { Class } from 'utils/interfaces';
 
 interface SubjectCardProps {
     id?: string;
@@ -29,6 +30,7 @@ interface SubjectCardProps {
     description?: string;
     startYear?: number;
     endYear?: number;
+    class?: Class;
 }
 
 const SubjectCard: FunctionComponent<SubjectCardProps> = (props) => {
@@ -44,7 +46,7 @@ const SubjectCard: FunctionComponent<SubjectCardProps> = (props) => {
                         <MoreHorizOutlined />
                     </IconButton>
                 }
-                title={props.name}
+                title={`${props.class?.classNumber}${props.class?.classLetter} ${props.name}`}
                 subheader={`${props.startYear} - ${props.endYear}`}
             />
             <Menu
@@ -81,6 +83,10 @@ const Subjects: FunctionComponent = () => {
                 description
                 startYear
                 endYear
+                class {
+                    classNumber
+                    classLetter
+                }
             }
         }
     `);
