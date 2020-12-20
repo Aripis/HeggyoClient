@@ -36,3 +36,12 @@ export enum ContractType {
     PART_TIME = 'part_time',
     FULL_TIME = 'full_time',
 }
+
+export enum MessageType {
+    ASSIGNMENT = 'assignment',
+}
+
+export enum MessageStatus {
+    CREATED = 'created',
+    PUBLISHED = 'published',
+}
