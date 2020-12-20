@@ -130,85 +130,88 @@ const Dashboard: FunctionComponent = () => {
                                         }
                                     )}
                             </div>
-                            <div className={styles['statistics']}>
-                                <Card elevation={0}>
-                                    <CardHeader
-                                        title={data?.institution?.name}
-                                        subheader={`${data?.institution?.email}`}
-                                    />
-                                </Card>
-                                {data?.users &&
-                                    data?.students &&
-                                    data?.teachers &&
-                                    data?.parents && (
-                                        <List
-                                            className={
-                                                styles['statistics-list']
-                                            }
-                                            subheader={
-                                                <ListSubheader>
-                                                    Статистика
-                                                </ListSubheader>
-                                            }
-                                        >
-                                            <ListItem>
-                                                <ListItemAvatar>
-                                                    <Avatar>
-                                                        <WorkIcon />
-                                                    </Avatar>
-                                                </ListItemAvatar>
-                                                <ListItemText
-                                                    primary={`${data?.institution?.educationalStage} SCHOOL`}
-                                                />
-                                            </ListItem>
-                                            <ListItem>
-                                                <ListItemAvatar>
-                                                    <Avatar>
-                                                        <WorkIcon />
-                                                    </Avatar>
-                                                </ListItemAvatar>
-                                                <ListItemText
-                                                    primary={
-                                                        data?.institution?.type
-                                                    }
-                                                />
-                                            </ListItem>
-                                            <ListItem>
-                                                <ListItemAvatar>
-                                                    <Avatar>
-                                                        <PeopleOutlinedIcon />
-                                                    </Avatar>
-                                                </ListItemAvatar>
-                                                <ListItemText
-                                                    primary='Общо потребители'
-                                                    secondary={`${data?.users.length}`}
-                                                />
-                                            </ListItem>
-                                            <ListItem>
-                                                <ListItemAvatar>
-                                                    <Avatar>
-                                                        <WorkIcon />
-                                                    </Avatar>
-                                                </ListItemAvatar>
-                                                <ListItemText
-                                                    primary='Ученици'
-                                                    secondary={`${data?.students.length}`}
-                                                />
-                                            </ListItem>
-                                            <ListItem>
-                                                <ListItemAvatar>
-                                                    <Avatar>
-                                                        <BeachAccessIcon />
-                                                    </Avatar>
-                                                </ListItemAvatar>
-                                                <ListItemText
-                                                    primary='Учители'
-                                                    secondary={`${data?.teachers.length}`}
-                                                />
-                                            </ListItem>
-                                        </List>
-                                    )}
-                            </div>
+                            {user && (user?.userRole as string) === 'ADMIN' && (
+                                <div className={styles['statistics']}>
+                                    <Card elevation={0}>
+                                        <CardHeader
+                                            title={data?.institution?.name}
+                                            subheader={`${data?.institution?.email}`}
+                                        />
+                                    </Card>
+                                    {data?.users &&
+                                        data?.students &&
+                                        data?.teachers &&
+                                        data?.parents && (
+                                            <List
+                                                className={
+                                                    styles['statistics-list']
+                                                }
+                                                subheader={
+                                                    <ListSubheader>
+                                                        Статистика
+                                                    </ListSubheader>
+                                                }
+                                            >
+                                                <ListItem>
+                                                    <ListItemAvatar>
+                                                        <Avatar>
+                                                            <WorkIcon />
+                                                        </Avatar>
+                                                    </ListItemAvatar>
+                                                    <ListItemText
+                                                        primary={`${data?.institution?.educationalStage} SCHOOL`}
+                                                    />
+                                                </ListItem>
+                                                <ListItem>
+                                                    <ListItemAvatar>
+                                                        <Avatar>
+                                                            <WorkIcon />
+                                                        </Avatar>
+                                                    </ListItemAvatar>
+                                                    <ListItemText
+                                                        primary={
+                                                            data?.institution
+                                                                ?.type
+                                                        }
+                                                    />
+                                                </ListItem>
+                                                <ListItem>
+                                                    <ListItemAvatar>
+                                                        <Avatar>
+                                                            <PeopleOutlinedIcon />
+                                                        </Avatar>
+                                                    </ListItemAvatar>
+                                                    <ListItemText
+                                                        primary='Общо потребители'
+                                                        secondary={`${data?.users.length}`}
+                                                    />
+                                                </ListItem>
+                                                <ListItem>
+                                                    <ListItemAvatar>
+                                                        <Avatar>
+                                                            <WorkIcon />
+                                                        </Avatar>
+                                                    </ListItemAvatar>
+                                                    <ListItemText
+                                                        primary='Ученици'
+                                                        secondary={`${data?.students.length}`}
+                                                    />
+                                                </ListItem>
+                                                <ListItem>
+                                                    <ListItemAvatar>
+                                                        <Avatar>
+                                                            <BeachAccessIcon />
+                                                        </Avatar>
+                                                    </ListItemAvatar>
+                                                    <ListItemText
+                                                        primary='Учители'
+                                                        secondary={`${data?.teachers.length}`}
+                                                    />
+                                                </ListItem>
+                                            </List>
+                                        )}
+                                </div>
+                            )}
                         </>
                     )}
                 </div>
