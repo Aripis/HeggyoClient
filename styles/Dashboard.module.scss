@@ -1,0 +1,36 @@
+@import 'variables';
+
+.card {
+    box-shadow: $card-shadow;
+    // width: 330px;
+    // width: calc(100% / 4 - 15px);
+    max-width: 900px;
+    min-height: 130px;
+    border-radius: 10px;
+    margin: 0 15px 15px 0;
+    cursor: pointer;
+
+    .card-header {
+    }
+}
+
+.container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+
+    .card-div {
+        min-width: 600px;
+    }
+
+    .statistics {
+        box-shadow: $card-shadow;
+        width: 330px;
+        min-width: 400px;
+        max-width: 500px;
+        min-height: 130px;
+        max-height: 470px;
+        border-radius: 10px;
+        margin: 0 15px 15px 0;
+    }
+}

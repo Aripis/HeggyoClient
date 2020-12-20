@@ -4,6 +4,8 @@ import {
     UserStatus,
     UserRoles,
     ContractType,
+    MessageType,
+    MessageStatus,
 } from './enums';
 
 export interface Institution {
@@ -57,4 +59,17 @@ export interface Class {
     classTeacher?: Teacher;
     classLetter?: string;
     classNumber?: number;
+}
+
+export interface Message {
+    id?: string;
+    createdAt?: number;
+    updatedAt?: number;
+    from?: User;
+    toUser?: User[];
+    toClasses?: Class[];
+    data?: string;
+    filePath?: string;
+    type?: MessageType;
+    status?: MessageStatus;
 }

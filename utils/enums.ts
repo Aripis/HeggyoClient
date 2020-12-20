@@ -46,3 +46,12 @@ export enum WeekDays {
     SATURDAY = 'saturday',
     SUNDAY = 'sunday',
 }
+
+export enum MessageType {
+    ASSIGNMENT = 'assignment',
+}
+
+export enum MessageStatus {
+    CREATED = 'created',
+    PUBLISHED = 'published',
+}
