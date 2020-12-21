@@ -53,11 +53,11 @@ interface ScheduleField {
     teachersUUIDs: string[];
 }
 
-interface ScheduleFieldProps extends ScheduleField {
+interface ScheduleFieldProps extends Partial<ScheduleField> {
+    id: number;
     subjects: Subject[];
     teachers: Teacher[];
     onDelete?: (id: number) => void;
-    // [key: string]: any;
 }
 
 interface ScheduleContext {
@@ -68,15 +68,13 @@ const ScheduleContext = createContext<ScheduleContext>({
     updateSubject: () => ({}),
 });
 
-//FIXME: :(
-
 const ScheduleField: FunctionComponent<ScheduleFieldProps> = (props) => {
     const { updateSubject } = useContext(ScheduleContext);
-    // const [weekDay, setWeekDay] = useState('');
-    // const [startTime, setStartTime] = useState<Date | null>(new Date());
-    // const [endTime, setEndTime] = useState<Date | null>(new Date());
-    // const [subjectUUID, setSubjectUUID] = useState('');
-    // const [teachersUUIDs, setTeachersUUIDs] = useState<string[]>([]);
+    const [weekDay, setWeekDay] = useState('');
+    const [startTime, setStartTime] = useState<Date | null>(new Date());
+    const [endTime, setEndTime] = useState<Date | null>(new Date());
+    const [subjectUUID, setSubjectUUID] = useState('');
+    const [teachersUUIDs, setTeachersUUIDs] = useState<string[]>([]);
     const weekDays = [
         { value: 'MONDAY', content: 'Понеделник' },
         { value: 'TUESDAY', content: 'Вторник' },
@@ -105,17 +103,18 @@ const ScheduleField: FunctionComponent<ScheduleFieldProps> = (props) => {
                 className={styles['day-select']}
                 label='Ден от седмицата'
                 required
-                value={props.weekDay}
-                onChange={(e) =>
+                value={weekDay}
+                onChange={(e) => {
+                    setWeekDay(e.target.value);
                     updateSubject({
                         id: props.id,
                         weekDay: e.target.value,
-                        startTime: props.startTime,
-                        endTime: props.endTime,
-                        subjectUUID: props.subjectUUID,
-                        teachersUUIDs: props.teachersUUIDs,
-                    })
-                }
+                        startTime: startTime,
+                        endTime: endTime,
+                        subjectUUID: subjectUUID,
+                        teachersUUIDs: teachersUUIDs,
+                    });
+                }}
                 variant='outlined'
             >
                 {weekDays &&
@@ -134,17 +133,18 @@ const ScheduleField: FunctionComponent<ScheduleFieldProps> = (props) => {
                     required
                     invalidDateMessage='Невалиден формат'
                     label='Начален час'
-                    value={props.startTime}
-                    onChange={(date) =>
+                    value={startTime}
+                    onChange={(date) => {
+                        setStartTime(date);
                         updateSubject({
                             id: props.id,
-                            weekDay: props.weekDay,
-                            startTime: date,
-                            endTime: props.endTime,
-                            subjectUUID: props.subjectUUID,
-                            teachersUUIDs: props.teachersUUIDs,
-                        })
-                    }
+                            weekDay: weekDay,
+                            startTime: date && new Date(date.setSeconds(0, 0)),
+                            endTime: endTime,
+                            subjectUUID: subjectUUID,
+                            teachersUUIDs: teachersUUIDs,
+                        });
+                    }}
                 />
                 <KeyboardTimePicker
                     inputVariant='outlined'
@@ -154,17 +154,18 @@ const ScheduleField: FunctionComponent<ScheduleFieldProps> = (props) => {
                     required
                     invalidDateMessage='Невалиден формат'
                     label='Краен час'
-                    value={props.endTime}
-                    onChange={(date) =>
+                    value={endTime}
+                    onChange={(date) => {
+                        setEndTime(date);
                         updateSubject({
                             id: props.id,
-                            weekDay: props.weekDay,
-                            startTime: props.startTime,
-                            endTime: date,
-                            subjectUUID: props.subjectUUID,
-                            teachersUUIDs: props.teachersUUIDs,
-                        })
-                    }
+                            weekDay: weekDay,
+                            startTime: startTime,
+                            endTime: date && new Date(date.setSeconds(0, 0)),
+                            subjectUUID: subjectUUID,
+                            teachersUUIDs: teachersUUIDs,
+                        });
+                    }}
                 />
             </div>
             <FormControl
@@ -176,17 +177,18 @@ const ScheduleField: FunctionComponent<ScheduleFieldProps> = (props) => {
                 <Select
                     label='Предмет'
                     labelId='subject-select-label'
-                    value={props.subjectUUID}
-                    onChange={(e: ChangeEvent<{ value: unknown }>) =>
+                    value={subjectUUID}
+                    onChange={(e: ChangeEvent<{ value: unknown }>) => {
+                        setSubjectUUID(e.target.value as string);
                         updateSubject({
                             id: props.id,
-                            weekDay: props.weekDay,
-                            startTime: props.startTime,
-                            endTime: props.endTime,
+                            weekDay: weekDay,
+                            startTime: startTime,
+                            endTime: endTime,
                             subjectUUID: e.target.value as string,
-                            teachersUUIDs: props.teachersUUIDs,
-                        })
-                    }
+                            teachersUUIDs: teachersUUIDs,
+                        });
+                    }}
                     renderValue={(selected) => {
                         const selectedSubject:
                             | Subject
@@ -216,17 +218,18 @@ const ScheduleField: FunctionComponent<ScheduleFieldProps> = (props) => {
                     label='Преподаватели'
                     labelId='teachers-select-label'
                     multiple
-                    value={props.teachersUUIDs}
-                    onChange={(e: ChangeEvent<{ value: unknown }>) =>
+                    value={teachersUUIDs}
+                    onChange={(e: ChangeEvent<{ value: unknown }>) => {
+                        setTeachersUUIDs(e.target.value as string[]);
                         updateSubject({
                             id: props.id,
-                            weekDay: props.weekDay,
-                            startTime: props.startTime,
-                            endTime: props.endTime,
-                            subjectUUID: props.subjectUUID,
+                            weekDay: weekDay,
+                            startTime: startTime,
+                            endTime: endTime,
+                            subjectUUID: subjectUUID,
                             teachersUUIDs: e.target.value as string[],
-                        })
-                    }
+                        });
+                    }}
                     renderValue={(selected) =>
                         (selected as string[])
                             .map(
@@ -242,14 +245,14 @@ const ScheduleField: FunctionComponent<ScheduleFieldProps> = (props) => {
                             .join(', ')
                     }
                 >
-                    {props.teachersUUIDs &&
+                    {teachersUUIDs &&
                         props.teachers &&
                         props.teachers.map((teacher: Teacher, i: number) => (
                             <MenuItem key={i} value={teacher.id}>
                                 <Checkbox
                                     color='primary'
                                     checked={
-                                        props.teachersUUIDs.indexOf(
+                                        teachersUUIDs.indexOf(
                                             teacher.id as string
                                         ) > -1
                                     }
@@ -274,8 +277,8 @@ const AddSchedule: FunctionComponent = () => {
     const [fields, setFields] = useState<ScheduleField[]>([
         {
             id: 0,
-            startTime: new Date(),
-            endTime: new Date(),
+            startTime: new Date(new Date().setSeconds(0, 0)),
+            endTime: new Date(new Date().setSeconds(0, 0)),
             weekDay: '',
             subjectUUID: '',
             teachersUUIDs: [],
@@ -323,7 +326,49 @@ const AddSchedule: FunctionComponent = () => {
     const addSchedule = async (e: FormEvent) => {
         e.preventDefault();
         try {
-        } catch (error) {
+            for (const field of fields) {
+                await graphQLClient.request(
+                    gql`
+                        mutation(
+                            $startTime: Date!
+                            $endTime: Date!
+                            $day: WeekDays!
+                            $subjectUUID: String!
+                            $classUUID: String!
+                            $teachersUUIDs: [String!]!
+                        ) {
+                            createSchedule(
+                                scheduleInput: {
+                                    startTime: $startTime
+                                    endTime: $endTime
+                                    day: $day
+                                    subjectUUID: $subjectUUID
+                                    classUUID: $classUUID
+                                    teachersUUIDs: $teachersUUIDs
+                                }
+                            ) {
+                                scheduleId
+                            }
+                        }
+                    `,
+                    {
+                        startTime: field.startTime,
+                        endTime: field.endTime,
+                        day: field.weekDay,
+                        subjectUUID: field.subjectUUID,
+                        classUUID: classUUID,
+                        teachersUUIDs: field.teachersUUIDs,
+                    }
+                );
+            }
+            router.push('/schedules');
+        } catch ({ response }) {
+            if (
+                response.errors[0].message.includes('This Class already exists')
+            ) {
+                setError('Има предмет вече на това място');
+            }
+            console.error(response);
             setError('Неизвестна грешка');
         }
     };
@@ -380,7 +425,6 @@ const AddSchedule: FunctionComponent = () => {
                                 form='addSchedule'
                                 type='submit'
                                 endIcon={<DoneOutlined />}
-                                onClick={() => console.log(fields)}
                             >
                                 Потвърди
                             </Button>
@@ -455,8 +499,6 @@ const AddSchedule: FunctionComponent = () => {
                                     >
                                         {fields &&
                                             fields.map((field) => (
-                                                // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                                                // @ts-ignore
                                                 <ScheduleField
                                                     key={field.id}
                                                     id={field.id}
@@ -499,7 +541,7 @@ const AddSchedule: FunctionComponent = () => {
                             {error}
                         </Alert>
                     </Snackbar>
-                </Container>{' '}
+                </Container>
             </ScheduleContext.Provider>
         </>
     );
