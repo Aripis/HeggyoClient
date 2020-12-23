@@ -49,6 +49,7 @@ export enum WeekDays {
 
 export enum MessageType {
     ASSIGNMENT = 'assignment',
+    MESSAGE = 'message',
 }
 
 export enum MessageStatus {

@@ -9,9 +9,6 @@
     border-radius: 10px;
     margin: 0 15px 15px 0;
     cursor: pointer;
-
-    .card-header {
-    }
 }
 
 .container {
@@ -19,18 +16,51 @@
     flex-direction: row;
     justify-content: space-around;
 
-    .card-div {
+    .messages-div {
         min-width: 600px;
+        .messages-filter {
+            margin-bottom: 10px;
+
+            Button {
+                margin: 0 5px;
+
+                &:first-child {
+                    margin-left: 0;
+                }
+
+                &:last-child {
+                    margin-right: 0;
+                }
+
+                button {
+                    box-shadow: $button-shadow;
+                }
+            }
+
+            .type-select,
+            .status-select {
+                min-width: 130px;
+                margin: 10px 0 20px;
+            }
+
+            .type-select {
+                margin-right: 20px;
+            }
+        }
+
+        .statistics {
+            box-shadow: $card-shadow;
+            width: 330px;
+            min-width: 400px;
+            max-width: 500px;
+            min-height: 130px;
+            max-height: 470px;
+            border-radius: 10px;
+            margin: 0 15px 15px 0;
+        }
     }
 
-    .statistics {
-        box-shadow: $card-shadow;
-        width: 330px;
-        min-width: 400px;
-        max-width: 500px;
-        min-height: 130px;
-        max-height: 470px;
-        border-radius: 10px;
-        margin: 0 15px 15px 0;
+    .else-div {
+        min-width: 600px;
     }
 }
