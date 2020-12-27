@@ -1,0 +1,166 @@
+@import 'variables';
+
+.card {
+    border: 1px solid $dark-color;
+    box-shadow: $card-shadow;
+    width: 330px;
+    width: calc(100% / 5 - 15px);
+    min-height: 90px;
+    border-radius: 10px;
+    margin: 0 15px 15px 0;
+    transition: 0.2s;
+    cursor: pointer;
+
+    .card-header {
+        :global .MuiCardHeader-avatar {
+            .MuiAvatar-root {
+                transition: 0.2s;
+                background-color: $dark-color;
+            }
+        }
+
+        :global .MuiCardHeader-content {
+            overflow: hidden;
+
+            .MuiCardHeader-title {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                font-weight: 600;
+            }
+
+            .MuiCardHeader-subheader {
+                transition: 0.2s;
+            }
+        }
+
+        :global .MuiCardHeader-action {
+            button {
+                transition: 0.2s;
+            }
+        }
+    }
+
+    &:hover {
+        background-color: $dark-color;
+        color: white;
+
+        .card-header {
+            :global .MuiCardHeader-avatar {
+                .MuiAvatar-root {
+                    background-color: white;
+                    color: $dark-color;
+                }
+            }
+
+            :global .MuiCardHeader-action {
+                button {
+                    color: white;
+                }
+            }
+
+            :global .MuiCardHeader-content {
+                .MuiCardHeader-subheader {
+                    color: white;
+                }
+            }
+        }
+    }
+}
+
+.content {
+    margin-right: 25px;
+    margin-top: 15px;
+    display: flex;
+    flex-direction: column;
+
+    .actions-container {
+        margin-bottom: 10px;
+
+        .class-add {
+            margin: 0 5px;
+
+            &:first-child {
+                margin-left: 0;
+            }
+
+            &:last-child {
+                margin-right: 0;
+            }
+
+            button {
+                box-shadow: $button-shadow;
+            }
+        }
+    }
+
+    .classes-container {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+
+        .no-classes {
+            width: 100%;
+            padding: 25px;
+            box-shadow: $card-shadow;
+            background-color: white;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    }
+}
+
+@media screen and (max-width: 1250px) {
+    .card {
+        width: calc(100% / 4 - 15px);
+    }
+}
+
+@media screen and (max-width: 990px) {
+    .card {
+        width: calc(100% / 2 - 15px);
+    }
+}
+
+@media screen and (max-width: 730px) {
+    .card {
+        margin: 0 0px 15px 0px;
+    }
+
+    .content {
+        margin-right: 0;
+        padding: 20px;
+
+        .classes-container {
+            justify-content: space-between;
+        }
+
+        .actions-container {
+            margin-bottom: 10px;
+
+            .class-add {
+                margin: 0 5px;
+
+                &:first-child {
+                    margin-left: 0;
+                }
+
+                &:last-child {
+                    margin-right: 0;
+                }
+
+                button {
+                    box-shadow: $button-shadow;
+                }
+            }
+        }
+    }
+}
+
+@media screen and (max-width: 530px) {
+    .card {
+        width: 100%;
+        margin: 0 0px 15px 0px;
+    }
+}

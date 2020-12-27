@@ -6,11 +6,8 @@ import {
     CardContent,
     CardHeader,
     Container,
-    FormControl,
-    InputLabel,
     ListSubheader,
     MenuItem,
-    Select,
     TextField,
 } from '@material-ui/core';
 import styles from 'styles/Dashboard.module.scss';
@@ -22,7 +19,7 @@ import Loader from 'components/Loader';
 import useSWR from 'swr';
 import { gql } from 'graphql-request';
 import { Card } from '@material-ui/core';
-import { Class, Message } from 'utils/interfaces';
+import { Message } from 'utils/interfaces';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -31,7 +28,6 @@ import PeopleOutlinedIcon from '@material-ui/icons/PeopleOutlined';
 import WorkIcon from '@material-ui/icons/Work';
 import BeachAccessIcon from '@material-ui/icons/BeachAccess';
 // import { FilterListOutlined } from '@material-ui/icons';
-import { MessageStatus, MessageType } from '../utils/enums';
 
 const Dashboard: FunctionComponent = () => {
     const router = useRouter();
@@ -110,7 +106,6 @@ const Dashboard: FunctionComponent = () => {
         if (status === 'REDIRECT') {
             router.push('/login');
         }
-        // console.log(MessageType.length);
     }, [user, status]);
 
     if (!user) {

@@ -13,6 +13,7 @@ import {
     DescriptionOutlined,
     CollectionsBookmarkOutlined,
     PeopleAltOutlined,
+    EventNote,
 } from '@material-ui/icons';
 import { FunctionComponent, useState } from 'react';
 import styles from 'styles/Drawer.module.scss';
@@ -87,6 +88,15 @@ const Drawer: FunctionComponent = () => {
                     <Link
                         underline='none'
                         className={styles.link}
+                        href='/calendar'
+                    >
+                        <Button>
+                            <EventNote /> Календар
+                        </Button>
+                    </Link>
+                    <Link
+                        underline='none'
+                        className={styles.link}
                         href='/users'
                     >
                         <Button>
@@ -103,7 +113,11 @@ const Drawer: FunctionComponent = () => {
                             Предмети
                         </Button>
                     </Link>
-                    <Link underline='none' className={styles.link} href='/'>
+                    <Link
+                        underline='none'
+                        className={styles.link}
+                        href='/classes'
+                    >
                         <Button>
                             <MeetingRoomOutlined />
                             Класове
