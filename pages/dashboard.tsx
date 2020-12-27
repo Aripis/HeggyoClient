@@ -2,15 +2,12 @@ import { useEffect, FunctionComponent, useState } from 'react';
 import Head from 'next/head';
 import {
     Avatar,
-    // Button,
+    Button,
+    Container,
     CardContent,
     CardHeader,
-    Container,
-    FormControl,
-    InputLabel,
     ListSubheader,
     MenuItem,
-    Select,
     TextField,
 } from '@material-ui/core';
 import styles from 'styles/Dashboard.module.scss';
@@ -22,7 +19,7 @@ import Loader from 'components/Loader';
 import useSWR from 'swr';
 import { gql } from 'graphql-request';
 import { Card } from '@material-ui/core';
-import { Class, Message } from 'utils/interfaces';
+import { Message } from 'utils/interfaces';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -30,8 +27,7 @@ import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import PeopleOutlinedIcon from '@material-ui/icons/PeopleOutlined';
 import WorkIcon from '@material-ui/icons/Work';
 import BeachAccessIcon from '@material-ui/icons/BeachAccess';
-// import { FilterListOutlined } from '@material-ui/icons';
-import { MessageStatus, MessageType } from '../utils/enums';
+import AddOutlinedIcon from '@material-ui/icons/AddOutlined';
 
 const Dashboard: FunctionComponent = () => {
     const router = useRouter();
@@ -186,6 +182,18 @@ const Dashboard: FunctionComponent = () => {
                                                 </MenuItem>
                                             ))}
                                     </TextField>
+                                    <Button
+                                        disableElevation
+                                        variant='contained'
+                                        color='primary'
+                                        className={styles['add-button']}
+                                        startIcon={<AddOutlinedIcon />}
+                                        onClick={() =>
+                                            router.push('/addmessage')
+                                        }
+                                    >
+                                        Добави
+                                    </Button>
                                 </div>
                                 {data?.messagesByCriteria &&
                                     data?.messagesByCriteria?.map(

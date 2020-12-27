@@ -20,6 +20,7 @@
         min-width: 600px;
         .messages-filter {
             margin-bottom: 10px;
+            display: flex;
 
             Button {
                 margin: 0 5px;
@@ -38,13 +39,19 @@
             }
 
             .type-select,
-            .status-select {
+            .status-select,
+            .add-button {
                 min-width: 130px;
                 margin: 10px 0 20px;
             }
 
-            .type-select {
-                margin-right: 20px;
+            .status-select,
+            .add-button {
+                margin-left: 20px;
+            }
+
+            .add-button {
+                border-radius: 5px;
             }
         }
 
