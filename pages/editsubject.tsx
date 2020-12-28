@@ -66,7 +66,7 @@ const EditSubject: FunctionComponent = () => {
     useEffect(() => {
         (async () => {
             try {
-                const sunjectData = await graphQLClient.request(
+                const subjectData = await graphQLClient.request(
                     gql`
                         query($id: String!) {
                             subject(id: $id) {
@@ -94,13 +94,13 @@ const EditSubject: FunctionComponent = () => {
                         id: router.query.id,
                     }
                 );
-                setName(sunjectData.subject.name);
-                setDescription(sunjectData.subject.description);
-                setStartYear(sunjectData.subject.startYear);
-                setEndYear(sunjectData.subject.endYear);
-                setClassUUID(sunjectData.subject.class.id);
+                setName(subjectData.subject.name);
+                setDescription(subjectData.subject.description);
+                setStartYear(subjectData.subject.startYear);
+                setEndYear(subjectData.subject.endYear);
+                setClassUUID(subjectData.subject.class.id);
                 setTeachersUUIDs(
-                    sunjectData.subject.teachers.map(
+                    subjectData.subject.teachers.map(
                         (teacher: Teacher) => teacher.id
                     )
                 );
@@ -125,7 +125,7 @@ const EditSubject: FunctionComponent = () => {
                         $teachersUUIDs: [String!]
                     ) {
                         updateSubject(
-                            subjectData: {
+                            createSubjectInput: {
                                 id: $id
                                 startYear: $startYear
                                 endYear: $endYear

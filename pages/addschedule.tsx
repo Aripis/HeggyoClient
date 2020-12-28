@@ -338,7 +338,7 @@ const AddSchedule: FunctionComponent = () => {
                             $teachersUUIDs: [String!]!
                         ) {
                             createSchedule(
-                                scheduleInput: {
+                                createScheduleInput: {
                                     startTime: $startTime
                                     endTime: $endTime
                                     day: $day
