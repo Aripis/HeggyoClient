@@ -141,9 +141,9 @@ const Classes: FunctionComponent = () => {
                         {data && !data.classes && (
                             <div className={styles['no-classes']}>
                                 <Typography color='textSecondary'>
-                                    Няма съществуващи предмети. За да добавите
-                                    такива, натиснете бутонът &quot;Добави
-                                    предмет&quot;.
+                                    Няма съществуващи класове. За да добавите
+                                    такива, натиснете бутона &quot;Създай
+                                    клас&quot;.
                                 </Typography>
                             </div>
                         )}

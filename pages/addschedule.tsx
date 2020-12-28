@@ -368,7 +368,6 @@ const AddSchedule: FunctionComponent = () => {
             ) {
                 setError('Има предмет вече на това място');
             }
-            console.error(response);
             setError('Неизвестна грешка');
         }
     };
