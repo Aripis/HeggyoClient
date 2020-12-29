@@ -1,10 +1,4 @@
-import {
-    useEffect,
-    useState,
-    FunctionComponent,
-    FormEvent,
-    ChangeEvent,
-} from 'react';
+import { useEffect, useState, FunctionComponent, FormEvent } from 'react';
 import Head from 'next/head';
 import Navbar from 'components/Navbar';
 import Drawer from 'components/Drawer';
@@ -67,9 +61,12 @@ const EditSubject: FunctionComponent = () => {
         if (user && (user?.userRole as string) !== 'ADMIN') {
             router.back();
         }
+    }, [user, status]);
+
+    useEffect(() => {
         (async () => {
             try {
-                const sunjectData = await graphQLClient.request(
+                const subjectData = await graphQLClient.request(
                     gql`
                         query($id: String!) {
                             subject(id: $id) {
@@ -97,13 +94,13 @@ const EditSubject: FunctionComponent = () => {
                         id: router.query.id,
                     }
                 );
-                setName(sunjectData.subject.name);
-                setDescription(sunjectData.subject.description);
-                setStartYear(sunjectData.subject.startYear);
-                setEndYear(sunjectData.subject.endYear);
-                setClassUUID(sunjectData.subject.class.id);
+                setName(subjectData.subject.name);
+                setDescription(subjectData.subject.description);
+                setStartYear(subjectData.subject.startYear);
+                setEndYear(subjectData.subject.endYear);
+                setClassUUID(subjectData.subject.class.id);
                 setTeachersUUIDs(
-                    sunjectData.subject.teachers.map(
+                    subjectData.subject.teachers.map(
                         (teacher: Teacher) => teacher.id
                     )
                 );
@@ -111,7 +108,7 @@ const EditSubject: FunctionComponent = () => {
                 setError('Неизвестна грешка');
             }
         })();
-    }, [user, status]);
+    }, []);
 
     const editSubject = async (e: FormEvent) => {
         e.preventDefault();
@@ -128,7 +125,7 @@ const EditSubject: FunctionComponent = () => {
                         $teachersUUIDs: [String!]
                     ) {
                         updateSubject(
-                            subjectData: {
+                            createSubjectInput: {
                                 id: $id
                                 startYear: $startYear
                                 endYear: $endYear
@@ -154,7 +151,6 @@ const EditSubject: FunctionComponent = () => {
             );
             router.push('/subjects');
         } catch (error) {
-            console.log(error);
             setError('Неизвестна грешка');
         }
     };
@@ -230,9 +226,7 @@ const EditSubject: FunctionComponent = () => {
                                         labelId='teachers-select-label'
                                         multiple
                                         value={teachersUUIDs}
-                                        onChange={(
-                                            e: ChangeEvent<{ value: unknown }>
-                                        ) =>
+                                        onChange={(e) =>
                                             setTeachersUUIDs(
                                                 e.target.value as string[]
                                             )

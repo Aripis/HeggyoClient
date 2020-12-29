@@ -22,7 +22,7 @@ const localizer = dateFnsLocalizer({
     startOfWeek,
     getDay,
     locales: {
-        bg: bg,
+        bg,
     },
 });
 
@@ -73,7 +73,6 @@ const CalendarComponent: FunctionComponent = () => {
     }
 
     const getAssignmentType = (type: string) => {
-        console.log(type);
         switch (type) {
             case 'HOMEWORK':
                 return 'Домашно';

@@ -67,7 +67,7 @@ const AddClass: FunctionComponent = () => {
                         $totalStudentCount: Int!
                         $classNumber: Int!
                         $classLetter: String!
-                        $classTeacher: String
+                        $teacherUUID: String
                     ) {
                         addClass(
                             createClassInput: {
@@ -76,7 +76,7 @@ const AddClass: FunctionComponent = () => {
                                 totalStudentCount: $totalStudentCount
                                 classNumber: $classNumber
                                 classLetter: $classLetter
-                                classTeacher: $classTeacher
+                                teacherUUID: $teacherUUID
                             }
                         ) {
                             classId
@@ -89,7 +89,7 @@ const AddClass: FunctionComponent = () => {
                     totalStudentCount,
                     classNumber,
                     classLetter,
-                    classTeacher: teacherUUID,
+                    teacherUUID,
                 }
             );
             router.push('/classes');

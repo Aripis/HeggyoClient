@@ -9,6 +9,11 @@ import {
     ListSubheader,
     MenuItem,
     TextField,
+    Card,
+    List,
+    ListItem,
+    ListItemText,
+    ListItemAvatar,
 } from '@material-ui/core';
 import styles from 'styles/Dashboard.module.scss';
 import Navbar from 'components/Navbar';
@@ -18,16 +23,9 @@ import { useRouter } from 'next/router';
 import Loader from 'components/Loader';
 import useSWR from 'swr';
 import { gql } from 'graphql-request';
-import { Card } from '@material-ui/core';
 import { Message } from 'utils/interfaces';
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import ListItemAvatar from '@material-ui/core/ListItemAvatar';
-import PeopleOutlinedIcon from '@material-ui/icons/PeopleOutlined';
-import WorkIcon from '@material-ui/icons/Work';
-import BeachAccessIcon from '@material-ui/icons/BeachAccess';
 import AddOutlinedIcon from '@material-ui/icons/AddOutlined';
+import { PeopleOutlined, Work, BeachAccess } from '@material-ui/icons';
 
 const Dashboard: FunctionComponent = () => {
     const router = useRouter();
@@ -52,8 +50,8 @@ const Dashboard: FunctionComponent = () => {
             query($filterByStatus: MessageStatus, $filterByType: MessageType) {
                 messagesByCriteria(
                     criteria: {
-                        messageType: $filterByType
                         messageStatus: $filterByStatus
+                        messageType: $filterByType
                     }
                 ) {
                     id
@@ -124,11 +122,11 @@ const Dashboard: FunctionComponent = () => {
                 disableGutters
             >
                 <Navbar title='Табло' />
-                <div className={styles['container']}>
+                <div className={styles.content}>
                     {data && (
                         <>
-                            <div className={styles['messages-div']}>
-                                <div className={styles['messages-filter']}>
+                            <div className={styles['messages-container']}>
+                                <div className={styles['filters-container']}>
                                     <TextField
                                         select
                                         label='Тип'
@@ -172,12 +170,12 @@ const Dashboard: FunctionComponent = () => {
                                             Без
                                         </MenuItem>
                                         {messageStatus &&
-                                            messageStatus.map((type) => (
+                                            messageStatus.map((status) => (
                                                 <MenuItem
-                                                    key={type.value}
-                                                    value={type.value}
+                                                    key={status.value}
+                                                    value={status.value}
                                                 >
-                                                    {type.content}
+                                                    {status.content}
                                                 </MenuItem>
                                             ))}
                                     </TextField>
@@ -258,7 +256,7 @@ const Dashboard: FunctionComponent = () => {
                                                 <ListItem>
                                                     <ListItemAvatar>
                                                         <Avatar>
-                                                            <WorkIcon />
+                                                            <Work />
                                                         </Avatar>
                                                     </ListItemAvatar>
                                                     <ListItemText
@@ -268,7 +266,7 @@ const Dashboard: FunctionComponent = () => {
                                                 <ListItem>
                                                     <ListItemAvatar>
                                                         <Avatar>
-                                                            <WorkIcon />
+                                                            <Work />
                                                         </Avatar>
                                                     </ListItemAvatar>
                                                     <ListItemText
@@ -281,7 +279,7 @@ const Dashboard: FunctionComponent = () => {
                                                 <ListItem>
                                                     <ListItemAvatar>
                                                         <Avatar>
-                                                            <PeopleOutlinedIcon />
+                                                            <PeopleOutlined />
                                                         </Avatar>
                                                     </ListItemAvatar>
                                                     <ListItemText
@@ -292,7 +290,7 @@ const Dashboard: FunctionComponent = () => {
                                                 <ListItem>
                                                     <ListItemAvatar>
                                                         <Avatar>
-                                                            <WorkIcon />
+                                                            <Work />
                                                         </Avatar>
                                                     </ListItemAvatar>
                                                     <ListItemText
@@ -303,7 +301,7 @@ const Dashboard: FunctionComponent = () => {
                                                 <ListItem>
                                                     <ListItemAvatar>
                                                         <Avatar>
-                                                            <BeachAccessIcon />
+                                                            <BeachAccess />
                                                         </Avatar>
                                                     </ListItemAvatar>
                                                     <ListItemText

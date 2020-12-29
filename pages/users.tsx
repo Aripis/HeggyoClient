@@ -23,7 +23,12 @@ import useSWR from 'swr';
 const Users: FunctionComponent = () => {
     const router = useRouter();
     const { user, status } = useAuth();
-    const { data: clsData } = useSWR(gql`
+
+    const [role, setRole] = useState('');
+    const [token, setToken] = useState('');
+    const [classUUID, setClassUUID] = useState('');
+    const [error, setError] = useState('');
+    const { data } = useSWR(gql`
         query {
             classes {
                 id
@@ -32,11 +37,6 @@ const Users: FunctionComponent = () => {
             }
         }
     `);
-
-    const [role, setRole] = useState('');
-    const [token, setToken] = useState('');
-    const [classUUID, setClassUUID] = useState('');
-    const [error, setError] = useState('');
 
     useEffect(() => {
         if (status === 'REDIRECT') {
@@ -54,7 +54,7 @@ const Users: FunctionComponent = () => {
     const generateToken = async (e: FormEvent) => {
         e.preventDefault();
         try {
-            const data = await graphQLClient.request(
+            const res = await graphQLClient.request(
                 gql`
                     query($classUUID: String, $userRole: UserRoles!) {
                         generateUserToken(
@@ -72,7 +72,7 @@ const Users: FunctionComponent = () => {
                     userRole: role,
                 }
             );
-            setToken(data.generateUserToken.userRoleToken);
+            setToken(res.generateUserToken.userRoleToken);
         } catch (error) {
             setError('Неизвестна грешка');
         }
@@ -154,9 +154,9 @@ const Users: FunctionComponent = () => {
                                     }
                                 >
                                     <MenuItem value=''>Без</MenuItem>
-                                    {clsData &&
-                                        clsData?.classes &&
-                                        clsData?.classes?.map(
+                                    {data &&
+                                        data?.classes &&
+                                        data?.classes?.map(
                                             (currClass: Class, i: number) => (
                                                 <MenuItem
                                                     key={i}

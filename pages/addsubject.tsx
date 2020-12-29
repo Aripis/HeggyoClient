@@ -77,7 +77,7 @@ const AddSubject: FunctionComponent = () => {
                         $teachersUUIDs: [String!]
                     ) {
                         createSubject(
-                            subjectData: {
+                            createSubjectInput: {
                                 startYear: $startYear
                                 endYear: $endYear
                                 name: $name

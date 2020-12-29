@@ -338,7 +338,7 @@ const AddSchedule: FunctionComponent = () => {
                             $teachersUUIDs: [String!]!
                         ) {
                             createSchedule(
-                                scheduleInput: {
+                                createScheduleInput: {
                                     startTime: $startTime
                                     endTime: $endTime
                                     day: $day
@@ -368,7 +368,6 @@ const AddSchedule: FunctionComponent = () => {
             ) {
                 setError('Има предмет вече на това място');
             }
-            console.error(response);
             setError('Неизвестна грешка');
         }
     };

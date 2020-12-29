@@ -143,7 +143,7 @@ const Subjects: FunctionComponent = () => {
                             <div className={styles['no-subjects']}>
                                 <Typography color='textSecondary'>
                                     Няма съществуващи предмети. За да добавите
-                                    такива, натиснете бутонът &quot;Добави
+                                    такива, натиснете бутона &quot;Добави
                                     предмет&quot;.
                                 </Typography>
                             </div>

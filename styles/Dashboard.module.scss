@@ -2,8 +2,6 @@
 
 .card {
     box-shadow: $card-shadow;
-    // width: 330px;
-    // width: calc(100% / 4 - 15px);
     max-width: 900px;
     min-height: 130px;
     border-radius: 10px;
@@ -11,30 +9,25 @@
     cursor: pointer;
 }
 
-.container {
+.content {
     display: flex;
     flex-direction: row;
     justify-content: space-around;
 
-    .messages-div {
+    .messages-container {
         min-width: 600px;
-        .messages-filter {
+        margin-bottom: 10px;
+        display: flex;
+        flex-direction: column;
+
+        .filters-container {
             margin-bottom: 10px;
             display: flex;
+            justify-content: space-between;
 
             Button {
-                margin: 0 5px;
-
                 &:first-child {
                     margin-left: 0;
-                }
-
-                &:last-child {
-                    margin-right: 0;
-                }
-
-                button {
-                    box-shadow: $button-shadow;
                 }
             }
 
@@ -48,10 +41,15 @@
             .status-select,
             .add-button {
                 margin-left: 20px;
+                margin-right: 15px;
             }
 
             .add-button {
                 border-radius: 5px;
+            }
+            .type-select {
+                min-width: 130px;
+                margin: 10px 20px 20px 0;
             }
         }
 
@@ -65,9 +63,5 @@
             border-radius: 10px;
             margin: 0 15px 15px 0;
         }
-    }
-
-    .else-div {
-        min-width: 600px;
     }
 }
