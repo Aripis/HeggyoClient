@@ -4,6 +4,7 @@ import {
     UserStatus,
     UserRoles,
     ContractType,
+    AssignmentType,
     MessageType,
     MessageStatus,
 } from './enums';
@@ -39,6 +40,7 @@ export interface Subject {
     institution?: Institution;
     teachers?: Teacher[];
     class?: Class;
+    messages?: Message[];
 }
 
 export interface Teacher {
@@ -71,5 +73,7 @@ export interface Message {
     data?: string;
     filePath?: string;
     type?: MessageType;
+    assignmentType?: AssignmentType;
     status?: MessageStatus;
+    subject?: Subject;
 }

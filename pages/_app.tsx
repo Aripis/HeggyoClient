@@ -7,6 +7,7 @@ import theme from 'components/theme';
 import 'styles/global.scss';
 import graphQLClient from 'utils/graphqlclient';
 import { SWRConfig } from 'swr';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 export default function MyApp(props: AppProps) {
     const { Component, pageProps } = props;

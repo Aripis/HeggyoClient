@@ -56,3 +56,9 @@ export enum MessageStatus {
     CREATED = 'created',
     PUBLISHED = 'published',
 }
+
+export enum AssignmentType {
+    HOMEWORK = 'homework',
+    CLASSWORK = 'classwork',
+    EXAM = 'exam',
+}

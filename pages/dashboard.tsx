@@ -106,7 +106,6 @@ const Dashboard: FunctionComponent = () => {
         if (status === 'REDIRECT') {
             router.push('/login');
         }
-        // console.log(MessageType.length);
     }, [user, status]);
 
     if (!user) {
