@@ -1,10 +1,4 @@
-import {
-    useEffect,
-    useState,
-    FunctionComponent,
-    FormEvent,
-    ChangeEvent,
-} from 'react';
+import { useEffect, useState, FunctionComponent, FormEvent } from 'react';
 import Head from 'next/head';
 import Navbar from 'components/Navbar';
 import Drawer from 'components/Drawer';
@@ -182,9 +176,7 @@ const AddSubject: FunctionComponent = () => {
                                         labelId='teachers-select-label'
                                         multiple
                                         value={teachersUUIDs}
-                                        onChange={(
-                                            e: ChangeEvent<{ value: unknown }>
-                                        ) =>
+                                        onChange={(e) =>
                                             setTeachersUUIDs(
                                                 e.target.value as string[]
                                             )

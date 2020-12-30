@@ -125,7 +125,7 @@ const EditSubject: FunctionComponent = () => {
                         $teachersUUIDs: [String!]
                     ) {
                         updateSubject(
-                            createSubjectInput: {
+                            updateSubjectInput: {
                                 id: $id
                                 startYear: $startYear
                                 endYear: $endYear
