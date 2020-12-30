@@ -52,6 +52,14 @@ export interface Teacher {
     subjects?: Subject[];
 }
 
+export interface Student {
+    id?: string;
+    user?: User;
+    class?: Class;
+    prevEducation?: string;
+    recordMessage?: string;
+}
+
 export interface Class {
     id?: string;
     institution?: Institution;

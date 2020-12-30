@@ -18,10 +18,10 @@ export enum EducationStage {
 }
 
 export enum UserStatus {
-    ACTIVE,
-    INACTIVE,
-    BLOCKED,
-    UNVERIFIED,
+    ACTIVE = 'Активен',
+    INACTIVE = 'Неактивен',
+    BLOCKED = 'Блокиран',
+    UNVERIFIED = 'Неверифициран',
 }
 
 export enum UserRoles {

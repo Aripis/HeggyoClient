@@ -32,14 +32,19 @@
         box-shadow: $card-shadow;
         background-color: white;
         border-radius: 10px;
+        align-items: center;
+
+        display: flex;
+        flex-direction: row;
 
         .input-container {
-            margin-top: 20px;
             display: flex;
             flex-direction: row;
 
+            margin-left: 20px;
             &:first-child {
                 margin-top: 0;
+                margin-left: 0;
             }
 
             .role-select {
@@ -49,6 +54,98 @@
             .class-select {
                 min-width: 120px;
                 margin-left: 20px;
+            }
+        }
+    }
+}
+
+.display-users {
+    padding: 25px 25px 0;
+    margin: 25px 20px 20px 0;
+    box-shadow: $card-shadow;
+    background-color: white;
+    border-radius: 10px;
+}
+
+.users-component {
+    .main-data {
+        align-items: center;
+        .names {
+            vertical-align: middle;
+        }
+        .role-text {
+            vertical-align: middle;
+        }
+        display: flex;
+        flex-direction: row;
+
+        .user-accordion {
+            width: 100%;
+
+            margin-bottom: 20px;
+
+            .accordion-summary {
+                display: flex;
+                flex-direction: row;
+                justify-content: flex-end;
+
+                .names,
+                .role-text,
+                .email-text,
+                .status {
+                    margin-right: 20px;
+                    padding: 5px 10px;
+                }
+
+                .names {
+                    min-width: 280px;
+                }
+
+                .role-text {
+                    min-width: 100px;
+                }
+
+                .email-text {
+                    min-width: 230px;
+                }
+            }
+
+            .accordion-details {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+
+                .details {
+                    display: flex;
+                    flex-direction: row;
+                    justify-content: space-between;
+                    align-items: center;
+
+                    .record-message {
+                        margin-left: 20px;
+                        word-wrap: break-word;
+                        max-width: 480px;
+                    }
+                    .class {
+                        margin-left: 10px;
+                        min-width: 150px;
+                    }
+
+                    .years-experience {
+                        margin-left: 10px;
+                        min-width: 150px;
+                    }
+
+                    .contract-type {
+                        margin-left: 20px;
+                        min-width: 220px;
+                    }
+
+                    .education {
+                        margin-left: 20px;
+                        min-width: 150px;
+                    }
+                }
             }
         }
     }
