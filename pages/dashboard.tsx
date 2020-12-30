@@ -2,9 +2,10 @@ import { useEffect, FunctionComponent, useState } from 'react';
 import Head from 'next/head';
 import {
     Avatar,
+    Button,
+    Container,
     CardContent,
     CardHeader,
-    Container,
     ListSubheader,
     MenuItem,
     TextField,
@@ -23,6 +24,7 @@ import Loader from 'components/Loader';
 import useSWR from 'swr';
 import { gql } from 'graphql-request';
 import { Message } from 'utils/interfaces';
+import AddOutlinedIcon from '@material-ui/icons/AddOutlined';
 import { PeopleOutlined, Work, BeachAccess } from '@material-ui/icons';
 
 const Dashboard: FunctionComponent = () => {
@@ -177,6 +179,18 @@ const Dashboard: FunctionComponent = () => {
                                                 </MenuItem>
                                             ))}
                                     </TextField>
+                                    <Button
+                                        disableElevation
+                                        variant='contained'
+                                        color='primary'
+                                        className={styles['add-button']}
+                                        startIcon={<AddOutlinedIcon />}
+                                        onClick={() =>
+                                            router.push('/addmessage')
+                                        }
+                                    >
+                                        Добави
+                                    </Button>
                                 </div>
                                 {data?.messagesByCriteria &&
                                     data?.messagesByCriteria?.map(

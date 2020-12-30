@@ -8,17 +8,143 @@ import {
     Snackbar,
     TextField,
     MenuItem,
+    Typography,
+    Accordion,
+    AccordionSummary,
+    AccordionDetails,
 } from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';
 import { LoopOutlined } from '@material-ui/icons';
+import ExpandMoreOutlinedIcon from '@material-ui/icons/ExpandMoreOutlined';
 import { useAuth } from 'utils/useAuth';
 import { useRouter } from 'next/router';
 import Loader from 'components/Loader';
 import styles from 'styles/Users.module.scss';
 import { gql } from 'graphql-request';
-import { Class } from 'utils/interfaces';
+import { Class, Student, Teacher } from 'utils/interfaces';
 import graphQLClient from 'utils/graphqlclient';
 import useSWR from 'swr';
+import { ContractType, UserStatus, UserRoles } from 'utils/enums';
+
+interface UsersProps {
+    id: string | undefined;
+    userRole: UserRoles | undefined;
+    firstName: string | undefined;
+    middleName: string | undefined;
+    lastName: string | undefined;
+    email: string | undefined;
+    status: UserStatus | undefined;
+    classNumber?: number | undefined;
+    classLetter?: string | undefined;
+    prevEducation?: string | undefined;
+    recordMessage?: string | undefined;
+    education?: string | undefined;
+    yearsExperience?: number | undefined;
+    contractType?: ContractType | undefined;
+}
+
+const UsersComponent: FunctionComponent<UsersProps> = (props) => {
+    const [expanded, setExpanded] = useState(false);
+    const router = useRouter();
+
+    return (
+        <div className={styles['users-component']}>
+            <div className={styles['main-data']}>
+                <Accordion
+                    expanded={expanded}
+                    onChange={() => setExpanded(!expanded)}
+                    className={styles['user-accordion']}
+                >
+                    <AccordionSummary
+                        expandIcon={<ExpandMoreOutlinedIcon />}
+                        id='user-component-header'
+                        className={styles['accordion-summary']}
+                    >
+                        <Typography variant='body1' className={styles['names']}>
+                            Име: {props.firstName}{' '}
+                            {expanded && props.middleName} {props.lastName}
+                            {!props.firstName &&
+                                !props.middleName &&
+                                !props.lastName &&
+                                '--'}
+                        </Typography>
+                        <Typography
+                            variant='body1'
+                            className={styles['role-text']}
+                        >
+                            Роля: {props.userRole}
+                            {!props.userRole && '--'}
+                        </Typography>
+                        <Typography
+                            variant='body1'
+                            className={styles['email-text']}
+                        >
+                            Имейл: {props.email}
+                            {!props.email && '--'}
+                        </Typography>
+                        <Typography
+                            variant='body1'
+                            className={styles['status']}
+                        >
+                            Статус: {props.status && UserStatus[props.status]}
+                        </Typography>
+                    </AccordionSummary>
+                    <AccordionDetails className={styles['accordion-details']}>
+                        {props.userRole === 'student' && (
+                            <div className={styles['details']}>
+                                <Typography className={styles['class']}>
+                                    Клас: {props.classNumber}
+                                    {props.classLetter}
+                                    {!props.classLetter &&
+                                        !props.classNumber &&
+                                        '--'}
+                                </Typography>
+                                <Typography
+                                    className={styles['record-message']}
+                                >
+                                    Коментар: {props.recordMessage}
+                                    {!props.recordMessage && '--'}
+                                </Typography>
+                            </div>
+                        )}
+                        {props.userRole === 'teacher' && (
+                            <div className={styles['details']}>
+                                <Typography
+                                    className={styles['years-experience']}
+                                >
+                                    Стаж: {props.yearsExperience}
+                                    {!props.yearsExperience && '--'}
+                                </Typography>
+                                <Typography className={styles['contract-type']}>
+                                    Вид договор:{' '}
+                                    {props.contractType &&
+                                        props.contractType.toUpperCase()}
+                                    {!props.contractType && '--'}
+                                </Typography>
+                                <Typography className={styles['education']}>
+                                    Квалификация: {props.education}
+                                    {!props.education && '--'}
+                                </Typography>
+                            </div>
+                        )}
+                        <Button
+                            variant='contained'
+                            color='primary'
+                            className={styles['button-view-more']}
+                            onClick={() =>
+                                router.push(
+                                    `/editforeignuser?r=${props.userRole}&id=${props.id}`
+                                )
+                            }
+                        >
+                            Виж още
+                        </Button>
+                    </AccordionDetails>
+                </Accordion>
+            </div>
+        </div>
+    );
+};
 
 const Users: FunctionComponent = () => {
     const router = useRouter();
@@ -34,6 +160,37 @@ const Users: FunctionComponent = () => {
                 id
                 classNumber
                 classLetter
+            }
+
+            students {
+                id
+                user {
+                    firstName
+                    middleName
+                    lastName
+                    email
+                    status
+                }
+                class {
+                    classNumber
+                    classLetter
+                }
+                prevEducation
+                recordMessage
+            }
+
+            teachers {
+                id
+                user {
+                    firstName
+                    middleName
+                    lastName
+                    email
+                    status
+                }
+                education
+                yearsExperience
+                contractType
             }
         }
     `);
@@ -142,10 +299,11 @@ const Users: FunctionComponent = () => {
                                     select
                                     className={styles['class-select']}
                                     label='Клас'
-                                    helperText={
-                                        role === 'TEACHER' &&
-                                        'Класен ръководител на'
-                                    }
+                                    // TODO: Ivan magic center css
+                                    // helperText={
+                                    //     role === 'TEACHER' &&
+                                    //     'Класен ръководител на'
+                                    // }
                                     required={role === 'STUDENT'}
                                     variant='outlined'
                                     value={classUUID}
@@ -180,6 +338,53 @@ const Users: FunctionComponent = () => {
                         </div>
                     </form>
                 </div>
+                {data && (
+                    <div className={styles['display-users']}>
+                        {data?.students &&
+                            data?.students?.map(
+                                (student: Student, i: number) => (
+                                    <UsersComponent
+                                        key={i}
+                                        id={student?.id}
+                                        userRole={UserRoles['STUDENT']}
+                                        firstName={student?.user?.firstName}
+                                        middleName={student?.user?.middleName}
+                                        lastName={student?.user?.lastName}
+                                        email={student?.user?.email}
+                                        status={student?.user?.status}
+                                        recordMessage={student?.recordMessage}
+                                        prevEducation={student?.prevEducation}
+                                        classLetter={
+                                            student?.class?.classLetter
+                                        }
+                                        classNumber={
+                                            student?.class?.classNumber
+                                        }
+                                    />
+                                )
+                            )}
+                        {data?.teachers &&
+                            data?.teachers?.map(
+                                (teacher: Teacher, i: number) => (
+                                    <UsersComponent
+                                        key={i}
+                                        id={teacher?.id}
+                                        userRole={UserRoles['TEACHER']}
+                                        firstName={teacher?.user?.firstName}
+                                        middleName={teacher?.user?.middleName}
+                                        lastName={teacher?.user?.lastName}
+                                        email={teacher?.user?.email}
+                                        status={teacher?.user?.status}
+                                        education={teacher?.education}
+                                        yearsExperience={
+                                            teacher?.yearsExperience
+                                        }
+                                        contractType={teacher?.contractType}
+                                    />
+                                )
+                            )}
+                    </div>
+                )}
                 <Snackbar
                     open={Boolean(error)}
                     autoHideDuration={6000}

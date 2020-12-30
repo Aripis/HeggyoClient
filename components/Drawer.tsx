@@ -15,13 +15,15 @@ import {
     PeopleAltOutlined,
     EventNote,
 } from '@material-ui/icons';
-import { FunctionComponent, useState } from 'react';
+import { FunctionComponent, useState, useEffect } from 'react';
 import styles from 'styles/Drawer.module.scss';
 
 const Drawer: FunctionComponent = () => {
-    const [open, setOpen] = useState(
-        !window.matchMedia('(max-width: 730px)').matches
-    );
+    const [open, setOpen] = useState<boolean | null>(null);
+
+    useEffect(() => {
+        setOpen(!window.matchMedia('(max-width: 730px)').matches);
+    }, []);
 
     return (
         <>
