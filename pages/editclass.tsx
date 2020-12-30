@@ -33,17 +33,20 @@ const EditClass: FunctionComponent = () => {
     const [totalStudentCount, setTotalStudentCount] = useState(0);
     const [teacherUUID, setTeacherUUID] = useState('');
     const [error, setError] = useState('');
-    const { data } = useSWR(gql`
-        query {
-            teachers {
-                id
-                user {
-                    firstName
-                    lastName
+    const { data } = useSWR([
+        gql`
+            query($includeClassId: String) {
+                availableClassTeachers(includeClassId: $includeClassId) {
+                    id
+                    user {
+                        firstName
+                        lastName
+                    }
                 }
             }
-        }
-    `);
+        `,
+        JSON.stringify({ includeClassId: router.query.id }),
+    ]);
 
     useEffect(() => {
         if (status === 'REDIRECT') {
@@ -238,7 +241,7 @@ const EditClass: FunctionComponent = () => {
                                         setTeacherUUID(e.target.value as string)
                                     }
                                     renderValue={(selected) => {
-                                        const selectedTeacher: Teacher = data.teachers.find(
+                                        const selectedTeacher: Teacher = data?.availableClassTeachers.find(
                                             (teacher: Teacher) =>
                                                 teacher.id === selected
                                         );
@@ -247,8 +250,8 @@ const EditClass: FunctionComponent = () => {
                                 >
                                     <MenuItem value=''>Без</MenuItem>
                                     {data &&
-                                        data?.teachers &&
-                                        data?.teachers?.map(
+                                        data?.availableClassTeachers &&
+                                        data?.availableClassTeachers?.map(
                                             (teacher: Teacher, i: number) => (
                                                 <MenuItem
                                                     key={i}

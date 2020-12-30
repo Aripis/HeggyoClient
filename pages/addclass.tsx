@@ -37,7 +37,7 @@ const AddClass: FunctionComponent = () => {
     const [error, setError] = useState('');
     const { data } = useSWR(gql`
         query {
-            teachers {
+            availableClassTeachers {
                 id
                 user {
                     firstName
@@ -206,7 +206,7 @@ const AddClass: FunctionComponent = () => {
                                         setTeacherUUID(e.target.value as string)
                                     }
                                     renderValue={(selected) => {
-                                        const selectedTeacher: Teacher = data.teachers.find(
+                                        const selectedTeacher: Teacher = data?.availableClassTeachers.find(
                                             (teacher: Teacher) =>
                                                 teacher.id === selected
                                         );
@@ -215,8 +215,8 @@ const AddClass: FunctionComponent = () => {
                                 >
                                     <MenuItem value=''>Без</MenuItem>
                                     {data &&
-                                        data?.teachers &&
-                                        data?.teachers?.map(
+                                        data?.availableClassTeachers &&
+                                        data?.availableClassTeachers?.map(
                                             (teacher: Teacher, i: number) => (
                                                 <MenuItem
                                                     key={i}
