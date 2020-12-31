@@ -47,6 +47,31 @@ const UsersComponent: FunctionComponent<UsersProps> = (props) => {
     const [expanded, setExpanded] = useState(false);
     const router = useRouter();
 
+    const getStatus = (role: UserStatus | string | undefined) => {
+        switch (role) {
+            case 'UNVERIFIED':
+                return 'Непотвърден';
+            case 'ACTIVE':
+                return 'Активен';
+            case 'INACTIVE':
+                return 'Неактивен';
+            case 'BLOCKED':
+                return 'Блокиран';
+            default:
+                return undefined;
+        }
+    };
+    const getContract = (role: ContractType | string | undefined) => {
+        switch (role) {
+            case 'PART_TIME':
+                return 'Хоноруван';
+            case 'FULL_TIME':
+                return 'На договор';
+            default:
+                return undefined;
+        }
+    };
+
     return (
         <div className={styles['users-component']}>
             <div className={styles['main-data']}>
@@ -86,7 +111,7 @@ const UsersComponent: FunctionComponent<UsersProps> = (props) => {
                             variant='body1'
                             className={styles['status']}
                         >
-                            Статус: {props.status && UserStatus[props.status]}
+                            Статус: {props.status && getStatus(props.status)}
                         </Typography>
                     </AccordionSummary>
                     <AccordionDetails className={styles['accordion-details']}>
@@ -118,7 +143,9 @@ const UsersComponent: FunctionComponent<UsersProps> = (props) => {
                                 <Typography className={styles['contract-type']}>
                                     Вид договор:{' '}
                                     {props.contractType &&
-                                        props.contractType.toUpperCase()}
+                                        getContract(
+                                            props.contractType.toUpperCase()
+                                        )}
                                     {!props.contractType && '--'}
                                 </Typography>
                                 <Typography className={styles['education']}>
