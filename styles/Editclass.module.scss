@@ -1,0 +1,153 @@
+@import 'variables';
+
+.content {
+    margin: {
+        top: 15px;
+        right: 25px;
+    }
+    display: flex;
+    flex-direction: column;
+
+    .actions-container {
+        margin-bottom: 10px;
+
+        .button-link {
+            margin: 0 5px;
+
+            &:first-child {
+                margin-left: 0;
+            }
+
+            &:last-child {
+                margin-right: 0;
+            }
+        }
+        .confirm {
+            box-shadow: $button-shadow;
+        }
+    }
+
+    .editclass-container {
+        padding: 25px;
+        box-shadow: $card-shadow;
+        background-color: white;
+        border-radius: 10px;
+
+        .input-container {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: row;
+
+            &:first-child {
+                margin-top: 0;
+            }
+
+            .classnumber-select {
+                min-width: 100px;
+            }
+
+            .classletter-select {
+                min-width: 80px;
+            }
+
+            .studentcount-select {
+                min-width: 220px;
+            }
+
+            .teacher-select {
+                min-width: 220px;
+            }
+
+            .years-container {
+                display: flex;
+                flex-direction: row;
+
+                .years-input {
+                    min-width: 180px;
+
+                    &:first-child {
+                        margin-right: 5px;
+                    }
+
+                    &:last-child {
+                        margin-left: 5px;
+                    }
+                }
+            }
+
+            & > * {
+                &:first-child {
+                    margin-left: 0;
+                }
+
+                margin-left: 20px;
+            }
+        }
+    }
+}
+
+@media screen and (max-width: 1200px) {
+    .content {
+        padding: 20px;
+        margin: {
+            top: 25px;
+            right: 0;
+        }
+        flex-direction: column-reverse;
+
+        .actions-container {
+            margin: {
+                bottom: 0;
+                top: 10px;
+            }
+        }
+
+        .editclass-container {
+            .input-container {
+                flex-direction: column;
+
+                .teacher-select {
+                    width: 100%;
+                }
+
+                .years-container {
+                    .years-input {
+                        width: 100%;
+                    }
+                }
+
+                & > * {
+                    &:first-child {
+                        margin-top: 0;
+                    }
+
+                    margin-top: 20px;
+                    margin-left: 0;
+                }
+            }
+        }
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .content {
+        .editclass-container {
+            .input-container {
+                .years-container {
+                    flex-direction: column;
+
+                    .years-input {
+                        &:first-child {
+                            margin-right: 0;
+                        }
+
+                        &:last-child {
+                            margin-top: 15px;
+                            margin-left: 0;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -3,7 +3,6 @@ import {
     useState,
     FunctionComponent,
     FormEvent,
-    ChangeEvent,
     createContext,
     useContext,
 } from 'react';
@@ -178,7 +177,7 @@ const ScheduleField: FunctionComponent<ScheduleFieldProps> = (props) => {
                     label='Предмет'
                     labelId='subject-select-label'
                     value={subjectUUID}
-                    onChange={(e: ChangeEvent<{ value: unknown }>) => {
+                    onChange={(e) => {
                         setSubjectUUID(e.target.value as string);
                         updateSubject({
                             id: props.id,
@@ -219,7 +218,7 @@ const ScheduleField: FunctionComponent<ScheduleFieldProps> = (props) => {
                     labelId='teachers-select-label'
                     multiple
                     value={teachersUUIDs}
-                    onChange={(e: ChangeEvent<{ value: unknown }>) => {
+                    onChange={(e) => {
                         setTeachersUUIDs(e.target.value as string[]);
                         updateSubject({
                             id: props.id,

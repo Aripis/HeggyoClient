@@ -17,35 +17,36 @@ import { DoneOutlined, CloseOutlined } from '@material-ui/icons';
 import { useAuth } from 'utils/useAuth';
 import { useRouter } from 'next/router';
 import Loader from 'components/Loader';
-import styles from 'styles/Addclass.module.scss';
+import styles from 'styles/Editclass.module.scss';
 import graphQLClient from 'utils/graphqlclient';
 import useSWR from 'swr';
 import { gql } from 'graphql-request';
 import Alert from '@material-ui/lab/Alert';
 import { Teacher } from 'utils/interfaces';
 
-const AddClass: FunctionComponent = () => {
+const EditClass: FunctionComponent = () => {
     const router = useRouter();
     const { user, status } = useAuth();
 
-    const [classNumber, setClassNumber] = useState<number>();
+    const [classNumber, setClassNumber] = useState(0);
     const [classLetter, setClassLetter] = useState('');
-    const [totalStudentCount, setTotalStudentCount] = useState<number>();
-    const [startYear, setStartYear] = useState(new Date().getFullYear());
-    const [endYear, setEndYear] = useState(new Date().getFullYear() + 1);
+    const [totalStudentCount, setTotalStudentCount] = useState(0);
     const [teacherUUID, setTeacherUUID] = useState('');
     const [error, setError] = useState('');
-    const { data } = useSWR(gql`
-        query {
-            availableClassTeachers {
-                id
-                user {
-                    firstName
-                    lastName
+    const { data } = useSWR([
+        gql`
+            query($includeClassId: String) {
+                availableClassTeachers(includeClassId: $includeClassId) {
+                    id
+                    user {
+                        firstName
+                        lastName
+                    }
                 }
             }
-        }
-    `);
+        `,
+        JSON.stringify({ includeClassId: router.query.id }),
+    ]);
 
     useEffect(() => {
         if (status === 'REDIRECT') {
@@ -56,27 +57,62 @@ const AddClass: FunctionComponent = () => {
         }
     }, [user, status]);
 
-    const addClass = async (e: FormEvent) => {
+    useEffect(() => {
+        (async () => {
+            try {
+                const classData = await graphQLClient.request(
+                    gql`
+                        query($id: String!) {
+                            class(id: $id) {
+                                id
+                                totalStudentCount
+                                teacher {
+                                    id
+                                    user {
+                                        firstName
+                                        lastName
+                                    }
+                                }
+                                classLetter
+                                classNumber
+                            }
+                        }
+                    `,
+                    {
+                        id: router.query.id,
+                    }
+                );
+                setClassNumber(classData.class.classNumber);
+                setClassLetter(classData.class.classLetter);
+                setTotalStudentCount(classData.class.totalStudentCount);
+                setTeacherUUID(
+                    classData.class.teacher ? classData.class.teacher.id : ''
+                );
+            } catch (error) {
+                setError('Неизвестна грешка');
+            }
+        })();
+    }, []);
+
+    const editClass = async (e: FormEvent) => {
         e.preventDefault();
         try {
             await graphQLClient.request(
                 gql`
                     mutation(
-                        $startYear: Int!
-                        $endYear: Int!
+                        $id: String!
                         $totalStudentCount: Int!
-                        $classNumber: Int!
+                        $teacherUUID: String!
                         $classLetter: String!
-                        $teacherUUID: String
+                        $classNumber: Int!
                     ) {
-                        addClass(
-                            createClassInput: {
-                                startYear: $startYear
-                                endYear: $endYear
+                        updateClass(
+                            updateClassInput: {
+                                id: $id
                                 totalStudentCount: $totalStudentCount
-                                classNumber: $classNumber
-                                classLetter: $classLetter
                                 teacherUUID: $teacherUUID
+                                classLetter: $classLetter
+                                classNumber: $classNumber
                             }
                         ) {
                             classId
@@ -84,12 +120,11 @@ const AddClass: FunctionComponent = () => {
                     }
                 `,
                 {
-                    startYear,
-                    endYear,
+                    id: router.query.id,
                     totalStudentCount,
-                    classNumber,
-                    classLetter,
                     teacherUUID,
+                    classLetter,
+                    classNumber,
                 }
             );
             router.push('/classes');
@@ -105,7 +140,7 @@ const AddClass: FunctionComponent = () => {
     return (
         <>
             <Head>
-                <title>Добави клас &#8226; Heggyo</title>
+                <title>Редактирай клас &#8226; Heggyo</title>
             </Head>
             <Drawer />
             <Container
@@ -113,7 +148,7 @@ const AddClass: FunctionComponent = () => {
                 maxWidth={false}
                 disableGutters
             >
-                <Navbar title='Добави клас' />
+                <Navbar title='Редактирай клас' />
                 <div className={styles.content}>
                     <div className={styles['actions-container']}>
                         <Button
@@ -121,7 +156,7 @@ const AddClass: FunctionComponent = () => {
                             disableElevation
                             variant='contained'
                             color='primary'
-                            form='addClass'
+                            form='editClass'
                             type='submit'
                             endIcon={<DoneOutlined />}
                         >
@@ -143,9 +178,9 @@ const AddClass: FunctionComponent = () => {
                         </Link>
                     </div>
                     <form
-                        id='addClass'
-                        className={styles['addclass-container']}
-                        onSubmit={addClass}
+                        id='editClass'
+                        className={styles['editclass-container']}
+                        onSubmit={editClass}
                     >
                         <div className={styles['input-container']}>
                             <TextField
@@ -228,36 +263,6 @@ const AddClass: FunctionComponent = () => {
                                         )}
                                 </Select>
                             </FormControl>
-                            <div className={styles['years-container']}>
-                                <TextField
-                                    className={styles['years-input']}
-                                    label='Стартираща година'
-                                    required
-                                    variant='outlined'
-                                    value={startYear}
-                                    inputProps={{
-                                        min: new Date().getFullYear(),
-                                    }}
-                                    onChange={(e) =>
-                                        setStartYear(parseInt(e.target.value))
-                                    }
-                                    type='number'
-                                />
-                                <TextField
-                                    className={styles['years-input']}
-                                    label='Завършваща година'
-                                    required
-                                    variant='outlined'
-                                    value={endYear}
-                                    inputProps={{
-                                        min: new Date().getFullYear() + 1,
-                                    }}
-                                    onChange={(e) =>
-                                        setEndYear(parseInt(e.target.value))
-                                    }
-                                    type='number'
-                                />
-                            </div>
                         </div>
                     </form>
                 </div>
@@ -280,4 +285,4 @@ const AddClass: FunctionComponent = () => {
     );
 };
 
-export default AddClass;
+export default EditClass;
