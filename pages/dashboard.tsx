@@ -283,8 +283,8 @@ const Dashboard: FunctionComponent = () => {
                                                         </Avatar>
                                                     </ListItemAvatar>
                                                     <ListItemText
-                                                        primary='Общо потребители'
-                                                        secondary={`${data?.users.length}`}
+                                                        primary={`${data?.users.length}`}
+                                                        secondary='Общо потребители'
                                                     />
                                                 </ListItem>
                                                 <ListItem>
@@ -294,8 +294,8 @@ const Dashboard: FunctionComponent = () => {
                                                         </Avatar>
                                                     </ListItemAvatar>
                                                     <ListItemText
-                                                        primary='Ученици'
-                                                        secondary={`${data?.students.length}`}
+                                                        primary={`${data?.students.length}`}
+                                                        secondary='Ученици'
                                                     />
                                                 </ListItem>
                                                 <ListItem>
@@ -305,8 +305,8 @@ const Dashboard: FunctionComponent = () => {
                                                         </Avatar>
                                                     </ListItemAvatar>
                                                     <ListItemText
-                                                        primary='Учители'
-                                                        secondary={`${data?.teachers.length}`}
+                                                        primary={`${data?.teachers.length}`}
+                                                        secondary='Учители'
                                                     />
                                                 </ListItem>
                                             </List>

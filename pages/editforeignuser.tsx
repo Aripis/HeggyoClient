@@ -16,7 +16,7 @@ import { FormEvent, FunctionComponent, useEffect, useState } from 'react';
 import useSWR from 'swr';
 import { useAuth } from 'utils/useAuth';
 // FIXME: fix import files for styles
-import styles from 'styles/Profile.module.scss';
+import styles from 'styles/EditForeignUser.module.scss';
 import { EditOutlined, PersonOutlineOutlined } from '@material-ui/icons';
 import { ContractType, UserRoles } from 'utils/enums';
 import graphQLClient from 'utils/graphqlclient';
@@ -27,18 +27,21 @@ const EditForeignUser: FunctionComponent = () => {
     // FIXME: Junk code. not structured
     const router = useRouter();
     const { user, status } = useAuth();
-    const [uuid, setUUID] = useState('');
+    const [uuid, setUUID] = useState('noUUID');
     const [role, setRole] = useState('');
     const [error, setError] = useState('');
+    const [userStatus, setUserStatus] = useState('');
+    const [userId, setUserId] = useState('');
 
     const [recordMessage, setRecordMessage] = useState('');
     const [teacherContract, setTeacherContract] = useState('');
 
     const forStudent = gql`
-        query($uuid: String!) {
+        query student($uuid: String!) {
             student(id: $uuid) {
                 id
                 user {
+                    id
                     firstName
                     middleName
                     lastName
@@ -56,7 +59,7 @@ const EditForeignUser: FunctionComponent = () => {
         }
     `;
     const forTeacher = gql`
-        query($uuid: String!) {
+        query teacher($uuid: String!) {
             teacher(id: $uuid) {
                 id
                 user {
@@ -74,8 +77,26 @@ const EditForeignUser: FunctionComponent = () => {
             }
         }
     `;
-    const [swrReq, setSwrReq] = useState('');
+    const [swrReq, setSwrReq] = useState(gql`
+        query {
+            profile {
+                id
+            }
+        }
+    `);
     const { data } = useSWR([swrReq, JSON.stringify({ uuid })]);
+
+    const contractTypes = [
+        { value: 'PART_TIME', content: 'Хоноруван' },
+        { value: 'FULL_TIME', content: 'На договор' },
+    ];
+
+    const statusTypes = [
+        { value: 'ACTIVE', content: 'Активен' },
+        { value: 'INACTIVE', content: 'Неактивен' },
+        { value: 'BLOCKED', content: 'Блокиран' },
+        { value: 'UNVERIFIED', content: 'Непотвърден' },
+    ];
 
     useEffect(() => {
         if (status === 'REDIRECT') {
@@ -88,19 +109,16 @@ const EditForeignUser: FunctionComponent = () => {
         ) {
             router.push('/dashboard');
         }
-    }, [data, status]);
-
-    useEffect(() => {
-        if (data?.student) {
-            setRecordMessage(data.student?.recordMessage as string);
+        if (role === 'teacher') {
+            setUserStatus(data?.teacher?.user?.status as string);
+            setTeacherContract(data?.teacher?.contractType as string);
+            setUserId(data?.teacher?.user?.id as string);
+        } else if (role === 'student') {
+            setUserStatus(data?.student?.user?.status as string);
+            setUserId(data?.student?.user?.id as string);
+            setRecordMessage(data?.student?.recordMessage as string);
         }
-    }, [data?.student?.recordMessage]);
-
-    useEffect(() => {
-        if (data?.teacher) {
-            setTeacherContract(data.teacher?.contractType as string);
-        }
-    }, [data?.teacher?.contractType]);
+    }, [data, status, role]);
 
     useEffect(() => {
         setRole(router.query.r as string);
@@ -111,7 +129,8 @@ const EditForeignUser: FunctionComponent = () => {
             setUUID(router.query.id as string);
             setSwrReq(forStudent);
         }
-    }, []);
+        console.log(error);
+    }, [router]);
 
     const getRole = (role: UserRoles | string | undefined) => {
         switch (role) {
@@ -130,72 +149,115 @@ const EditForeignUser: FunctionComponent = () => {
         }
     };
 
-    const updateStudent = async (e: FormEvent) => {
-        e.preventDefault();
-        try {
-            await graphQLClient.request(
-                gql`
-                    mutation($id: String!, $recordMessage: String!) {
-                        updateStudentRecord(
-                            updateStudentRecordInput: {
-                                uuid: $id
-                                recordMessage: $recordMessage
-                            }
-                        ) {
-                            studentId
-                        }
-                    }
-                `,
-                {
-                    id: router.query.id,
-                    recordMessage,
-                }
-            );
-            router.push('/users');
-        } catch (error) {
-            setError('Неизвестна грешка');
-        }
-    };
-    const updateTeacher = async (e: FormEvent) => {
-        e.preventDefault();
-        try {
-            await graphQLClient.request(
-                gql`
-                    mutation($id: String!, $contractType: ContractType!) {
-                        updateTeacher(
-                            updateTeacherInput: {
-                                id: $id
-                                contractType: $contractType
-                            }
-                        ) {
-                            teacherId
-                        }
-                    }
-                `,
-                {
-                    id: router.query.id,
-                    contractType: teacherContract,
-                }
-            );
-            router.push('/users');
-        } catch (error) {
-            setError('Неизвестна грешка');
-        }
-    };
-
-    const contractTypes = [
-        { value: 'PART_TIME', content: 'Хоноруван' },
-        { value: 'FULL_TIME', content: 'На договор' },
-    ];
-
-    const getContract = (role: ContractType | string | undefined) => {
-        switch (role) {
+    const getContract = (contract: ContractType | string | undefined) => {
+        switch (contract) {
             case 'PART_TIME':
                 return 'Хоноруван';
             case 'FULL_TIME':
                 return 'На договор';
             default:
                 return undefined;
+        }
+    };
+
+    // const getStatus = (status: UserStatus | string | undefined) => {
+    //     switch (status) {
+    //         case 'ACTIVE':
+    //             return 'Активен';
+    //         case 'INACTIVE':
+    //             return 'Неактивен';
+    //         case 'BLOCKED':
+    //             return 'Блокиран';
+    //         case 'UNVERIFIED':
+    //             return 'Непотвърден';
+    //         default:
+    //             return undefined;
+    //     }
+    // };
+
+    const updateStudent = async (e: FormEvent) => {
+        e.preventDefault();
+        try {
+            await graphQLClient.request(
+                gql`
+                    mutation(
+                        $stId: String!
+                        $userId: String!
+                        $recordMessage: String!
+                        $userStatus: UserStatus!
+                    ) {
+                        updateStudentRecord(
+                            updateStudentRecordInput: {
+                                uuid: $stId
+                                recordMessage: $recordMessage
+                            }
+                        ) {
+                            studentId
+                        }
+
+                        updateUserStatus(
+                            updateUserStatus: {
+                                id: $userId
+                                userStatus: $userStatus
+                            }
+                        ) {
+                            userId
+                        }
+                    }
+                `,
+                {
+                    stId: router.query.id,
+                    recordMessage,
+                    userId,
+                    userStatus,
+                }
+            );
+            router.push('/users');
+        } catch (error) {
+            setError('Неизвестна грешка');
+        }
+    };
+
+    const updateTeacher = async (e: FormEvent) => {
+        e.preventDefault();
+        try {
+            await graphQLClient.request(
+                gql`
+                    mutation(
+                        $tchId: String!
+                        $userId: String!
+                        $userStatus: UserStatus!
+                        $contractType: ContractType!
+                    ) {
+                        updateTeacher(
+                            updateTeacherInput: {
+                                id: $tchId
+                                contractType: $contractType
+                            }
+                        ) {
+                            teacherId
+                        }
+
+                        updateUserStatus(
+                            updateUserStatus: {
+                                id: $userId
+                                userStatus: $userStatus
+                            }
+                        ) {
+                            userId
+                        }
+                    }
+                `,
+                {
+                    tchId: router.query.id,
+                    contractType: teacherContract,
+                    userId,
+                    userStatus,
+                }
+            );
+            router.push('/users');
+        } catch (error) {
+            setError('Неизвестна грешка');
         }
     };
 
@@ -319,24 +381,14 @@ const EditForeignUser: FunctionComponent = () => {
                                 className={styles['record-files']}
                                 onChange={() => null}
                             />
-                            <div className={styles['actions']}>
-                                <Button
-                                    color='primary'
-                                    variant='contained'
-                                    disableElevation
-                                    startIcon={<EditOutlined />}
-                                    onClick={updateStudent}
-                                >
-                                    Редактиране
-                                </Button>
-                            </div>
                         </>
                     )}
                     {data && role === 'teacher' && data?.teacher && (
                         <>
                             <TextField
                                 select
-                                label='Коментар'
+                                label='Договор'
+                                // FIXME: contract type is not being displayed
                                 value={getContract(teacherContract)}
                                 variant='outlined'
                                 className={styles['contract-type']}
@@ -356,20 +408,55 @@ const EditForeignUser: FunctionComponent = () => {
                                         </MenuItem>
                                     ))}
                             </TextField>
-                            <div className={styles['actions']}>
-                                <Button
-                                    color='primary'
-                                    variant='contained'
-                                    disableElevation
-                                    startIcon={<EditOutlined />}
-                                    onClick={updateTeacher}
-                                >
-                                    Редактиране
-                                </Button>
-                            </div>
                         </>
                     )}
+                    <TextField
+                        select
+                        label='Статус'
+                        // value={getStatus(userStatus)}
+                        // TODO: How does it work without the getStatus()
+                        value={userStatus}
+                        variant='outlined'
+                        className={styles['user-status']}
+                        onChange={(e) => {
+                            setUserStatus(e.target.value as string);
+                        }}
+                    >
+                        {statusTypes &&
+                            statusTypes.map((type) => (
+                                <MenuItem key={type.value} value={type.value}>
+                                    {type.content}
+                                </MenuItem>
+                            ))}
+                    </TextField>
                 </div>
+
+                {data && role === 'teacher' && data?.teacher && (
+                    <div className={styles['actions']}>
+                        <Button
+                            color='primary'
+                            variant='contained'
+                            disableElevation
+                            startIcon={<EditOutlined />}
+                            onClick={updateTeacher}
+                        >
+                            Редактиране
+                        </Button>
+                    </div>
+                )}
+                {data && role === 'student' && data?.student && (
+                    <div className={styles['actions']}>
+                        <Button
+                            color='primary'
+                            variant='contained'
+                            disableElevation
+                            startIcon={<EditOutlined />}
+                            onClick={updateStudent}
+                        >
+                            Редактиране
+                        </Button>
+                    </div>
+                )}
             </Container>
         </>
     );

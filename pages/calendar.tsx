@@ -110,7 +110,7 @@ const CalendarComponent: FunctionComponent = () => {
                                             title: `${
                                                 event.subject?.name
                                             } - ${getAssignmentType(
-                                                event.assignmentType
+                                                event.assignmentType as string
                                             )}`,
                                             start: new Date(
                                                 event.createdAt as number

@@ -45,7 +45,6 @@ const AddMessage: FunctionComponent = () => {
     const [assignmentDueDate, setAssignmentDueDate] = useState<Date | null>(
         new Date()
     );
-
     const messageTypes = [
         { value: 'MESSAGE', content: 'Съобщениe' },
         { value: 'ASSIGNMENT', content: 'Заданиe' },
@@ -86,47 +85,47 @@ const AddMessage: FunctionComponent = () => {
         if (status === 'REDIRECT') {
             router.push('/login');
         }
+        console.log(error);
     }, [user, status]);
+
+    const gqlMutation = gql`
+        mutation(
+            $toUserUUIDs: [String!]
+            $toClassUUIDs: [String!]
+            $data: String
+            $assignmentType: AssignmentType
+            $type: MessageType!
+            $subjectUUID: String
+            $assignmentDueDate: Date
+        ) {
+            createMessage(
+                createMessageInput: {
+                    toUserUUIDs: $toUserUUIDs
+                    toClassUUIDs: $toClassUUIDs
+                    data: $data
+                    assignmentType: $assignmentType
+                    type: $type
+                    subjectUUID: $subjectUUID
+                    assignmentDueDate: $assignmentDueDate
+                }
+            ) {
+                messageId
+            }
+        }
+    `;
 
     const addMessage = async (e: FormEvent) => {
         e.preventDefault();
         try {
-            await graphQLClient.request(
-                gql`
-                    mutation(
-                        $toUserUUIDs: [String!]
-                        $toClassUUIDs: [String!]
-                        $data: String
-                        $assignmentType: AssignmentType
-                        $type: MessageType
-                        $subjectUUID: String
-                        $assignmentDueDate: Date
-                    ) {
-                        createMessage(
-                            createMessageData: {
-                                toUserUUIDs: $toUserUUIDs
-                                toClassUUIDs: $toClassUUIDs
-                                data: $data
-                                assignmentType: $assignmentType
-                                type: $type
-                                subjectUUID: $subjectUUID
-                                assignmentDueDate: $assignmentDueDate
-                            }
-                        ) {
-                            messageId
-                        }
-                    }
-                `,
-                {
-                    toUserUUIDs: toUsersUUIDs,
-                    toClassUUIDs: toClassUUIDs,
-                    data: messageData,
-                    assignmentType: assignmentType,
-                    type: type,
-                    subjectUUID: subjectUUID,
-                    assignmentDueDate: assignmentDueDate,
-                }
-            );
+            await graphQLClient.request(gqlMutation, {
+                toUserUUIDs: toUsersUUIDs,
+                toClassUUIDs: toClassUUIDs,
+                data: messageData,
+                assignmentType: assignmentType,
+                type: type,
+                subjectUUID: subjectUUID,
+                assignmentDueDate: assignmentDueDate,
+            });
             router.push('/dashboard');
         } catch ({ response }) {
             if (
