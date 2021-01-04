@@ -38,13 +38,12 @@
         flex-direction: row;
 
         .input-container {
+            margin-top: 20px;
             display: flex;
             flex-direction: row;
 
-            margin-left: 20px;
             &:first-child {
                 margin-top: 0;
-                margin-left: 0;
             }
 
             .role-select {
@@ -53,98 +52,61 @@
 
             .class-select {
                 min-width: 120px;
+            }
+
+            & > * {
+                &:first-child {
+                    margin-left: 0;
+                }
+
                 margin-left: 20px;
             }
         }
     }
-}
 
-.display-users {
-    padding: 25px 25px 0;
-    margin: 25px 20px 20px 0;
-    box-shadow: $card-shadow;
-    background-color: white;
-    border-radius: 10px;
-}
-
-.users-component {
-    .main-data {
-        align-items: center;
-        .names {
-            vertical-align: middle;
-        }
-        .role-text {
-            vertical-align: middle;
-        }
-        display: flex;
-        flex-direction: row;
+    .users-container {
+        margin-top: 25px;
 
         .user-accordion {
-            width: 100%;
-
             margin-bottom: 20px;
+            box-shadow: $card-shadow;
+            border-radius: 10px;
+            padding: 10px;
 
             .accordion-summary {
-                display: flex;
-                flex-direction: row;
-                justify-content: flex-end;
-
-                .names,
-                .role-text,
-                .email-text,
-                .status {
-                    margin-right: 20px;
-                    padding: 5px 10px;
-                }
-
-                .names {
-                    min-width: 280px;
-                }
-
-                .role-text {
-                    min-width: 100px;
-                }
-
-                .email-text {
-                    min-width: 230px;
+                :global(.MuiAccordionSummary-content) {
+                    & > * {
+                        &:first-child {
+                            margin-left: 0;
+                        }
+                        width: 100%;
+                        margin-left: 20px;
+                    }
                 }
             }
 
             .accordion-details {
                 display: flex;
-                flex-direction: row;
-                justify-content: space-between;
+                flex-direction: column;
 
                 .details {
                     display: flex;
                     flex-direction: row;
-                    justify-content: space-between;
-                    align-items: center;
+                    margin-right: 35px;
 
-                    .record-message {
+                    & > * {
+                        &:first-child {
+                            margin-left: 0;
+                        }
+                        width: 100%;
                         margin-left: 20px;
-                        word-wrap: break-word;
-                        max-width: 480px;
+                        word-break: break-word;
                     }
-                    .class {
-                        margin-left: 10px;
-                        min-width: 150px;
-                    }
+                }
 
-                    .years-experience {
-                        margin-left: 10px;
-                        min-width: 150px;
-                    }
-
-                    .contract-type {
-                        margin-left: 20px;
-                        min-width: 220px;
-                    }
-
-                    .education {
-                        margin-left: 20px;
-                        min-width: 150px;
-                    }
+                .button-view-more {
+                    margin-top: 10px;
+                    align-self: flex-end;
                 }
             }
         }
@@ -176,22 +138,58 @@
                 }
 
                 .class-select {
-                    margin: {
-                        left: 0;
-                        top: 20px;
-                    }
                     width: 100%;
+                }
+
+                & > * {
+                    &:first-child {
+                        margin-top: 0;
+                    }
+
+                    margin-top: 20px;
+                    margin-left: 0;
                 }
             }
         }
     }
 }
 
-@media screen and (max-width: 410px) {
+@media screen and (max-width: 550px) {
     .content {
-        .generatetoken-container {
-            .input-container {
-                flex-direction: column;
+        .users-container {
+            .user-accordion {
+                .accordion-summary {
+                    :global(.MuiAccordionSummary-content) {
+                        flex-direction: column;
+                        & > * {
+                            &:first-child {
+                                margin-top: 0;
+                            }
+
+                            margin-left: 0;
+                            margin-top: 10px;
+                        }
+                    }
+                }
+
+                .accordion-details {
+                    .details {
+                        flex-direction: column;
+
+                        & > * {
+                            &:first-child {
+                                margin-top: 0;
+                            }
+
+                            margin-left: 0;
+                            margin-top: 10px;
+                        }
+                    }
+
+                    .button-view-more {
+                        align-self: auto;
+                    }
+                }
             }
         }
     }

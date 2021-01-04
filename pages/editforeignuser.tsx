@@ -9,25 +9,23 @@ import {
     MenuItem,
     TextField,
     Typography,
+    Snackbar,
 } from '@material-ui/core';
+import Alert from '@material-ui/lab/Alert';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { FormEvent, FunctionComponent, useEffect, useState } from 'react';
 import useSWR from 'swr';
 import { useAuth } from 'utils/useAuth';
-// FIXME: fix import files for styles
 import styles from 'styles/EditForeignUser.module.scss';
 import { EditOutlined, PersonOutlineOutlined } from '@material-ui/icons';
-import { ContractType, UserRoles } from 'utils/enums';
+import { UserRoles } from 'utils/enums';
 import graphQLClient from 'utils/graphqlclient';
 
 const EditForeignUser: FunctionComponent = () => {
-    // FIXME: after reload on this page bad request and no data fetched
-
-    // FIXME: Junk code. not structured
     const router = useRouter();
     const { user, status } = useAuth();
-    const [uuid, setUUID] = useState('noUUID');
+    const [uuid, setUUID] = useState('');
     const [role, setRole] = useState('');
     const [error, setError] = useState('');
     const [userStatus, setUserStatus] = useState('');
@@ -102,35 +100,23 @@ const EditForeignUser: FunctionComponent = () => {
         if (status === 'REDIRECT') {
             router.push('/login');
         }
-        if (
-            (user?.userRole as string) === 'STUDENT' ||
-            (user?.userRole as string) === 'PARENT' ||
-            (user?.userRole as string) === 'TEACHER'
-        ) {
-            router.push('/dashboard');
+        if (user && (user?.userRole as string) !== 'ADMIN') {
+            router.back();
         }
-        if (role === 'teacher') {
+        setRole(router.query.r as string);
+        setUUID(router.query.id as string);
+        if (router.query.r === 'teacher') {
+            setSwrReq(forTeacher);
             setUserStatus(data?.teacher?.user?.status as string);
             setTeacherContract(data?.teacher?.contractType as string);
             setUserId(data?.teacher?.user?.id as string);
-        } else if (role === 'student') {
+        } else if (router.query.r === 'student') {
+            setSwrReq(forStudent);
             setUserStatus(data?.student?.user?.status as string);
             setUserId(data?.student?.user?.id as string);
             setRecordMessage(data?.student?.recordMessage as string);
         }
-    }, [data, status, role]);
-
-    useEffect(() => {
-        setRole(router.query.r as string);
-        if (router.query.r === 'teacher') {
-            setUUID(router.query.id as string);
-            setSwrReq(forTeacher);
-        } else {
-            setUUID(router.query.id as string);
-            setSwrReq(forStudent);
-        }
-        console.log(error);
-    }, [router]);
+    }, [data, status, router]);
 
     const getRole = (role: UserRoles | string | undefined) => {
         switch (role) {
@@ -148,33 +134,6 @@ const EditForeignUser: FunctionComponent = () => {
                 return undefined;
         }
     };
-
-    const getContract = (contract: ContractType | string | undefined) => {
-        switch (contract) {
-            case 'PART_TIME':
-                return 'Хоноруван';
-            case 'FULL_TIME':
-                return 'На договор';
-            default:
-                return undefined;
-        }
-    };
-
-    // const getStatus = (status: UserStatus | string | undefined) => {
-    //     switch (status) {
-    //         case 'ACTIVE':
-    //             return 'Активен';
-    //         case 'INACTIVE':
-    //             return 'Неактивен';
-    //         case 'BLOCKED':
-    //             return 'Блокиран';
-    //         case 'UNVERIFIED':
-    //             return 'Непотвърден';
-    //         default:
-    //             return undefined;
-    //     }
-    // };
-
     const updateStudent = async (e: FormEvent) => {
         e.preventDefault();
         try {
@@ -281,38 +240,29 @@ const EditForeignUser: FunctionComponent = () => {
                             alt='profile'
                         />
                         <div className={styles['profile-info']}>
-                            <div className={styles['info']}>
-                                {data && role === 'student' && data?.student && (
-                                    <div className={styles['details']}>
-                                        <div>
-                                            <Typography
-                                                className={styles['name']}
-                                                variant='h4'
-                                            >
-                                                {data.student.user.firstName}
-                                                &nbsp;
-                                                {data.student.user.middleName}
-                                                &nbsp;
-                                                {data.student.user.lastName}
-                                            </Typography>
-                                            <Breadcrumbs
-                                                className={
-                                                    styles['additional-info']
-                                                }
-                                            >
-                                                <Typography
-                                                    className={
-                                                        styles[
-                                                            'additional-text'
-                                                        ]
-                                                    }
-                                                >
-                                                    <PersonOutlineOutlined />
-                                                    {getRole(
-                                                        data.student.user
-                                                            .userRole
-                                                    )}
-                                                </Typography>
+                            {data && role === 'student' && data?.student && (
+                                <>
+                                    <Typography
+                                        className={styles['name']}
+                                        variant='h4'
+                                    >
+                                        {`${data.student.user.firstName} ${data.student.user.middleName} ${data.student.user.lastName}`}
+                                    </Typography>
+                                    <Breadcrumbs
+                                        className={styles['additional-info']}
+                                    >
+                                        <Typography
+                                            className={
+                                                styles['additional-text']
+                                            }
+                                        >
+                                            <PersonOutlineOutlined />
+                                            {getRole(
+                                                data.student.user.userRole
+                                            )}
+                                        </Typography>
+                                        {data.student.class.classNumber &&
+                                            data.student.class.classLetter && (
                                                 <Typography>
                                                     {
                                                         data.student.class
@@ -323,83 +273,107 @@ const EditForeignUser: FunctionComponent = () => {
                                                             .classLetter
                                                     }
                                                 </Typography>
-                                            </Breadcrumbs>
-                                        </div>
-                                        <div>{data.student.recordMessage}</div>
-                                    </div>
-                                )}
-                                {data && role === 'teacher' && data?.teacher && (
-                                    <div className={styles['details']}>
+                                            )}
+                                    </Breadcrumbs>
+                                    <Typography
+                                        className={styles['record-message']}
+                                    >
+                                        {data.student.recordMessage}
+                                    </Typography>
+                                </>
+                            )}
+                            {data && role === 'teacher' && data?.teacher && (
+                                <>
+                                    <Typography
+                                        className={styles['name']}
+                                        variant='h4'
+                                    >
+                                        {data.teacher.user.firstName}
+                                        {data.teacher.user.lastName}
+                                    </Typography>
+                                    <Breadcrumbs
+                                        className={styles['additional-info']}
+                                    >
                                         <Typography
-                                            className={styles['name']}
-                                            variant='h4'
-                                        >
-                                            {data.teacher.user.firstName}
-                                            {data.teacher.user.lastName}
-                                        </Typography>
-                                        <Breadcrumbs
                                             className={
-                                                styles['additional-info']
+                                                styles['additional-text']
                                             }
                                         >
-                                            <Typography
-                                                className={
-                                                    styles['additional-text']
-                                                }
-                                            >
-                                                <PersonOutlineOutlined />
-                                                {getRole(
-                                                    data.teacher.user.userRole
-                                                )}
-                                            </Typography>
-                                            <Typography>
-                                                {data.teacher.contractType}
-                                            </Typography>
-                                        </Breadcrumbs>
-                                    </div>
-                                )}
-                            </div>
+                                            <PersonOutlineOutlined />
+                                            {getRole(
+                                                data.teacher.user.userRole
+                                            )}
+                                        </Typography>
+                                        <Typography>
+                                            {data.teacher.contractType}
+                                        </Typography>
+                                    </Breadcrumbs>
+                                </>
+                            )}
                         </div>
                     </div>
-                </div>
-                <div className={styles['edit-fields']}>
-                    {data && role === 'student' && data?.student && (
-                        <>
-                            <TextField
-                                label='Коментар'
-                                value={recordMessage}
-                                variant='outlined'
-                                className={styles['record-message']}
-                                onChange={(e) => {
-                                    setRecordMessage(e.target.value as string);
-                                }}
-                            />
-                            <TextField
-                                label='Файлове'
-                                value=''
-                                variant='outlined'
-                                className={styles['record-files']}
-                                onChange={() => null}
-                            />
-                        </>
-                    )}
-                    {data && role === 'teacher' && data?.teacher && (
-                        <>
+                    <div className={styles['edit-fields']}>
+                        {data && role === 'student' && data?.student && (
+                            <>
+                                <TextField
+                                    label='Коментар'
+                                    value={recordMessage}
+                                    variant='outlined'
+                                    className={styles['record-message']}
+                                    onChange={(e) => {
+                                        setRecordMessage(
+                                            e.target.value as string
+                                        );
+                                    }}
+                                />
+                                <TextField
+                                    label='Файлове'
+                                    value=''
+                                    variant='outlined'
+                                    className={styles['record-files']}
+                                    onChange={() => null}
+                                />
+                            </>
+                        )}
+                        {role === 'teacher' && teacherContract && (
+                            <>
+                                <TextField
+                                    select
+                                    label='Договор'
+                                    value={teacherContract}
+                                    variant='outlined'
+                                    className={styles['contract-type']}
+                                    onChange={(e) => {
+                                        setTeacherContract(
+                                            e.target.value as string
+                                        );
+                                    }}
+                                >
+                                    {contractTypes &&
+                                        contractTypes.map((type) => (
+                                            <MenuItem
+                                                key={type.value}
+                                                value={type.value}
+                                            >
+                                                {type.content}
+                                            </MenuItem>
+                                        ))}
+                                </TextField>
+                            </>
+                        )}
+                        {userStatus && (
                             <TextField
                                 select
-                                label='Договор'
-                                // FIXME: contract type is not being displayed
-                                value={getContract(teacherContract)}
+                                label='Статус'
+                                value={userStatus}
                                 variant='outlined'
-                                className={styles['contract-type']}
+                                className={styles['user-status']}
                                 onChange={(e) => {
-                                    setTeacherContract(
-                                        e.target.value as string
-                                    );
+                                    setUserStatus(e.target.value as string);
                                 }}
                             >
-                                {contractTypes &&
-                                    contractTypes.map((type) => (
+                                {statusTypes &&
+                                    statusTypes.map((type) => (
                                         <MenuItem
                                             key={type.value}
                                             value={type.value}
@@ -408,55 +382,49 @@ const EditForeignUser: FunctionComponent = () => {
                                         </MenuItem>
                                     ))}
                             </TextField>
-                        </>
+                        )}
+                    </div>
+                    {data && role === 'teacher' && data?.teacher && (
+                        <div className={styles['actions']}>
+                            <Button
+                                color='primary'
+                                variant='contained'
+                                disableElevation
+                                startIcon={<EditOutlined />}
+                                onClick={updateTeacher}
+                            >
+                                Редактиране
+                            </Button>
+                        </div>
                     )}
-                    <TextField
-                        select
-                        label='Статус'
-                        // value={getStatus(userStatus)}
-                        // TODO: How does it work without the getStatus()
-                        value={userStatus}
-                        variant='outlined'
-                        className={styles['user-status']}
-                        onChange={(e) => {
-                            setUserStatus(e.target.value as string);
-                        }}
-                    >
-                        {statusTypes &&
-                            statusTypes.map((type) => (
-                                <MenuItem key={type.value} value={type.value}>
-                                    {type.content}
-                                </MenuItem>
-                            ))}
-                    </TextField>
+                    {data && role === 'student' && data?.student && (
+                        <div className={styles['actions']}>
+                            <Button
+                                color='primary'
+                                variant='contained'
+                                disableElevation
+                                startIcon={<EditOutlined />}
+                                onClick={updateStudent}
+                            >
+                                Редактиране
+                            </Button>
+                        </div>
+                    )}
                 </div>
-
-                {data && role === 'teacher' && data?.teacher && (
-                    <div className={styles['actions']}>
-                        <Button
-                            color='primary'
-                            variant='contained'
-                            disableElevation
-                            startIcon={<EditOutlined />}
-                            onClick={updateTeacher}
-                        >
-                            Редактиране
-                        </Button>
-                    </div>
-                )}
-                {data && role === 'student' && data?.student && (
-                    <div className={styles['actions']}>
-                        <Button
-                            color='primary'
-                            variant='contained'
-                            disableElevation
-                            startIcon={<EditOutlined />}
-                            onClick={updateStudent}
-                        >
-                            Редактиране
-                        </Button>
-                    </div>
-                )}
+                <Snackbar
+                    open={Boolean(error)}
+                    autoHideDuration={6000}
+                    onClose={() => setError('')}
+                >
+                    <Alert
+                        elevation={6}
+                        variant='filled'
+                        onClose={() => setError('')}
+                        severity='error'
+                    >
+                        {error}
+                    </Alert>
+                </Snackbar>
             </Container>
         </>
     );

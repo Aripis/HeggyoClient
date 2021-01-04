@@ -1,14 +1,14 @@
 @import 'variables';
 
 .content {
-    background-color: white;
-    padding: 25px;
     margin-right: 25px;
     margin-top: 15px;
-    box-shadow: $card-shadow;
-    border-radius: 10px;
 
     .profile-container {
+        padding: 25px;
+        border-radius: 10px;
+        background-color: white;
+        box-shadow: $card-shadow;
         display: flex;
         flex-direction: row;
         margin-bottom: 25px;
@@ -22,46 +22,77 @@
             margin-left: 50px;
             display: flex;
             flex-direction: column;
-            justify-content: space-around;
+            justify-content: center;
 
-            .info {
-                .details {
-                    .additional-info {
-                        margin-top: 5px;
+            & > * {
+                word-break: break-word;
+            }
 
-                        .additional-text {
-                            display: flex;
+            .record-message {
+                margin-top: 10px;
+            }
 
-                            svg {
-                                margin-right: 5px;
-                            }
-                        }
+            .additional-info {
+                margin-top: 5px;
+
+                .additional-text {
+                    display: flex;
+
+                    svg {
+                        margin-right: 5px;
                     }
                 }
             }
         }
     }
-}
-.edit-fields {
-    margin: 20px 20px 0 0;
-    display: flex;
-    flex-direction: row;
 
-    * {
-        margin-right: 20px;
+    .edit-fields {
+        padding: 25px;
+        border-radius: 10px;
+        background-color: white;
+        box-shadow: $card-shadow;
+        margin-top: 20px;
+        display: flex;
+        flex-direction: row;
+
+        & > * {
+            margin-right: 20px;
+        }
     }
-}
 
-.actions {
-    margin: 20px 20px 0 0;
-    display: flex;
-    flex-direction: row;
+    .actions {
+        margin: 20px 20px 0 0;
+        display: flex;
+        flex-direction: row;
+    }
 }
 
 @media screen and (max-width: 730px) {
     .content {
         margin-right: 0;
-        box-shadow: none;
         padding: 25px 10px;
+
+        .profile-container {
+            flex-direction: column;
+            align-items: center;
+
+            .profile-info {
+                align-items: center;
+                margin-left: 0;
+
+                .name {
+                    margin: 10px 0;
+                    text-align: center;
+                }
+            }
+        }
+        .edit-fields {
+            flex-direction: column;
+
+            & > * {
+                margin-right: 0;
+                margin-top: 20px;
+            }
+        }
     }
 }
