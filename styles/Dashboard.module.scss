@@ -25,12 +25,6 @@
             display: flex;
             justify-content: space-between;
 
-            Button {
-                &:first-child {
-                    margin-left: 0;
-                }
-            }
-
             .type-select,
             .status-select,
             .add-button {
@@ -53,15 +47,17 @@
             }
         }
 
-        .statistics {
-            box-shadow: $card-shadow;
-            width: 330px;
-            min-width: 400px;
-            max-width: 500px;
-            min-height: 130px;
-            max-height: 470px;
-            border-radius: 10px;
-            margin: 0 15px 15px 0;
-        }
+        
+    }
+
+    .statistics {
+        box-shadow: $card-shadow;
+        width: 330px;
+        min-width: 400px;
+        max-width: 500px;
+        min-height: 130px;
+        max-height: 470px;
+        border-radius: 10px;
+        margin: 96px 15px 15px 0;
     }
 }
