@@ -14,8 +14,7 @@ import {
     AccordionDetails,
 } from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';
-import { LoopOutlined } from '@material-ui/icons';
-import ExpandMoreOutlinedIcon from '@material-ui/icons/ExpandMoreOutlined';
+import { LoopOutlined, ExpandMoreOutlined } from '@material-ui/icons';
 import { useAuth } from 'utils/useAuth';
 import { useRouter } from 'next/router';
 import Loader from 'components/Loader';
@@ -80,7 +79,7 @@ const UsersComponent: FunctionComponent<UsersProps> = (props) => {
             className={styles['user-accordion']}
         >
             <AccordionSummary
-                expandIcon={<ExpandMoreOutlinedIcon />}
+                expandIcon={<ExpandMoreOutlined />}
                 className={styles['accordion-summary']}
             >
                 <Typography variant='body1' className={styles['names']}>

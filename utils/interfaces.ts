@@ -73,8 +73,9 @@ export interface Class {
 
 export interface Message {
     id?: string;
-    createdAt?: number;
-    updatedAt?: number;
+    createdAt?: Date;
+    updatedAt?: Date;
+    assignmentDueDate?: Date;
     from?: User;
     toUser?: User[];
     toClasses?: Class[];
