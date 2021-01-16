@@ -59,6 +59,7 @@ export interface Student {
     class?: Class;
     prevEducation?: string;
     recordMessage?: string;
+    dossier?: StudentDossier;
 }
 
 export interface Class {
@@ -97,4 +98,13 @@ export interface Schedule {
     class?: Class;
     teachers?: Teacher[];
     institution?: Institution;
+}
+
+export interface StudentDossier {
+    id?: string;
+    createdAt?: Date;
+    updatedAt?: Date;
+    fromUser?: User;
+    subject?: Subject;
+    dossierMessage?: string;
 }
