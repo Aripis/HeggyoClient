@@ -58,6 +58,7 @@ export interface Student {
     class?: Class;
     prevEducation?: string;
     recordMessage?: string;
+    dossier?: StudentDossier;
 }
 
 export interface Class {
@@ -85,4 +86,13 @@ export interface Message {
     assignmentType?: AssignmentType;
     status?: MessageStatus;
     subject?: Subject;
+}
+
+export interface StudentDossier {
+    id?: string;
+    createdAt?: Date;
+    updatedAt?: Date;
+    fromUser?: User;
+    subject?: Subject;
+    dossierMessage?: string;
 }

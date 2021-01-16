@@ -108,6 +108,15 @@ const Drawer: FunctionComponent = () => {
                     <Link
                         underline='none'
                         className={styles.link}
+                        href='/students'
+                    >
+                        <Button>
+                            <PeopleAltOutlined /> Ученици
+                        </Button>
+                    </Link>
+                    <Link
+                        underline='none'
+                        className={styles.link}
                         href='/subjects'
                     >
                         <Button>
