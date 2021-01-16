@@ -7,6 +7,7 @@ import {
     AssignmentType,
     MessageType,
     MessageStatus,
+    WeekDays,
 } from './enums';
 
 export interface Institution {
@@ -85,4 +86,15 @@ export interface Message {
     assignmentType?: AssignmentType;
     status?: MessageStatus;
     subject?: Subject;
+}
+
+export interface Schedule {
+    id?: string;
+    startTime?: Date;
+    endTime?: Date;
+    day?: WeekDays;
+    subject?: Subject;
+    class?: Class;
+    teachers?: Teacher[];
+    institution?: Institution;
 }

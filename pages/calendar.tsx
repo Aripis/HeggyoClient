@@ -56,7 +56,7 @@ const CalendarComponent: FunctionComponent = () => {
 
     const [editDialog, setEditDialog] = useState<Message | null>(null);
     const [error, setError] = useState('');
-    const { data } = useSWR([
+    const { data, mutate } = useSWR([
         gql`
             query($filterByType: MessageType) {
                 messagesByCriteria(criteria: { messageType: $filterByType }) {
@@ -122,6 +122,7 @@ const CalendarComponent: FunctionComponent = () => {
                 gql`
                     query($id: String!) {
                         message(id: $id) {
+                            id
                             createdAt
                             assignmentType
                             assignmentDueDate
@@ -136,6 +137,61 @@ const CalendarComponent: FunctionComponent = () => {
                 { id }
             );
             setEditDialog(data.message);
+        } catch (error) {
+            setError('Неизвестна грешка');
+        }
+    };
+
+    const updateAssignment = async () => {
+        try {
+            await graphQLClient.request(
+                gql`
+                    mutation(
+                        $id: String!
+                        $data: String!
+                        $assignmentDueDate: Date!
+                        $status: MessageStatus!
+                    ) {
+                        updateMessage(
+                            updateMessageInput: {
+                                id: $id
+                                data: $data
+                                assignmentDueDate: $assignmentDueDate
+                                status: $status
+                            }
+                        ) {
+                            messageId
+                        }
+                    }
+                `,
+                {
+                    id: editDialog?.id,
+                    data: editDialog?.data,
+                    assignmentDueDate: editDialog?.assignmentDueDate,
+                    status: editDialog?.status,
+                }
+            );
+            mutate();
+            setEditDialog(null);
+        } catch (error) {
+            setError('Неизвестна грешка');
+        }
+    };
+
+    const deleteAssignment = async () => {
+        try {
+            await graphQLClient.request(
+                gql`
+                    mutation($id: String!) {
+                        removeMessage(id: $id) {
+                            messageId
+                        }
+                    }
+                `,
+                { id: editDialog?.id }
+            );
+            mutate();
+            setEditDialog(null);
         } catch (error) {
             setError('Неизвестна грешка');
         }
@@ -289,7 +345,7 @@ const CalendarComponent: FunctionComponent = () => {
                                 <div className={styles['actions-container']}>
                                     <Button
                                         className={styles['remove-asg']}
-                                        onClick={() => setEditDialog(null)}
+                                        onClick={deleteAssignment}
                                         disableElevation
                                         variant='outlined'
                                         endIcon={<DeleteOutlined />}
@@ -308,7 +364,7 @@ const CalendarComponent: FunctionComponent = () => {
                                         Отказ
                                     </Button>
                                     <Button
-                                        onClick={() => setEditDialog(null)}
+                                        onClick={updateAssignment}
                                         disableElevation
                                         variant='contained'
                                         color='primary'

@@ -85,7 +85,6 @@ const AddMessage: FunctionComponent = () => {
         if (status === 'REDIRECT') {
             router.push('/login');
         }
-        console.log(error);
     }, [user, status]);
 
     const gqlMutation = gql`
@@ -133,7 +132,6 @@ const AddMessage: FunctionComponent = () => {
             ) {
                 setError('Има съобщение вече на това място');
             }
-            console.error(response);
             setError('Неизвестна грешка');
         }
     };
