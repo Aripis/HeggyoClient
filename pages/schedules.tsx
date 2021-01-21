@@ -69,7 +69,7 @@ const ScheduleCard: FunctionComponent<ScheduleCardProps> = (props) => {
                         underline='none'
                         href={{
                             pathname: '/editschedule',
-                            query: { id: props.id },
+                            query: { classId: props.id },
                         }}
                     >
                         Редактирай
