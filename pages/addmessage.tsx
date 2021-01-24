@@ -8,7 +8,9 @@ import {
     MenuItem,
     Select,
     TextField,
+    Snackbar,
 } from '@material-ui/core';
+import Alert from '@material-ui/lab/Alert';
 import Head from 'next/head';
 import Navbar from 'components/Navbar';
 import ArrowBackIosOutlinedIcon from '@material-ui/icons/ArrowBackIosOutlined';
@@ -139,7 +141,7 @@ const AddMessage: FunctionComponent = () => {
     return (
         <>
             <Head>
-                <title>Редактирай предмет &#8226; Heggyo</title>
+                <title>Добави съобщение &#8226; Heggyo</title>
             </Head>
             <Container
                 className='main-container'
@@ -343,6 +345,20 @@ const AddMessage: FunctionComponent = () => {
                                             )
                                         )}
                                 </TextField>
+                                <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                                    <KeyboardDateTimePicker
+                                        inputVariant='outlined'
+                                        ampm={false}
+                                        className={styles['date-time-select']}
+                                        autoOk
+                                        invalidDateMessage='Невалиден формат'
+                                        label='Краен срок'
+                                        value={assignmentDueDate}
+                                        onChange={(date) => {
+                                            setAssignmentDueDate(date);
+                                        }}
+                                    />
+                                </MuiPickersUtilsProvider>
                             </>
                         )}
                         <TextField
@@ -354,22 +370,22 @@ const AddMessage: FunctionComponent = () => {
                             }}
                             variant='outlined'
                         />
-                        <MuiPickersUtilsProvider utils={DateFnsUtils}>
-                            <KeyboardDateTimePicker
-                                inputVariant='outlined'
-                                ampm={false}
-                                className={styles['date-time-select']}
-                                autoOk
-                                invalidDateMessage='Невалиден формат'
-                                label='Краен срок'
-                                value={assignmentDueDate}
-                                onChange={(date) => {
-                                    setAssignmentDueDate(date);
-                                }}
-                            />
-                        </MuiPickersUtilsProvider>
                     </div>
                 </div>
+                <Snackbar
+                    open={Boolean(error)}
+                    autoHideDuration={6000}
+                    onClose={() => setError('')}
+                >
+                    <Alert
+                        elevation={6}
+                        variant='filled'
+                        onClose={() => setError('')}
+                        severity='error'
+                    >
+                        {error}
+                    </Alert>
+                </Snackbar>
             </Container>
         </>
     );

@@ -196,7 +196,7 @@ const Dashboard: FunctionComponent = () => {
                                     data?.messagesByCriteria?.map(
                                         (message: Message, i: number) => {
                                             const date = new Date(
-                                                message?.updatedAt as number
+                                                message?.updatedAt as Date
                                             );
                                             return (
                                                 <Card
