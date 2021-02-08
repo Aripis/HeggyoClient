@@ -374,7 +374,7 @@ const CalendarComponent: FunctionComponent = () => {
                                     </Button>
                                 </div>
                             </DialogActions>
-                        </Dialog>{' '}
+                        </Dialog>
                     </MuiPickersUtilsProvider>
                 )}
                 <Snackbar

@@ -5,7 +5,6 @@ import {
     AccordionSummary,
     Avatar,
     Breadcrumbs,
-    Button,
     Container,
     Snackbar,
     Typography,
@@ -15,17 +14,12 @@ import Navbar from 'components/Navbar';
 import { gql } from 'graphql-request';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { FormEvent, FunctionComponent, useEffect, useState } from 'react';
+import { FunctionComponent, useEffect, useState } from 'react';
 import useSWR from 'swr';
 import { useAuth } from 'utils/useAuth';
 import styles from 'styles/EditForeignUser.module.scss';
-import {
-    EditOutlined,
-    ExpandMoreOutlined,
-    PersonOutlineOutlined,
-} from '@material-ui/icons';
-import { ContractType, UserRoles, UserStatus } from 'utils/enums';
-import graphQLClient from 'utils/graphqlclient';
+import { ExpandMoreOutlined, PersonOutlineOutlined } from '@material-ui/icons';
+import { UserRoles, UserStatus } from 'utils/enums';
 import { StudentDossier, Subject, User } from 'utils/interfaces';
 
 interface DossierProps {
@@ -39,7 +33,6 @@ interface DossierProps {
 
 const StudentsComponent: FunctionComponent<DossierProps> = (props) => {
     const [expanded, setExpanded] = useState(false);
-    const router = useRouter();
 
     const getStatus = (role: UserStatus | string | undefined) => {
         switch (role) {
@@ -69,19 +62,19 @@ const StudentsComponent: FunctionComponent<DossierProps> = (props) => {
             >
                 <Typography variant='body1' className={styles['names']}>
                     <strong>от: </strong>
-                    {props.fromUser.firstName}
-                    {expanded && props.fromUser.middleName}{' '}
-                    {props.fromUser.lastName}
+                    {`${props.fromUser?.firstName} ${
+                        expanded ? props.fromUser?.middleName : ''
+                    } ${props.fromUser?.lastName}`}
                     {!props.fromUser && '--'}
                 </Typography>
                 <Typography variant='body1' className={styles['role-text']}>
                     <strong>Роля: </strong>
-                    {props.fromUser.userRole || '--'}
+                    {props.fromUser?.userRole || '--'}
                 </Typography>
                 <Typography variant='body1' className={styles['status']}>
-                    <strong>Статус: </strong>
-                    {props.fromUser.status
-                        ? getStatus(props.fromUser.status)
+                    <strong> Статус: </strong>
+                    {props.fromUser?.status
+                        ? getStatus(props.fromUser?.status)
                         : '--'}
                 </Typography>
             </AccordionSummary>
@@ -105,13 +98,6 @@ const ViewStudent: FunctionComponent = () => {
     const { user, status } = useAuth();
     const [role, setRole] = useState('');
     const [error, setError] = useState('');
-    // const [uuid, setUUID] = useState('');
-    // const [userStatus, setUserStatus] = useState('');
-    // const [userId, setUserId] = useState('');
-    const [userStatus, setUserStatus] = useState('');
-    const [userId, setUserId] = useState('');
-
-    const [recordMessage, setRecordMessage] = useState('');
 
     const [studentUUID, setStudentUUID] = useState('');
 
@@ -171,13 +157,9 @@ const ViewStudent: FunctionComponent = () => {
         }
         setRole(router.query.r as string);
         if (role === 'student') {
-            //prevents wrong query request
             setStudentUUID(router.query.id as string);
         }
         setSwrReq(studentQuery);
-        {
-            data && console.log(data.student.dossier);
-        }
     }, [data, status, router]);
 
     const getRole = (role: UserRoles | string | undefined) => {
@@ -194,49 +176,6 @@ const ViewStudent: FunctionComponent = () => {
                 return 'Посетител';
             default:
                 return undefined;
-        }
-    };
-
-    const updateStudent = async (e: FormEvent) => {
-        e.preventDefault();
-        try {
-            await graphQLClient.request(
-                gql`
-                    mutation(
-                        $stId: String!
-                        $userId: String!
-                        $recordMessage: String!
-                        $userStatus: UserStatus!
-                    ) {
-                        updateStudentRecord(
-                            updateStudentRecordInput: {
-                                uuid: $stId
-                                recordMessage: $recordMessage
-                            }
-                        ) {
-                            studentId
-                        }
-
-                        updateUserStatus(
-                            updateUserStatus: {
-                                id: $userId
-                                userStatus: $userStatus
-                            }
-                        ) {
-                            userId
-                        }
-                    }
-                `,
-                {
-                    stId: router.query.id,
-                    recordMessage,
-                    userId,
-                    userStatus,
-                }
-            );
-            router.push('/users');
-        } catch (error) {
-            setError('Неизвестна грешка');
         }
     };
 
@@ -325,17 +264,6 @@ const ViewStudent: FunctionComponent = () => {
                             )}
                         </div>
                     )}
-                    <div className={styles['actions']}>
-                        <Button
-                            color='primary'
-                            variant='contained'
-                            disableElevation
-                            startIcon={<EditOutlined />}
-                            onClick={updateStudent}
-                        >
-                            Редактиране
-                        </Button>
-                    </div>
                 </div>
                 <Snackbar
                     open={Boolean(error)}

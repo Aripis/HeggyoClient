@@ -58,12 +58,19 @@ const UsersComponent: FunctionComponent<UsersProps> = (props) => {
                 return undefined;
         }
     };
-    const getContract = (role: ContractType | string | undefined) => {
-        switch (role) {
-            case 'PART_TIME':
-                return 'Хоноруван';
-            case 'FULL_TIME':
-                return 'На договор';
+
+    const getRole = (role: UserRoles | string | undefined) => {
+        switch (role?.toUpperCase()) {
+            case 'ADMIN':
+                return 'Админ';
+            case 'PARENT':
+                return 'Родител';
+            case 'STUDENT':
+                return 'Ученик';
+            case 'TEACHER':
+                return 'Учител';
+            case 'VIEWER':
+                return 'Посетител';
             default:
                 return undefined;
         }
@@ -82,8 +89,9 @@ const UsersComponent: FunctionComponent<UsersProps> = (props) => {
             >
                 <Typography variant='body1' className={styles['names']}>
                     <strong>Име: </strong>
-                    {props.firstName}
-                    {expanded && props.middleName} {props.lastName}
+                    {`${props.firstName} ${expanded ? props.middleName : ''} ${
+                        props.lastName
+                    }`}
                     {!props.firstName &&
                         !props.middleName &&
                         !props.lastName &&
@@ -91,7 +99,7 @@ const UsersComponent: FunctionComponent<UsersProps> = (props) => {
                 </Typography>
                 <Typography variant='body1' className={styles['role-text']}>
                     <strong>Роля: </strong>
-                    {props.userRole || '--'}
+                    {getRole(props.userRole) || '--'}
                 </Typography>
                 <Typography variant='body1' className={styles['status']}>
                     <strong>Статус: </strong>
@@ -195,10 +203,6 @@ const Students: FunctionComponent = () => {
         }
         if (user && (user?.userRole as string) !== 'ADMIN') {
             router.back();
-        }
-
-        if (data) {
-            console.log(data);
         }
     }, [user, status, data]);
 

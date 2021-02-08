@@ -42,6 +42,7 @@ const ViewSchedule: FunctionComponent = () => {
                     subject {
                         name
                     }
+                    room
                 }
             }
         `,
@@ -90,7 +91,7 @@ const ViewSchedule: FunctionComponent = () => {
                                             );
                                             return {
                                                 id: event.id,
-                                                title: event.subject?.name,
+                                                title: `${event.subject?.name} (${event.room})`,
                                                 start: setDay(
                                                     set(new Date(), {
                                                         hours: startTime.getHours(),

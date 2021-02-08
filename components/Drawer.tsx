@@ -7,7 +7,6 @@ import {
 } from '@material-ui/core';
 import Link from './Link';
 import {
-    SettingsOutlined,
     MeetingRoomOutlined,
     DashboardOutlined,
     DescriptionOutlined,
@@ -142,12 +141,6 @@ const Drawer: FunctionComponent = () => {
                         <Button>
                             <DescriptionOutlined />
                             Учебни програми
-                        </Button>
-                    </Link>
-                    <Link underline='none' className={styles.link} href='/'>
-                        <Button>
-                            <SettingsOutlined />
-                            Настройки
                         </Button>
                     </Link>
                 </SwipeableDrawer>

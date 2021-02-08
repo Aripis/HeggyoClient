@@ -237,10 +237,6 @@ const Users: FunctionComponent = () => {
         if (user && (user?.userRole as string) !== 'ADMIN') {
             router.back();
         }
-
-        if (data) {
-            console.log(data);
-        }
     }, [user, status, data]);
 
     if (!user) {

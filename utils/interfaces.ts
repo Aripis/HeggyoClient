@@ -98,6 +98,7 @@ export interface Schedule {
     class?: Class;
     teachers?: Teacher[];
     institution?: Institution;
+    room?: string;
 }
 
 export interface StudentDossier {

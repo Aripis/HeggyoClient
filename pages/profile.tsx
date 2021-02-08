@@ -1,4 +1,10 @@
-import { useEffect, useState, FunctionComponent, ReactNode } from 'react';
+import {
+    useEffect,
+    useState,
+    FunctionComponent,
+    ReactNode,
+    FormEvent,
+} from 'react';
 import Head from 'next/head';
 import {
     Container,
@@ -9,7 +15,10 @@ import {
     Tab,
     Tabs,
     Button,
+    TextField,
+    Snackbar,
 } from '@material-ui/core';
+import Alert from '@material-ui/lab/Alert';
 import styles from 'styles/Profile.module.scss';
 import { useRouter } from 'next/router';
 import { User } from 'utils/interfaces';
@@ -17,8 +26,16 @@ import Navbar from 'components/Navbar';
 import Drawer from 'components/Drawer';
 import { useAuth } from 'utils/useAuth';
 import Loader from 'components/Loader';
-import { PersonOutlineOutlined, EditOutlined } from '@material-ui/icons';
-import { UserRoles } from 'utils/enums';
+import {
+    PersonOutlineOutlined,
+    EditOutlined,
+    AdjustOutlined,
+    DoneOutlined,
+    CloseOutlined,
+} from '@material-ui/icons';
+import { UserRoles, UserStatus } from 'utils/enums';
+import graphQLClient from 'utils/graphqlclient';
+import { gql } from 'graphql-request';
 
 interface TabPanelProps {
     children?: ReactNode;
@@ -44,10 +61,22 @@ const Profile: FunctionComponent<User> = () => {
     const router = useRouter();
     const { user, status } = useAuth();
     const [value, setValue] = useState(0);
+    const [edit, setEdit] = useState(false);
+    const [firstName, setFirstName] = useState<string | undefined>('');
+    const [middleName, setMiddleName] = useState<string | undefined>('');
+    const [lastName, setLastName] = useState<string | undefined>('');
+    const [email, setEmail] = useState<string | undefined>('');
+    const [error, setError] = useState('');
 
     useEffect(() => {
         if (status === 'REDIRECT') {
             router.push('/login');
+        }
+        if (user) {
+            setFirstName(user.firstName);
+            setMiddleName(user.middleName);
+            setLastName(user.lastName);
+            setEmail(user.email);
         }
     }, [user, status]);
 
@@ -69,6 +98,52 @@ const Profile: FunctionComponent<User> = () => {
                 return 'Посетител';
             default:
                 return undefined;
+        }
+    };
+
+    const getStatus = (role: UserStatus | string | undefined) => {
+        switch (role) {
+            case 'UNVERIFIED':
+                return 'Непотвърден';
+            case 'ACTIVE':
+                return 'Активен';
+            case 'INACTIVE':
+                return 'Неактивен';
+            case 'BLOCKED':
+                return 'Блокиран';
+            default:
+                return undefined;
+        }
+    };
+
+    const updateProfile = async (e: FormEvent) => {
+        e.preventDefault();
+        try {
+            await graphQLClient.request(
+                gql`
+                    mutation(
+                        $firstName: String!
+                        $middleName: String!
+                        $lastName: String!
+                        $email: String!
+                    ) {
+                        updateUser(
+                            updateUserInput: {
+                                firstName: $firstName
+                                middleName: $middleName
+                                lastName: $lastName
+                                email: $email
+                            }
+                        ) {
+                            userId
+                        }
+                    }
+                `,
+                { firstName, middleName, lastName, email }
+            );
+            setEdit(false);
+        } catch (error) {
+            setError('Неизвестна грешка');
         }
     };
 
@@ -109,18 +184,16 @@ const Profile: FunctionComponent<User> = () => {
                                             <PersonOutlineOutlined />
                                             {getRole(user.userRole)}
                                         </Typography>
+                                        <Typography
+                                            className={
+                                                styles['additional-text']
+                                            }
+                                        >
+                                            <AdjustOutlined />
+                                            {getStatus(user.status)}
+                                        </Typography>
                                     </Breadcrumbs>
                                 </div>
-                            </div>
-                            <div className={styles['actions']}>
-                                <Button
-                                    color='primary'
-                                    variant='contained'
-                                    disableElevation
-                                    startIcon={<EditOutlined />}
-                                >
-                                    Редактиране
-                                </Button>
                             </div>
                         </div>
                     </div>
@@ -131,20 +204,114 @@ const Profile: FunctionComponent<User> = () => {
                             onChange={(_e, newValue) => setValue(newValue)}
                         >
                             <Tab disableRipple label='За потребителя' />
-                            <Tab disableRipple label='Item Two' />
-                            <Tab disableRipple label='Item Three' />
+                            <Tab disableRipple label='Оценки' />
                         </Tabs>
                     </AppBar>
                     <TabPanel value={value} index={0}>
-                        За потребителя
+                        <form
+                            onSubmit={updateProfile}
+                            className={styles['additional-info']}
+                        >
+                            <TextField
+                                required
+                                inputProps={{ readOnly: !edit }}
+                                className={styles['info-field']}
+                                label='Първо име'
+                                value={firstName}
+                                onChange={(e) => {
+                                    setFirstName(e.target.value as string);
+                                }}
+                                variant='outlined'
+                            />
+                            <TextField
+                                required
+                                inputProps={{ readOnly: !edit }}
+                                className={styles['info-field']}
+                                label='Презиме'
+                                value={middleName}
+                                onChange={(e) => {
+                                    setMiddleName(e.target.value as string);
+                                }}
+                                variant='outlined'
+                            />
+                            <TextField
+                                required
+                                inputProps={{ readOnly: !edit }}
+                                className={styles['info-field']}
+                                label='Фамилия'
+                                value={lastName}
+                                onChange={(e) => {
+                                    setLastName(e.target.value as string);
+                                }}
+                                variant='outlined'
+                            />
+                            <TextField
+                                required
+                                inputProps={{ readOnly: !edit }}
+                                className={styles['info-field']}
+                                label='Имейл'
+                                value={email}
+                                type='email'
+                                onChange={(e) => {
+                                    setEmail(e.target.value as string);
+                                }}
+                                variant='outlined'
+                            />
+                            {!edit ? (
+                                <Button
+                                    className={styles['edit-button']}
+                                    color='primary'
+                                    variant='contained'
+                                    disableElevation
+                                    startIcon={<EditOutlined />}
+                                    onClick={() => setEdit(!edit)}
+                                >
+                                    Редактиране
+                                </Button>
+                            ) : (
+                                <div className={styles['actions-container']}>
+                                    <Button
+                                        className={styles['edit-button']}
+                                        disableElevation
+                                        variant='contained'
+                                        color='primary'
+                                        endIcon={<DoneOutlined />}
+                                        type='submit'
+                                    >
+                                        Потвърди
+                                    </Button>
+                                    <Button
+                                        className={styles['edit-button']}
+                                        disableElevation
+                                        variant='outlined'
+                                        color='secondary'
+                                        endIcon={<CloseOutlined />}
+                                        onClick={() => setEdit(false)}
+                                    >
+                                        Отказ
+                                    </Button>
+                                </div>
+                            )}
+                        </form>
                     </TabPanel>
                     <TabPanel value={value} index={1}>
-                        Item Two
-                    </TabPanel>
-                    <TabPanel value={value} index={2}>
-                        Item Three
+                        Оценки
                     </TabPanel>
                 </div>
+                <Snackbar
+                    open={Boolean(error)}
+                    autoHideDuration={6000}
+                    onClose={() => setError('')}
+                >
+                    <Alert
+                        elevation={6}
+                        variant='filled'
+                        onClose={() => setError('')}
+                        severity='error'
+                    >
+                        {error}
+                    </Alert>
+                </Snackbar>
             </Container>
         </>
     );
