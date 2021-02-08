@@ -134,6 +134,7 @@ const EditForeignUser: FunctionComponent = () => {
                 return undefined;
         }
     };
+
     const updateStudent = async (e: FormEvent) => {
         e.preventDefault();
         try {

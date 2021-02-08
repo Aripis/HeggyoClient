@@ -123,26 +123,6 @@ const UsersComponent: FunctionComponent<UsersProps> = (props) => {
                             </Typography>
                         </>
                     )}
-                    {props.userRole === 'teacher' && (
-                        <>
-                            <Typography className={styles['years-experience']}>
-                                <strong>Стаж: </strong>
-                                {props.yearsExperience || '--'}
-                            </Typography>
-                            <Typography className={styles['contract-type']}>
-                                <strong>Вид договор: </strong>
-                                {props.contractType
-                                    ? getContract(
-                                          props.contractType.toUpperCase()
-                                      )
-                                    : '--'}
-                            </Typography>
-                            <Typography className={styles['education']}>
-                                <strong>Квалификация: </strong>
-                                {props.education || '--'}
-                            </Typography>
-                        </>
-                    )}
                 </div>
                 <Button
                     variant='contained'
@@ -205,20 +185,6 @@ const Students: FunctionComponent = () => {
                     }
                     dossierMessage
                 }
-            }
-
-            teachers {
-                id
-                user {
-                    firstName
-                    middleName
-                    lastName
-                    email
-                    status
-                }
-                education
-                yearsExperience
-                contractType
             }
         }
     `);
