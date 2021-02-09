@@ -37,6 +37,7 @@ const AddMessage: FunctionComponent = () => {
     const [messageData, setMessageData] = useState('');
     const [type, setType] = useState<string | undefined>('MESSAGE');
     const [error, setError] = useState('');
+    const [files, setFiles] = useState<FileList | null>(null);
 
     const [subjectUUID, setSubjectUUID] = useState<string | undefined>(
         undefined
@@ -136,6 +137,15 @@ const AddMessage: FunctionComponent = () => {
             }
             setError('Неизвестна грешка');
         }
+        graphQLClient.request(
+            gql`
+                query myQuery($firstName: String! $middleName: String! $lastName: String! $email: String!){
+                    updateUser(updateUserInput: {firstName: $firstName middleName: $middleName lastName: $lastName email: $email}){
+                        
+                    }
+                }
+            `
+        );
     };
 
     return (
@@ -296,6 +306,27 @@ const AddMessage: FunctionComponent = () => {
                                     </MenuItem>
                                 ))}
                         </TextField>
+                        <input
+                            accept='image/*'
+                            className={styles['upload-files']}
+                            style={{ display: 'none' }}
+                            id='raised-button-file'
+                            multiple
+                            type='file'
+                            // value={files?.map((file) => file.name) ?? ''}
+                            onChange={(e) => {
+                                console.log(e.target.files);
+                            }}
+                        />
+                        <label htmlFor='raised-button-file'>
+                            <Button
+                                variant='contained'
+                                component='span'
+                                className={styles['upload-files-button']}
+                            >
+                                Upload
+                            </Button>
+                        </label>
                         {type && type === 'ASSIGNMENT' && (
                             <>
                                 <TextField

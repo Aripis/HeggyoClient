@@ -36,7 +36,7 @@ const Login: FunctionComponent = () => {
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         try {
-            await graphQLClient.rawRequest(
+            await graphQLClient.request(
                 gql`
                     query($email: String!, $password: String!) {
                         login(
