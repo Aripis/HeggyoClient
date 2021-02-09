@@ -1,4 +1,4 @@
-import { FormEvent, FunctionComponent, useState } from 'react';
+import { FormEvent, FunctionComponent, useState, useEffect } from 'react';
 import graphQLClient from 'utils/graphqlclient';
 import { gql } from 'graphql-request';
 import { useRouter } from 'next/router';
@@ -15,20 +15,29 @@ import {
     Stepper,
     StepLabel,
     TextField,
-    Typography,
+    InputAdornment,
+    IconButton,
 } from '@material-ui/core';
+import { Visibility, VisibilityOff } from '@material-ui/icons';
 import Alert from '@material-ui/lab/Alert';
-// TODO: change styling
-import styles from 'styles/Login.module.scss';
+import styles from 'styles/RegisterInstitution.module.scss';
 import { EducationStage, InstitutionType } from 'utils/enums';
 import { getEducationStage, getInstitutionType } from 'utils/helpers';
+import { useAuth } from 'utils/useAuth';
+import Loader from 'components/Loader';
 
 const Register: FunctionComponent = () => {
     const router = useRouter();
-    const [error, setError] = useState('');
+    const { user, status } = useAuth();
 
+    const [firstName, setFirstName] = useState('');
+    const [middleName, setMiddleName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [userEmail, setUserEmail] = useState('');
     const [email, setEmail] = useState('');
     const [name, setName] = useState('');
+    const [password, setPassword] = useState('');
+    const [revealPassword, setRevealPassword] = useState(false);
     const [alias, setAlias] = useState('');
     const [type, setType] = useState('');
     const [educationalStage, setEducationalStage] = useState('');
@@ -38,6 +47,25 @@ const Register: FunctionComponent = () => {
         'Регистрирай администратор',
         'Завърши регистрацията',
     ];
+    const [error, setError] = useState('');
+
+    useEffect(() => {
+        if (status === 'DONE') {
+            router.push('/');
+        }
+        if (typeof window !== 'undefined') {
+            setName(sessionStorage.getItem('name') || '');
+            setEmail(sessionStorage.getItem('email') || '');
+            setAlias(sessionStorage.getItem('alias') || '');
+            setType(sessionStorage.getItem('type') as string);
+            setEducationalStage(
+                sessionStorage.getItem('educationalStage') as string
+            );
+            setActiveStep(
+                parseInt(sessionStorage.getItem('activeStep') as string) || 0
+            );
+        }
+    }, [user, status]);
 
     const handleInstitutionSubmit = async (e: FormEvent) => {
         e.preventDefault();
@@ -66,15 +94,15 @@ const Register: FunctionComponent = () => {
                 `,
                 { name, email, type, educationalStage, alias }
             );
-            setActiveStep((prevActiveStep) => prevActiveStep + 1);
-        } catch ({ response }) {
-            if (response.errors[0].message.includes('User not found')) {
-                setError('Невалиден имейл');
-            } else if (
-                response.errors[0].message.includes('Invalid password')
-            ) {
-                setError('Невалиден парола');
-            }
+            sessionStorage.setItem('name', name);
+            sessionStorage.setItem('email', email);
+            sessionStorage.setItem('type', type);
+            sessionStorage.setItem('educationalStage', educationalStage);
+            sessionStorage.setItem('alias', alias);
+            sessionStorage.setItem('activeStep', (activeStep + 1).toString());
+            setActiveStep(activeStep + 1);
+        } catch (error) {
+            setError('Неизвестна грешка');
         }
     };
     const handleAdminSubmit = async (e: FormEvent) => {
@@ -83,43 +111,54 @@ const Register: FunctionComponent = () => {
             await graphQLClient.request(
                 gql`
                     mutation(
-                        $name: String!
+                        $firstName: String!
+                        $middleName: String!
+                        $lastName: String!
                         $email: String!
-                        $type: InstitutionType!
-                        $educationalStage: EducationStage!
-                        $alias: String!
+                        $password: String!
+                        $registerToken: String!
                     ) {
-                        addInstitution(
-                            createInstitutionInput: {
-                                name: $name
+                        register(
+                            createUserInput: {
+                                firstName: $firstName
+                                middleName: $middleName
+                                lastName: $lastName
                                 email: $email
-                                type: $type
-                                educationalStage: $educationalStage
-                                alias: $alias
+                                password: $password
+                                registerToken: $registerToken
                             }
                         ) {
-                            institutionId
+                            userId
                         }
                     }
                 `,
-                { name, email, type, educationalStage, alias }
+                {
+                    firstName,
+                    middleName,
+                    lastName,
+                    email: userEmail,
+                    password,
+                    registerToken: `${
+                        alias || sessionStorage.getItem('alias')
+                    }#a@`,
+                }
             );
-            setActiveStep((prevActiveStep) => prevActiveStep + 1);
-        } catch ({ response }) {
-            if (response.errors[0].message.includes('User not found')) {
-                setError('Невалиден имейл');
-            } else if (
-                response.errors[0].message.includes('Invalid password')
-            ) {
-                setError('Невалиден парола');
-            }
+            sessionStorage.setItem('activeStep', (activeStep + 1).toString());
+            setActiveStep(activeStep + 1);
+        } catch (error) {
+            console.log(error);
+            setError('Неизвестна грешка');
         }
     };
+
+    if (user) {
+        return <Loader />;
+    }
 
     return (
         <>
             <Head>
-                <title>Вход &#8226; Heggyo</title>
+                <title>Регистрация &#8226; Heggyo</title>
             </Head>
             <Container
                 maxWidth={false}
@@ -153,53 +192,28 @@ const Register: FunctionComponent = () => {
                                 required
                                 onChange={(e) => setName(e.target.value)}
                             />
-                            <div>
-                                <TextField
-                                    label='Имейл'
-                                    className={styles.textfield}
-                                    variant='outlined'
-                                    type='email'
-                                    value={email}
-                                    required
-                                    onChange={(e) => setEmail(e.target.value)}
-                                />
-                            </div>
-                            <div>
-                                <TextField
-                                    label='Абревиатура'
-                                    className={styles.textfield}
-                                    variant='outlined'
-                                    value={alias}
-                                    required
-                                    onChange={(e) => setAlias(e.target.value)}
-                                />
-                            </div>
-                            <FormControl>
-                                <InputLabel id='institution-type'>
-                                    Тип
-                                </InputLabel>
-                                <Select
-                                    label='Тип'
-                                    variant='outlined'
-                                    labelId='institution-type'
-                                    value={type}
-                                    onChange={(e) => {
-                                        setType(e.target.value as string);
-                                    }}
-                                    renderValue={(selected) =>
-                                        getInstitutionType(selected as string)
-                                    }
-                                >
-                                    {Object.values(InstitutionType).map(
-                                        (type) => (
-                                            <MenuItem key={type} value={type}>
-                                                {`${getInstitutionType(type)}`}
-                                            </MenuItem>
-                                        )
-                                    )}
-                                </Select>
-                            </FormControl>
-                            <FormControl>
+                            <TextField
+                                label='Имейл'
+                                className={styles.textfield}
+                                variant='outlined'
+                                type='email'
+                                value={email}
+                                required
+                                onChange={(e) => setEmail(e.target.value)}
+                            />
+                            <TextField
+                                label='Абревиатура'
+                                className={styles.textfield}
+                                variant='outlined'
+                                value={alias}
+                                required
+                                onChange={(e) => setAlias(e.target.value)}
+                            />
+                            <FormControl
+                                variant='outlined'
+                                required
+                                className={styles.textfield}
+                            >
                                 <InputLabel id='institution-educational-stage'>
                                     Тип
                                 </InputLabel>
@@ -226,6 +240,35 @@ const Register: FunctionComponent = () => {
                                     )}
                                 </Select>
                             </FormControl>
+                            <FormControl
+                                variant='outlined'
+                                required
+                                className={styles.textfield}
+                            >
+                                <InputLabel id='institution-type'>
+                                    Вид
+                                </InputLabel>
+                                <Select
+                                    label='Тип'
+                                    variant='outlined'
+                                    labelId='institution-type'
+                                    value={type}
+                                    onChange={(e) => {
+                                        setType(e.target.value as string);
+                                    }}
+                                    renderValue={(selected) =>
+                                        getInstitutionType(selected as string)
+                                    }
+                                >
+                                    {Object.values(InstitutionType).map(
+                                        (type) => (
+                                            <MenuItem key={type} value={type}>
+                                                {`${getInstitutionType(type)}`}
+                                            </MenuItem>
+                                        )
+                                    )}
+                                </Select>
+                            </FormControl>
                         </div>
                         <div className={styles['input-container']}>
                             <Button
@@ -235,39 +278,148 @@ const Register: FunctionComponent = () => {
                                 className={styles.submit}
                                 type='submit'
                             >
-                                Регистрирай институция
+                                Създай институция
                             </Button>
                         </div>
                     </form>
                 )}
                 {activeStep === 1 && (
-                    <div className={styles['input-container']}>
-                        <Button
-                            color='primary'
-                            variant='contained'
-                            disableElevation
-                            onChange={() =>
-                                setActiveStep(
-                                    (prevActiveStep) => prevActiveStep + 1
-                                )
-                            }
-                            className={styles.submit}
-                        >
-                            Регистрирай администратор
-                        </Button>
-                    </div>
+                    <form className={styles.form} onSubmit={handleAdminSubmit}>
+                        <div className={styles['input-container']}>
+                            <span className={styles['sub-title']}>
+                                Създай своя администраторски акаунт
+                            </span>
+                        </div>
+                        <div className={styles['input-container']}>
+                            <TextField
+                                required
+                                className={styles.textfield}
+                                label='Първо име'
+                                value={firstName}
+                                onChange={(e) => setFirstName(e.target.value)}
+                                variant='outlined'
+                            />
+                            <TextField
+                                required
+                                className={styles.textfield}
+                                label='Презиме'
+                                value={middleName}
+                                onChange={(e) => setMiddleName(e.target.value)}
+                                variant='outlined'
+                            />
+                            <TextField
+                                required
+                                className={styles.textfield}
+                                label='Фамилия'
+                                value={lastName}
+                                onChange={(e) => setLastName(e.target.value)}
+                                variant='outlined'
+                            />
+                            <TextField
+                                label='Имейл'
+                                className={styles.textfield}
+                                variant='outlined'
+                                type='email'
+                                value={userEmail}
+                                required
+                                onChange={(e) => setUserEmail(e.target.value)}
+                            />
+                            <TextField
+                                label='Парола'
+                                className={styles.textfield}
+                                variant='outlined'
+                                InputProps={{
+                                    endAdornment: (
+                                        <InputAdornment
+                                            onClick={() =>
+                                                setRevealPassword(
+                                                    !revealPassword
+                                                )
+                                            }
+                                            position='end'
+                                        >
+                                            <IconButton edge='end'>
+                                                {revealPassword ? (
+                                                    <VisibilityOff />
+                                                ) : (
+                                                    <Visibility />
+                                                )}
+                                            </IconButton>
+                                        </InputAdornment>
+                                    ),
+                                }}
+                                type={revealPassword ? 'text' : 'password'}
+                                value={password}
+                                required
+                                onChange={(e) => setPassword(e.target.value)}
+                            />
+                        </div>
+                        <div className={styles['input-container']}>
+                            <Button
+                                className={styles.submit}
+                                type='submit'
+                                disableElevation
+                                color='primary'
+                                variant='contained'
+                            >
+                                Регистрирай администратор
+                            </Button>
+                        </div>
+                    </form>
                 )}
                 {activeStep === 2 && (
-                    <div className={styles['input-container']}>
-                        <Button
-                            color='primary'
-                            variant='contained'
-                            disableElevation
-                            onClick={() => router.replace('/dashboard')}
-                            className={styles.submit}
-                        >
-                            Завърши регистрацията
-                        </Button>
+                    <div className={styles.form}>
+                        <div className={styles['input-container']}>
+                            <span className={styles['sub-title']}>
+                                Превю на институцията
+                            </span>
+                        </div>
+                        <div className={styles['input-container']}>
+                            <TextField
+                                className={styles.textfield}
+                                label='Име'
+                                value={name}
+                                variant='outlined'
+                            />
+                            <TextField
+                                className={styles.textfield}
+                                label='Имейл'
+                                value={email}
+                                variant='outlined'
+                            />
+                            <TextField
+                                label='Абревиатура'
+                                className={styles.textfield}
+                                value={alias}
+                                variant='outlined'
+                            />
+                            <TextField
+                                className={styles.textfield}
+                                label='Тип'
+                                value={getInstitutionType(type)}
+                                variant='outlined'
+                            />
+                            <TextField
+                                className={styles.textfield}
+                                label='Вид'
+                                value={getEducationStage(educationalStage)}
+                                variant='outlined'
+                            />
+                        </div>
+                        <div className={styles['input-container']}>
+                            <Button
+                                className={styles.submit}
+                                disableElevation
+                                color='primary'
+                                variant='contained'
+                                onClick={() => {
+                                    sessionStorage.clear();
+                                    router.replace('/login');
+                                }}
+                            >
+                                Завърши регистрацията
+                            </Button>
+                        </div>
                     </div>
                 )}
 

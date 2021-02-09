@@ -32,6 +32,10 @@
             color: white;
         }
 
+        :global(.MuiButton-outlinedPrimary) {
+            color: $primary-color;
+        }
+
         .separator {
             display: block;
             width: 100%;

@@ -14,7 +14,6 @@ export enum EducationStage {
     PRIMARY = 'PRIMARY',
     UNITED = 'UNITED',
     HIGH = 'HIGH',
-    SECONDARY = 'SECONDARY',
 }
 
 export enum UserStatus {

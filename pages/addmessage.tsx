@@ -139,7 +139,7 @@ const AddMessage: FunctionComponent = () => {
         }
         graphQLClient.request(
             gql`
-                query myQuery($firstName: String! $middleName: String! $lastName: String! $email: String!){
+                query ($firstName: String! $middleName: String! $lastName: String! $email: String!){
                     updateUser(updateUserInput: {firstName: $firstName middleName: $middleName lastName: $lastName email: $email}){
                         
                     }

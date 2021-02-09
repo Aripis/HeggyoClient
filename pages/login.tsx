@@ -138,7 +138,7 @@ const Login: FunctionComponent = () => {
                 </form>
                 <div className={styles['register']}>
                     <span>Нямате институция? </span>
-                    <Link href='/'>Регистрирайте</Link>
+                    <Link href='/registerInstitution'>Регистрирайте</Link>
                 </div>
                 <Snackbar
                     open={Boolean(error)}
