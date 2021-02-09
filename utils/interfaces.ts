@@ -15,7 +15,6 @@ export interface Institution {
     name?: string;
     email?: string;
     type: InstitutionType;
-    capacityPerClass?: number;
     educationalStage?: EducationStage;
     alias?: string;
     user?: User[];

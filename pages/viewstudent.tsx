@@ -19,8 +19,8 @@ import useSWR from 'swr';
 import { useAuth } from 'utils/useAuth';
 import styles from 'styles/EditForeignUser.module.scss';
 import { ExpandMoreOutlined, PersonOutlineOutlined } from '@material-ui/icons';
-import { UserRoles, UserStatus } from 'utils/enums';
 import { StudentDossier, Subject, User } from 'utils/interfaces';
+import { getUserStatus, getUserRole } from 'utils/helpers';
 
 interface DossierProps {
     id: string | undefined;
@@ -33,21 +33,6 @@ interface DossierProps {
 
 const StudentsComponent: FunctionComponent<DossierProps> = (props) => {
     const [expanded, setExpanded] = useState(false);
-
-    const getStatus = (role: UserStatus | string | undefined) => {
-        switch (role) {
-            case 'UNVERIFIED':
-                return 'Непотвърден';
-            case 'ACTIVE':
-                return 'Активен';
-            case 'INACTIVE':
-                return 'Неактивен';
-            case 'BLOCKED':
-                return 'Блокиран';
-            default:
-                return undefined;
-        }
-    };
 
     return (
         <Accordion
@@ -74,7 +59,7 @@ const StudentsComponent: FunctionComponent<DossierProps> = (props) => {
                 <Typography variant='body1' className={styles['status']}>
                     <strong> Статус: </strong>
                     {props.fromUser?.status
-                        ? getStatus(props.fromUser?.status)
+                        ? getUserStatus(props.fromUser?.status)
                         : '--'}
                 </Typography>
             </AccordionSummary>
@@ -152,32 +137,15 @@ const ViewStudent: FunctionComponent = () => {
         if (status === 'REDIRECT') {
             router.push('/login');
         }
-        if (user && (user?.userRole as string) !== 'ADMIN') {
+        if (user && user?.userRole !== 'ADMIN') {
             router.back();
         }
         setRole(router.query.r as string);
-        if (role === 'student') {
+        if (role === 'STUDENT') {
             setStudentUUID(router.query.id as string);
         }
         setSwrReq(studentQuery);
     }, [data, status, router]);
-
-    const getRole = (role: UserRoles | string | undefined) => {
-        switch (role) {
-            case 'ADMIN':
-                return 'Админ';
-            case 'PARENT':
-                return 'Родител';
-            case 'STUDENT':
-                return 'Ученик';
-            case 'TEACHER':
-                return 'Учител';
-            case 'VIEWER':
-                return 'Посетител';
-            default:
-                return undefined;
-        }
-    };
 
     return (
         <>
@@ -219,7 +187,9 @@ const ViewStudent: FunctionComponent = () => {
                                         {data &&
                                             data?.student &&
                                             data?.student?.user &&
-                                            getRole(data.student.user.userRole)}
+                                            getUserRole(
+                                                data.student.user.userRole
+                                            )}
                                     </Typography>
                                     {data &&
                                         data?.student &&

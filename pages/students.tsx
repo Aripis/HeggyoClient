@@ -21,6 +21,7 @@ import { gql } from 'graphql-request';
 import { Student, StudentDossier, Teacher } from 'utils/interfaces';
 import useSWR from 'swr';
 import { ContractType, UserStatus, UserRoles } from 'utils/enums';
+import { getUserStatus, getUserRole } from 'utils/helpers';
 
 interface UsersProps {
     id: string | undefined;
@@ -43,38 +44,6 @@ interface UsersProps {
 const UsersComponent: FunctionComponent<UsersProps> = (props) => {
     const [expanded, setExpanded] = useState(false);
     const router = useRouter();
-
-    const getStatus = (role: UserStatus | string | undefined) => {
-        switch (role) {
-            case 'UNVERIFIED':
-                return 'Непотвърден';
-            case 'ACTIVE':
-                return 'Активен';
-            case 'INACTIVE':
-                return 'Неактивен';
-            case 'BLOCKED':
-                return 'Блокиран';
-            default:
-                return undefined;
-        }
-    };
-
-    const getRole = (role: UserRoles | string | undefined) => {
-        switch (role?.toUpperCase()) {
-            case 'ADMIN':
-                return 'Админ';
-            case 'PARENT':
-                return 'Родител';
-            case 'STUDENT':
-                return 'Ученик';
-            case 'TEACHER':
-                return 'Учител';
-            case 'VIEWER':
-                return 'Посетител';
-            default:
-                return undefined;
-        }
-    };
 
     return (
         <Accordion
@@ -99,11 +68,11 @@ const UsersComponent: FunctionComponent<UsersProps> = (props) => {
                 </Typography>
                 <Typography variant='body1' className={styles['role-text']}>
                     <strong>Роля: </strong>
-                    {getRole(props.userRole) || '--'}
+                    {getUserRole(props.userRole) || '--'}
                 </Typography>
                 <Typography variant='body1' className={styles['status']}>
                     <strong>Статус: </strong>
-                    {props.status ? getStatus(props.status) : '--'}
+                    {props.status ? getUserStatus(props.status) : '--'}
                 </Typography>
             </AccordionSummary>
             <AccordionDetails className={styles['accordion-details']}>
@@ -115,7 +84,7 @@ const UsersComponent: FunctionComponent<UsersProps> = (props) => {
                         <strong>Имейл: </strong>
                         {props.email || '--'}
                     </Typography>
-                    {props.userRole === 'student' && (
+                    {props.userRole === 'STUDENT' && (
                         <>
                             <Typography className={styles['class']}>
                                 <strong>Клас: </strong>
@@ -201,7 +170,7 @@ const Students: FunctionComponent = () => {
         if (status === 'REDIRECT') {
             router.push('/login');
         }
-        if (user && (user?.userRole as string) !== 'ADMIN') {
+        if (user && user?.userRole !== 'ADMIN') {
             router.back();
         }
     }, [user, status, data]);

@@ -58,7 +58,7 @@ const AddSubject: FunctionComponent = () => {
         if (status === 'REDIRECT') {
             router.push('/login');
         }
-        if (user && (user?.userRole as string) !== 'ADMIN') {
+        if (user && user?.userRole !== 'ADMIN') {
             router.back();
         }
     }, [user, status]);
@@ -195,7 +195,7 @@ const AddSubject: FunctionComponent = () => {
                                                 )
                                                 .map(
                                                     (user) =>
-                                                        `${user?.firstName} ${user?.lastName}`
+                                                        `${user.firstName} ${user.lastName}`
                                                 )
                                                 .join(', ')
                                         }

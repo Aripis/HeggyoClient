@@ -206,7 +206,7 @@ const Users: FunctionComponent = () => {
         if (status === 'REDIRECT') {
             router.push('/login');
         }
-        if (user && (user?.userRole as string) !== 'ADMIN') {
+        if (user && user?.userRole !== 'ADMIN') {
             router.back();
         }
     }, [user, status, data]);
@@ -332,29 +332,23 @@ const Users: FunctionComponent = () => {
                     </form>
                     {data && (
                         <div className={styles['users-container']}>
-                            {data?.students?.map(
-                                (student: Student, i: number) => (
-                                    <UsersComponent
-                                        key={student?.id}
-                                        id={student?.id}
-                                        userRole={UserRoles['STUDENT']}
-                                        firstName={student?.user?.firstName}
-                                        middleName={student?.user?.middleName}
-                                        lastName={student?.user?.lastName}
-                                        email={student?.user?.email}
-                                        status={student?.user?.status}
-                                        recordMessage={student?.recordMessage}
-                                        prevEducation={student?.prevEducation}
-                                        classLetter={
-                                            student?.class?.classLetter
-                                        }
-                                        classNumber={
-                                            student?.class?.classNumber
-                                        }
-                                        studentDossier={student?.dossier}
-                                    />
-                                )
-                            )}
+                            {data?.students?.map((student: Student) => (
+                                <UsersComponent
+                                    key={student?.id}
+                                    id={student?.id}
+                                    userRole={UserRoles['STUDENT']}
+                                    firstName={student?.user?.firstName}
+                                    middleName={student?.user?.middleName}
+                                    lastName={student?.user?.lastName}
+                                    email={student?.user?.email}
+                                    status={student?.user?.status}
+                                    recordMessage={student?.recordMessage}
+                                    prevEducation={student?.prevEducation}
+                                    classLetter={student?.class?.classLetter}
+                                    classNumber={student?.class?.classNumber}
+                                    studentDossier={student?.dossier}
+                                />
+                            ))}
                             {data?.teachers &&
                                 data?.teachers?.map(
                                     (teacher: Teacher, i: number) => (

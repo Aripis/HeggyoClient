@@ -49,7 +49,6 @@ export const useAuth = (): Auth => {
                                 name
                                 email
                                 type
-                                capacityPerClass
                                 educationalStage
                                 alias
                             }

@@ -23,6 +23,7 @@ import useSWR from 'swr';
 import { gql } from 'graphql-request';
 import { Subject } from 'utils/interfaces';
 import { Class } from 'utils/interfaces';
+import { UserRoles } from 'utils/enums';
 
 interface SubjectCardProps {
     id?: string;
@@ -31,6 +32,7 @@ interface SubjectCardProps {
     startYear?: number;
     endYear?: number;
     class?: Class;
+    role?: UserRoles;
 }
 
 const SubjectCard: FunctionComponent<SubjectCardProps> = (props) => {
@@ -49,25 +51,27 @@ const SubjectCard: FunctionComponent<SubjectCardProps> = (props) => {
                 title={`${props.class?.classNumber}${props.class?.classLetter} ${props.name}`}
                 subheader={`${props.startYear} - ${props.endYear}`}
             />
-            <Menu
-                anchorEl={menu}
-                keepMounted
-                open={Boolean(menu)}
-                onClose={() => setMenu(null)}
-            >
-                <MenuItem onClick={() => setMenu(null)}>
-                    <Link
-                        color='textPrimary'
-                        underline='none'
-                        href={{
-                            pathname: '/editsubject',
-                            query: { id: props.id },
-                        }}
-                    >
-                        Редактирай
-                    </Link>
-                </MenuItem>
-            </Menu>
+            {props.role === 'ADMIN' && (
+                <Menu
+                    anchorEl={menu}
+                    keepMounted
+                    open={Boolean(menu)}
+                    onClose={() => setMenu(null)}
+                >
+                    <MenuItem onClick={() => setMenu(null)}>
+                        <Link
+                            color='textPrimary'
+                            underline='none'
+                            href={{
+                                pathname: '/editsubject',
+                                query: { id: props.id },
+                            }}
+                        >
+                            Редактирай
+                        </Link>
+                    </MenuItem>
+                </Menu>
+            )}
         </Card>
     );
 };
@@ -115,7 +119,7 @@ const Subjects: FunctionComponent = () => {
                 <Navbar title='Предмети' />
                 <div className={styles.content}>
                     <div className={styles['actions-container']}>
-                        {user && (user?.userRole as string) === 'ADMIN' && (
+                        {user.userRole === 'ADMIN' && (
                             <Link
                                 className={styles['subject-add']}
                                 underline='none'
@@ -136,7 +140,11 @@ const Subjects: FunctionComponent = () => {
                         {data &&
                             data.subjects?.map(
                                 (subject: Subject, i: number) => (
-                                    <SubjectCard key={i} {...subject} />
+                                    <SubjectCard
+                                        key={i}
+                                        role={user.userRole}
+                                        {...subject}
+                                    />
                                 )
                             )}
                         {data && !data.subjects && (

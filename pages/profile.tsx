@@ -33,7 +33,7 @@ import {
     DoneOutlined,
     CloseOutlined,
 } from '@material-ui/icons';
-import { UserRoles, UserStatus } from 'utils/enums';
+import { getUserStatus, getUserRole } from 'utils/helpers';
 import graphQLClient from 'utils/graphqlclient';
 import { gql } from 'graphql-request';
 
@@ -83,38 +83,6 @@ const Profile: FunctionComponent<User> = () => {
     if (!user) {
         return <Loader />;
     }
-
-    const getRole = (role: UserRoles | string | undefined) => {
-        switch (role) {
-            case 'ADMIN':
-                return 'Админ';
-            case 'PARENT':
-                return 'Родител';
-            case 'STUDENT':
-                return 'Ученик';
-            case 'TEACHER':
-                return 'Учител';
-            case 'VIEWER':
-                return 'Посетител';
-            default:
-                return undefined;
-        }
-    };
-
-    const getStatus = (role: UserStatus | string | undefined) => {
-        switch (role) {
-            case 'UNVERIFIED':
-                return 'Непотвърден';
-            case 'ACTIVE':
-                return 'Активен';
-            case 'INACTIVE':
-                return 'Неактивен';
-            case 'BLOCKED':
-                return 'Блокиран';
-            default:
-                return undefined;
-        }
-    };
 
     const updateProfile = async (e: FormEvent) => {
         e.preventDefault();
@@ -182,7 +150,7 @@ const Profile: FunctionComponent<User> = () => {
                                             }
                                         >
                                             <PersonOutlineOutlined />
-                                            {getRole(user.userRole)}
+                                            {getUserRole(user.userRole)}
                                         </Typography>
                                         <Typography
                                             className={
@@ -190,7 +158,7 @@ const Profile: FunctionComponent<User> = () => {
                                             }
                                         >
                                             <AdjustOutlined />
-                                            {getStatus(user.status)}
+                                            {getUserStatus(user.status)}
                                         </Typography>
                                     </Breadcrumbs>
                                 </div>

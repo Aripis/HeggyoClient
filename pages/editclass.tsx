@@ -52,7 +52,7 @@ const EditClass: FunctionComponent = () => {
         if (status === 'REDIRECT') {
             router.push('/login');
         }
-        if (user && (user?.userRole as string) !== 'ADMIN') {
+        if (user && user?.userRole !== 'ADMIN') {
             router.back();
         }
     }, [user, status]);

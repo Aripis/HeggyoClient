@@ -148,7 +148,9 @@ const Drawer: FunctionComponent = () => {
                     >
                         <Button>
                             <DescriptionOutlined />
-                            Учебни програми
+                            {user?.userRole === 'STUDENT'
+                                ? 'Учебна програма'
+                                : 'Учебни програми'}
                         </Button>
                     </Link>
                 </SwipeableDrawer>

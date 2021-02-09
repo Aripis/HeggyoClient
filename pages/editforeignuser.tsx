@@ -19,7 +19,7 @@ import useSWR from 'swr';
 import { useAuth } from 'utils/useAuth';
 import styles from 'styles/EditForeignUser.module.scss';
 import { EditOutlined, PersonOutlineOutlined } from '@material-ui/icons';
-import { UserRoles } from 'utils/enums';
+import { getUserRole } from 'utils/helpers';
 import graphQLClient from 'utils/graphqlclient';
 
 const EditForeignUser: FunctionComponent = () => {
@@ -100,40 +100,23 @@ const EditForeignUser: FunctionComponent = () => {
         if (status === 'REDIRECT') {
             router.push('/login');
         }
-        if (user && (user?.userRole as string) !== 'ADMIN') {
+        if (user && user?.userRole !== 'ADMIN') {
             router.back();
         }
         setRole(router.query.r as string);
         setUUID(router.query.id as string);
-        if (router.query.r === 'teacher') {
+        if (router.query.r === 'TEACHER') {
             setSwrReq(forTeacher);
             setUserStatus(data?.teacher?.user?.status as string);
             setTeacherContract(data?.teacher?.contractType as string);
             setUserId(data?.teacher?.user?.id as string);
-        } else if (router.query.r === 'student') {
+        } else if (router.query.r === 'STUDENT') {
             setSwrReq(forStudent);
             setUserStatus(data?.student?.user?.status as string);
             setUserId(data?.student?.user?.id as string);
             setRecordMessage(data?.student?.recordMessage as string);
         }
     }, [data, status, router]);
-
-    const getRole = (role: UserRoles | string | undefined) => {
-        switch (role) {
-            case 'ADMIN':
-                return 'Админ';
-            case 'PARENT':
-                return 'Родител';
-            case 'STUDENT':
-                return 'Ученик';
-            case 'TEACHER':
-                return 'Учител';
-            case 'VIEWER':
-                return 'Посетител';
-            default:
-                return undefined;
-        }
-    };
 
     const updateStudent = async (e: FormEvent) => {
         e.preventDefault();
@@ -241,7 +224,7 @@ const EditForeignUser: FunctionComponent = () => {
                             alt='profile'
                         />
                         <div className={styles['profile-info']}>
-                            {data && role === 'student' && data?.student && (
+                            {data && role === 'STUDENT' && data?.student && (
                                 <>
                                     <Typography
                                         className={styles['name']}
@@ -258,7 +241,7 @@ const EditForeignUser: FunctionComponent = () => {
                                             }
                                         >
                                             <PersonOutlineOutlined />
-                                            {getRole(
+                                            {getUserRole(
                                                 data.student.user.userRole
                                             )}
                                         </Typography>
@@ -283,7 +266,7 @@ const EditForeignUser: FunctionComponent = () => {
                                     </Typography>
                                 </>
                             )}
-                            {data && role === 'teacher' && data?.teacher && (
+                            {data && role === 'TEACHER' && data?.teacher && (
                                 <>
                                     <Typography
                                         className={styles['name']}
@@ -301,7 +284,7 @@ const EditForeignUser: FunctionComponent = () => {
                                             }
                                         >
                                             <PersonOutlineOutlined />
-                                            {getRole(
+                                            {getUserRole(
                                                 data.teacher.user.userRole
                                             )}
                                         </Typography>
@@ -314,7 +297,7 @@ const EditForeignUser: FunctionComponent = () => {
                         </div>
                     </div>
                     <div className={styles['edit-fields']}>
-                        {data && role === 'student' && data?.student && (
+                        {data && role === 'STUDENT' && data?.student && (
                             <>
                                 <TextField
                                     label='Коментар'
@@ -336,7 +319,7 @@ const EditForeignUser: FunctionComponent = () => {
                                 />
                             </>
                         )}
-                        {role === 'teacher' && teacherContract && (
+                        {role === 'TEACHER' && teacherContract && (
                             <>
                                 <TextField
                                     select
@@ -385,7 +368,7 @@ const EditForeignUser: FunctionComponent = () => {
                             </TextField>
                         )}
                     </div>
-                    {data && role === 'teacher' && data?.teacher && (
+                    {data && role === 'TEACHER' && data?.teacher && (
                         <div className={styles['actions']}>
                             <Button
                                 color='primary'
@@ -398,7 +381,7 @@ const EditForeignUser: FunctionComponent = () => {
                             </Button>
                         </div>
                     )}
-                    {data && role === 'student' && data?.student && (
+                    {data && role === 'STUDENT' && data?.student && (
                         <div className={styles['actions']}>
                             <Button
                                 color='primary'

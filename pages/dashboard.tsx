@@ -256,7 +256,7 @@ const Dashboard: FunctionComponent = () => {
                                         }
                                     )}
                             </div>
-                            {user && user?.userRole === 'ADMIN' && (
+                            {user.userRole === 'ADMIN' && (
                                 <Card
                                     elevation={0}
                                     className={`${styles['card']} ${styles['statistics']}`}

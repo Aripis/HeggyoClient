@@ -4,7 +4,23 @@ import {
     InstitutionType,
     EducationStage,
     ContractType,
+    AssignmentType,
 } from './enums';
+
+export const getAssignmentType = (
+    type: AssignmentType | string | undefined
+): string | undefined => {
+    switch (type) {
+        case 'HOMEWORK':
+            return 'Домашно';
+        case 'CLASSWORK':
+            return 'Работа в клас';
+        case 'EXAM':
+            return 'Контролно';
+        default:
+            return undefined;
+    }
+};
 
 export const getContractType = (
     type: ContractType | string | undefined

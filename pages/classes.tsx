@@ -93,7 +93,7 @@ const Classes: FunctionComponent = () => {
         if (status === 'REDIRECT') {
             router.push('/login');
         }
-        if (user && (user?.userRole as string) !== 'ADMIN') {
+        if (user && user?.userRole !== 'ADMIN') {
             router.back();
         }
     }, [user, status]);
@@ -116,7 +116,7 @@ const Classes: FunctionComponent = () => {
                 <Navbar title='Класове' />
                 <div className={styles.content}>
                     <div className={styles['actions-container']}>
-                        {user && (user?.userRole as string) === 'ADMIN' && (
+                        {user.userRole === 'ADMIN' && (
                             <Link
                                 className={styles['class-add']}
                                 underline='none'

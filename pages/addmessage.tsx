@@ -199,7 +199,7 @@ const AddMessage: FunctionComponent = () => {
                                         )
                                         .map(
                                             (user) =>
-                                                `${user?.firstName} ${user?.lastName}`
+                                                `${user.firstName} ${user.lastName}`
                                         )
                                         .join(', ')
                                 }

@@ -58,7 +58,7 @@ const EditSubject: FunctionComponent = () => {
         if (status === 'REDIRECT') {
             router.push('/login');
         }
-        if (user && (user?.userRole as string) !== 'ADMIN') {
+        if (user && user?.userRole !== 'ADMIN') {
             router.back();
         }
     }, [user, status]);
@@ -245,7 +245,7 @@ const EditSubject: FunctionComponent = () => {
                                                 )
                                                 .map(
                                                     (user) =>
-                                                        `${user?.firstName} ${user?.lastName}`
+                                                        `${user.firstName} ${user.lastName}`
                                                 )
                                                 .join(', ')
                                         }
@@ -296,7 +296,7 @@ const EditSubject: FunctionComponent = () => {
                                                     key={i}
                                                     value={currClass.id}
                                                 >
-                                                    {`${currClass.classNumber} ${currClass.classLetter}`}
+                                                    {`${currClass.classNumber}${currClass.classLetter}`}
                                                 </MenuItem>
                                             )
                                         )}

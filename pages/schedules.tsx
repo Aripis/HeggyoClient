@@ -31,6 +31,7 @@ interface ScheduleCardProps {
     endYear?: number;
     classNumber?: number;
     classLetter?: string;
+    role?: string;
 }
 
 const ScheduleCard: FunctionComponent<ScheduleCardProps> = (props) => {
@@ -57,25 +58,27 @@ const ScheduleCard: FunctionComponent<ScheduleCardProps> = (props) => {
                 title={`Програма на ${props.classNumber}${props.classLetter}`}
                 subheader={`${props.startYear} - ${props.endYear}`}
             />
-            <Menu
-                anchorEl={menu}
-                keepMounted
-                open={Boolean(menu)}
-                onClose={() => setMenu(null)}
-            >
-                <MenuItem onClick={() => setMenu(null)}>
-                    <Link
-                        color='textPrimary'
-                        underline='none'
-                        href={{
-                            pathname: '/editschedule',
-                            query: { classId: props.id },
-                        }}
-                    >
-                        Редактирай
-                    </Link>
-                </MenuItem>
-            </Menu>
+            {props.role === 'ADMIN' && (
+                <Menu
+                    anchorEl={menu}
+                    keepMounted
+                    open={Boolean(menu)}
+                    onClose={() => setMenu(null)}
+                >
+                    <MenuItem onClick={() => setMenu(null)}>
+                        <Link
+                            color='textPrimary'
+                            underline='none'
+                            href={{
+                                pathname: '/editschedule',
+                                query: { classId: props.id },
+                            }}
+                        >
+                            Редактирай
+                        </Link>
+                    </MenuItem>
+                </Menu>
+            )}
         </Card>
     );
 };
@@ -101,9 +104,6 @@ const Schedule: FunctionComponent = () => {
         if (status === 'REDIRECT') {
             router.push('/login');
         }
-        if (user && (user?.userRole as string) !== 'ADMIN') {
-            router.back();
-        }
     }, [user, status]);
 
     if (!user) {
@@ -124,25 +124,31 @@ const Schedule: FunctionComponent = () => {
                 <Navbar title='Учебни програми' />
                 <div className={styles.content}>
                     <div className={styles['actions-container']}>
-                        <Link
-                            className={styles['schedule-add']}
-                            underline='none'
-                            href='/addschedule'
-                        >
-                            <Button
-                                disableElevation
-                                variant='contained'
-                                color='primary'
-                                endIcon={<AddOutlined />}
+                        {user.userRole === 'ADMIN' && (
+                            <Link
+                                className={styles['schedule-add']}
+                                underline='none'
+                                href='/addschedule'
                             >
-                                Добави програма
-                            </Button>
-                        </Link>
+                                <Button
+                                    disableElevation
+                                    variant='contained'
+                                    color='primary'
+                                    endIcon={<AddOutlined />}
+                                >
+                                    Добави програма
+                                </Button>
+                            </Link>
+                        )}
                     </div>
                     <div className={styles['schedules-container']}>
                         {data &&
                             data.classes?.map((currClass: Class, i: number) => (
-                                <ScheduleCard key={i} {...currClass} />
+                                <ScheduleCard
+                                    key={i}
+                                    role={user.userRole}
+                                    {...currClass}
+                                />
                             ))}
                         {data && !data.classes && (
                             <div className={styles['no-classes']}>

@@ -33,7 +33,7 @@ import useSWR from 'swr';
 import { gql } from 'graphql-request';
 import Alert from '@material-ui/lab/Alert';
 import { Message } from 'utils/interfaces';
-
+import { getAssignmentType } from 'utils/helpers';
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { bg } from 'date-fns/locale';
@@ -99,19 +99,6 @@ const CalendarComponent: FunctionComponent = () => {
         { value: 'CREATED', content: 'Създадено' },
         { value: 'PUBLISHED', content: 'Изпратено' },
     ];
-
-    const getAssignmentType = (type: string) => {
-        switch (type) {
-            case 'HOMEWORK':
-                return 'Домашно';
-            case 'CLASSWORK':
-                return 'Работа в клас';
-            case 'EXAM':
-                return 'Контролно';
-            default:
-                return undefined;
-        }
-    };
 
     const openDialog = async (id: string) => {
         try {
