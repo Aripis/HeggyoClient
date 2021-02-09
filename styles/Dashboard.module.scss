@@ -46,18 +46,20 @@
                 margin: 10px 20px 20px 0;
             }
         }
-
-        
     }
 
     .statistics {
         box-shadow: $card-shadow;
         width: 330px;
-        min-width: 400px;
-        max-width: 500px;
-        min-height: 130px;
-        max-height: 470px;
+        height: auto;
         border-radius: 10px;
-        margin: 96px 15px 15px 0;
+        margin-top: 90px;
+        margin-bottom: auto;
+
+        :global .MuiCardHeader-content {
+            .MuiCardHeader-title {
+                font-weight: 600;
+            }
+        }
     }
 }

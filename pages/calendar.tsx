@@ -89,9 +89,6 @@ const CalendarComponent: FunctionComponent = () => {
         if (status === 'REDIRECT') {
             router.push('/login');
         }
-        if (user && (user?.userRole as string) !== 'ADMIN') {
-            router.back();
-        }
     }, [user, status]);
 
     if (!user) {

@@ -16,9 +16,11 @@ import {
 } from '@material-ui/icons';
 import { FunctionComponent, useState, useEffect } from 'react';
 import styles from 'styles/Drawer.module.scss';
+import { useAuth } from 'utils/useAuth';
 
 const Drawer: FunctionComponent = () => {
     const [open, setOpen] = useState<boolean | null>(null);
+    const { user } = useAuth();
 
     useEffect(() => {
         setOpen(!window.matchMedia('(max-width: 730px)').matches);
@@ -95,24 +97,28 @@ const Drawer: FunctionComponent = () => {
                             <EventNote /> Календар
                         </Button>
                     </Link>
-                    <Link
-                        underline='none'
-                        className={styles.link}
-                        href='/users'
-                    >
-                        <Button>
-                            <PeopleAltOutlined /> Потребители
-                        </Button>
-                    </Link>
-                    <Link
-                        underline='none'
-                        className={styles.link}
-                        href='/students'
-                    >
-                        <Button>
-                            <PeopleAltOutlined /> Ученици
-                        </Button>
-                    </Link>
+                    {user?.userRole === 'ADMIN' && (
+                        <>
+                            <Link
+                                underline='none'
+                                className={styles.link}
+                                href='/users'
+                            >
+                                <Button>
+                                    <PeopleAltOutlined /> Потребители
+                                </Button>
+                            </Link>
+                            <Link
+                                underline='none'
+                                className={styles.link}
+                                href='/students'
+                            >
+                                <Button>
+                                    <PeopleAltOutlined /> Ученици
+                                </Button>
+                            </Link>
+                        </>
+                    )}
                     <Link
                         underline='none'
                         className={styles.link}
@@ -123,16 +129,18 @@ const Drawer: FunctionComponent = () => {
                             Предмети
                         </Button>
                     </Link>
-                    <Link
-                        underline='none'
-                        className={styles.link}
-                        href='/classes'
-                    >
-                        <Button>
-                            <MeetingRoomOutlined />
-                            Класове
-                        </Button>
-                    </Link>
+                    {user?.userRole === 'ADMIN' && (
+                        <Link
+                            underline='none'
+                            className={styles.link}
+                            href='/classes'
+                        >
+                            <Button>
+                                <MeetingRoomOutlined />
+                                Класове
+                            </Button>
+                        </Link>
+                    )}
                     <Link
                         underline='none'
                         className={styles.link}
