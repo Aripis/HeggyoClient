@@ -97,27 +97,29 @@ const Drawer: FunctionComponent = () => {
                             <EventNote /> Календар
                         </Button>
                     </Link>
+
                     {user?.userRole === 'ADMIN' && (
-                        <>
-                            <Link
-                                underline='none'
-                                className={styles.link}
-                                href='/users'
-                            >
-                                <Button>
-                                    <PeopleAltOutlined /> Потребители
-                                </Button>
-                            </Link>
-                            <Link
-                                underline='none'
-                                className={styles.link}
-                                href='/students'
-                            >
-                                <Button>
-                                    <PeopleAltOutlined /> Ученици
-                                </Button>
-                            </Link>
-                        </>
+                        <Link
+                            underline='none'
+                            className={styles.link}
+                            href='/users'
+                        >
+                            <Button>
+                                <PeopleAltOutlined /> Потребители
+                            </Button>
+                        </Link>
+                    )}
+                    {(user?.userRole === 'ADMIN' ||
+                        user?.userRole === 'TEACHER') && (
+                        <Link
+                            underline='none'
+                            className={styles.link}
+                            href='/students'
+                        >
+                            <Button>
+                                <PeopleAltOutlined /> Ученици
+                            </Button>
+                        </Link>
                     )}
                     <Link
                         underline='none'

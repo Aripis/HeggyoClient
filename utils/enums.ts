@@ -61,3 +61,10 @@ export enum AssignmentType {
     CLASSWORK = 'CLASSWORK',
     EXAM = 'EXAM',
 }
+
+export enum GradeTypes {
+    YEAR = 'YEAR',
+    TURM_1 = 'TURM_1',
+    TURM_2 = 'TURM_2',
+    ONGOING = 'ONGOING',
+}

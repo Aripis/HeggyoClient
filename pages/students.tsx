@@ -1,4 +1,11 @@
-import { useEffect, useState, FunctionComponent } from 'react';
+import {
+    useEffect,
+    useState,
+    FunctionComponent,
+    ReactNode,
+    MouseEvent,
+    Fragment,
+} from 'react';
 import Head from 'next/head';
 import Navbar from 'components/Navbar';
 import Drawer from 'components/Drawer';
@@ -10,18 +17,29 @@ import {
     Accordion,
     AccordionSummary,
     AccordionDetails,
+    AppBar,
+    Tabs,
+    Tab,
+    Popover,
 } from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';
 import { ExpandMoreOutlined } from '@material-ui/icons';
 import { useAuth } from 'utils/useAuth';
 import { useRouter } from 'next/router';
 import Loader from 'components/Loader';
-import styles from 'styles/Users.module.scss';
+import styles from 'styles/Students.module.scss';
 import { gql } from 'graphql-request';
-import { Student, StudentDossier, Teacher } from 'utils/interfaces';
+import {
+    Student,
+    StudentDossier,
+    Class,
+    Subject,
+    Grade,
+} from 'utils/interfaces';
 import useSWR from 'swr';
 import { ContractType, UserStatus, UserRoles } from 'utils/enums';
-import { getUserStatus, getUserRole } from 'utils/helpers';
+import { getUserStatus, getUserRole, getGradeName } from 'utils/helpers';
+import graphQLClient from 'utils/graphqlclient';
 
 interface UsersProps {
     id: string | undefined;
@@ -40,6 +58,22 @@ interface UsersProps {
     contractType?: ContractType | undefined;
     studentDossier?: StudentDossier | undefined;
 }
+
+interface TabPanelProps {
+    children?: ReactNode;
+    index: number;
+    value: number;
+}
+
+const TabPanel = (props: TabPanelProps) => {
+    const { children, value, index, ...other } = props;
+
+    return (
+        <div hidden={value !== index} {...other}>
+            {value === index && <div>{children}</div>}
+        </div>
+    );
+};
 
 const UsersComponent: FunctionComponent<UsersProps> = (props) => {
     const [expanded, setExpanded] = useState(false);
@@ -119,16 +153,157 @@ const UsersComponent: FunctionComponent<UsersProps> = (props) => {
     );
 };
 
+interface GradeTableProps {
+    students: Student[];
+    subjectId: string | undefined;
+    classId: string | undefined;
+}
+
+const GradeTable: FunctionComponent<GradeTableProps> = (props) => {
+    const [grades, setGrades] = useState<Grade[]>([]);
+    const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+
+    useEffect(() => {
+        (async () => {
+            try {
+                const data = await graphQLClient.request(
+                    gql`
+                        query($subjectId: String!, $classId: String!) {
+                            gradesPerClassPerSubject(
+                                subjectId: $subjectId
+                                classId: $classId
+                            ) {
+                                id
+                                createdAt
+                                message
+                                grade
+                                gradeWithWords
+                                type
+                                student {
+                                    id
+                                }
+                            }
+                        }
+                    `,
+                    { subjectId: props.subjectId, classId: props.classId }
+                );
+                setGrades(data.gradesPerClassPerSubject);
+            } catch (error) {
+                console.log(error);
+            }
+        })();
+    }, []);
+
+    return (
+        <div className={styles['grades-container']}>
+            <div className={styles['grade-row']}>
+                <div
+                    className={`${styles['grade-field']} ${styles['grade-field-name']}`}
+                >
+                    <span>
+                        <strong>Име</strong>
+                    </span>
+                </div>
+
+                <div
+                    className={`${styles['grade-field']} ${styles['grade-field-grades']}`}
+                >
+                    <span>
+                        <strong>Оценки</strong>
+                    </span>
+                </div>
+            </div>
+            {props.students.map((student) => (
+                <div key={student.id} className={styles['grade-row']}>
+                    <div
+                        className={`${styles['grade-field']} ${styles['grade-field-name']}`}
+                    >
+                        <span>{`${
+                            student?.user?.firstName
+                        } ${student?.user?.middleName?.charAt(0)}. ${
+                            student?.user?.lastName
+                        }`}</span>
+                    </div>
+                    <div
+                        className={`${styles['grade-field']} ${styles['grade-field-grades']}`}
+                    >
+                        {grades
+                            .filter(
+                                (grade) => grade?.student?.id === student.id
+                            )
+                            .sort((a: Grade, b: Grade) =>
+                                (a.createdAt as Date) > (b.createdAt as Date)
+                                    ? 1
+                                    : (a.createdAt as Date) <
+                                      (b.createdAt as Date)
+                                    ? -1
+                                    : 0
+                            )
+                            .map((grade) => (
+                                <Fragment key={grade.id}>
+                                    <span
+                                        aria-haspopup='true'
+                                        className={styles.grade}
+                                        onMouseEnter={(
+                                            e: MouseEvent<HTMLButtonElement>
+                                        ) => setAnchorEl(e.currentTarget)}
+                                        onMouseLeave={() => setAnchorEl(null)}
+                                        key={grade.id}
+                                    >{`${getGradeName(
+                                        grade.gradeWithWords?.toUpperCase(),
+                                        true
+                                    )} ${grade.grade}`}</span>
+                                    <Popover
+                                        style={{ pointerEvents: 'none' }}
+                                        open={Boolean(anchorEl)}
+                                        anchorEl={anchorEl}
+                                        onClose={() => setAnchorEl(null)}
+                                        anchorOrigin={{
+                                            vertical: 'bottom',
+                                            horizontal: 'center',
+                                        }}
+                                        transformOrigin={{
+                                            vertical: 'top',
+                                            horizontal: 'center',
+                                        }}
+                                    >
+                                        <Typography className='grade-message'>
+                                            {grade.message}
+                                        </Typography>
+                                    </Popover>
+                                </Fragment>
+                            ))}
+                    </div>
+                </div>
+            ))}
+        </div>
+    );
+};
+
 const Students: FunctionComponent = () => {
     const router = useRouter();
     const { user, status } = useAuth();
+
+    const [value, setValue] = useState(0);
+    const [innerValue, setInnerValue] = useState(0);
     const [error, setError] = useState('');
+
     const { data } = useSWR(gql`
         query {
             classes {
                 id
                 classNumber
                 classLetter
+                subjects {
+                    id
+                    name
+                }
+                teacher {
+                    id
+                    user {
+                        id
+                    }
+                }
             }
 
             students {
@@ -141,6 +316,7 @@ const Students: FunctionComponent = () => {
                     status
                 }
                 class {
+                    id
                     classNumber
                     classLetter
                 }
@@ -170,7 +346,11 @@ const Students: FunctionComponent = () => {
         if (status === 'REDIRECT') {
             router.push('/login');
         }
-        if (user && user?.userRole !== 'ADMIN') {
+        if (
+            user &&
+            user?.userRole !== 'ADMIN' &&
+            user?.userRole !== 'TEACHER'
+        ) {
             router.back();
         }
     }, [user, status, data]);
@@ -178,6 +358,8 @@ const Students: FunctionComponent = () => {
     if (!user) {
         return <Loader />;
     }
+
+    let tabCounter = 0;
 
     return (
         <>
@@ -192,61 +374,176 @@ const Students: FunctionComponent = () => {
             >
                 <Navbar title='Ученици' />
                 <div className={styles.content}>
-                    {data && (
-                        <div className={styles['users-container']}>
-                            {data?.students &&
-                                data?.students?.map(
-                                    (student: Student, i: number) => (
-                                        <UsersComponent
-                                            key={i}
-                                            id={student?.id}
-                                            userRole={UserRoles['STUDENT']}
-                                            firstName={student?.user?.firstName}
-                                            middleName={
-                                                student?.user?.middleName
+                    <AppBar position='static' color='transparent' elevation={0}>
+                        <Tabs
+                            indicatorColor='primary'
+                            value={value}
+                            onChange={(_e, newValue) => setValue(newValue)}
+                        >
+                            {data?.classes?.filter(
+                                (cls: Class) =>
+                                    cls?.teacher?.user?.id === user?.id
+                            ).length && <Tab disableRipple label='Моят клас' />}
+
+                            {data?.classes?.map((cls: Class) =>
+                                cls?.subjects?.map((subject: Subject) => (
+                                    <Tab
+                                        disableRipple
+                                        key={subject.id}
+                                        label={`${cls.classNumber}${cls.classLetter} ${subject.name}`}
+                                    />
+                                ))
+                            )}
+                        </Tabs>
+                    </AppBar>
+                    <TabPanel value={value} index={0}>
+                        {data && (
+                            <div className={styles['users-container']}>
+                                {data.students &&
+                                    data.students
+                                        .filter((student: Student) => {
+                                            if (
+                                                data.classes
+                                                    .filter((cls: Class) => {
+                                                        if (
+                                                            cls?.teacher?.user
+                                                                ?.id ===
+                                                            user?.id
+                                                        ) {
+                                                            tabCounter = 1;
+                                                            return true;
+                                                        }
+                                                    })
+                                                    .map((cls: Class) => cls.id)
+                                                    .includes(
+                                                        student?.class?.id
+                                                    )
+                                            ) {
+                                                return student;
                                             }
-                                            lastName={student?.user?.lastName}
-                                            email={student?.user?.email}
-                                            status={student?.user?.status}
-                                            recordMessage={
-                                                student?.recordMessage
-                                            }
-                                            prevEducation={
-                                                student?.prevEducation
-                                            }
-                                            classLetter={
-                                                student?.class?.classLetter
-                                            }
-                                            classNumber={
-                                                student?.class?.classNumber
-                                            }
-                                            studentDossier={student?.dossier}
-                                        />
-                                    )
-                                )}
-                            {data?.teachers &&
-                                data?.teachers?.map(
-                                    (teacher: Teacher, i: number) => (
-                                        <UsersComponent
-                                            key={i}
-                                            id={teacher?.id}
-                                            userRole={UserRoles['TEACHER']}
-                                            firstName={teacher?.user?.firstName}
-                                            middleName={
-                                                teacher?.user?.middleName
-                                            }
-                                            lastName={teacher?.user?.lastName}
-                                            email={teacher?.user?.email}
-                                            status={teacher?.user?.status}
-                                            education={teacher?.education}
-                                            yearsExperience={
-                                                teacher?.yearsExperience
-                                            }
-                                            contractType={teacher?.contractType}
-                                        />
-                                    )
-                                )}
-                        </div>
+                                        })
+                                        .map((student: Student, i: number) => (
+                                            <UsersComponent
+                                                key={i}
+                                                id={student?.id}
+                                                userRole={UserRoles['STUDENT']}
+                                                firstName={
+                                                    student?.user?.firstName
+                                                }
+                                                middleName={
+                                                    student?.user?.middleName
+                                                }
+                                                lastName={
+                                                    student?.user?.lastName
+                                                }
+                                                email={student?.user?.email}
+                                                status={student?.user?.status}
+                                                recordMessage={
+                                                    student?.recordMessage
+                                                }
+                                                prevEducation={
+                                                    student?.prevEducation
+                                                }
+                                                classLetter={
+                                                    student?.class?.classLetter
+                                                }
+                                                classNumber={
+                                                    student?.class?.classNumber
+                                                }
+                                                studentDossier={
+                                                    student?.dossier
+                                                }
+                                            />
+                                        ))}
+                            </div>
+                        )}
+                    </TabPanel>
+                    {data?.classes?.map((cls: Class) =>
+                        cls?.subjects?.map((subject: Subject) => (
+                            <TabPanel
+                                key={subject.id}
+                                value={value}
+                                index={tabCounter++}
+                            >
+                                <AppBar
+                                    position='static'
+                                    color='transparent'
+                                    elevation={0}
+                                >
+                                    <Tabs
+                                        indicatorColor='primary'
+                                        value={innerValue}
+                                        onChange={(_e, newValue) =>
+                                            setInnerValue(newValue)
+                                        }
+                                    >
+                                        <Tab disableRipple label='Ученици' />
+                                        <Tab disableRipple label='Оценки' />
+                                    </Tabs>
+                                </AppBar>
+                                <TabPanel value={innerValue} index={0}>
+                                    {' '}
+                                    <div className={styles['users-container']}>
+                                        {data.students
+                                            .filter(
+                                                (student: Student) =>
+                                                    student?.class?.id ===
+                                                    cls.id
+                                            )
+                                            .map((student: Student) => (
+                                                <UsersComponent
+                                                    key={student?.id}
+                                                    id={student?.id}
+                                                    userRole={
+                                                        UserRoles['STUDENT']
+                                                    }
+                                                    firstName={
+                                                        student?.user?.firstName
+                                                    }
+                                                    middleName={
+                                                        student?.user
+                                                            ?.middleName
+                                                    }
+                                                    lastName={
+                                                        student?.user?.lastName
+                                                    }
+                                                    email={student?.user?.email}
+                                                    status={
+                                                        student?.user?.status
+                                                    }
+                                                    recordMessage={
+                                                        student?.recordMessage
+                                                    }
+                                                    prevEducation={
+                                                        student?.prevEducation
+                                                    }
+                                                    classLetter={
+                                                        student?.class
+                                                            ?.classLetter
+                                                    }
+                                                    classNumber={
+                                                        student?.class
+                                                            ?.classNumber
+                                                    }
+                                                    studentDossier={
+                                                        student?.dossier
+                                                    }
+                                                />
+                                            ))}
+                                    </div>
+                                </TabPanel>
+                                <TabPanel value={innerValue} index={1}>
+                                    <GradeTable
+                                        students={data.students.filter(
+                                            (student: Student) =>
+                                                student?.class?.id === cls.id
+                                        )}
+                                        subjectId={subject.id}
+                                        classId={cls.id}
+                                    />
+                                </TabPanel>
+                            </TabPanel>
+                        ))
                     )}
                 </div>
                 <Snackbar

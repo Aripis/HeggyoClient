@@ -3,7 +3,7 @@
 .card-div {
     .buttons-div {
         .back-button {
-            margin: 0 20px;
+            margin: 0 20px 0 0;
         }
     }
 
@@ -20,7 +20,7 @@
         .msg-data-select,
         .date-time-select {
             min-width: 150px;
-            margin-left: 20px;
+            margin-right: 20px;
         }
     }
 }

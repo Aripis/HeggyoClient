@@ -8,6 +8,7 @@ import {
     MessageType,
     MessageStatus,
     WeekDays,
+    GradeTypes,
 } from './enums';
 
 export interface Institution {
@@ -63,16 +64,17 @@ export interface Student {
 
 export interface Class {
     id?: string;
+    subjects?: Subject[];
     institution?: Institution;
     startYear?: number;
     endYear?: number;
     totalStudentCount?: number;
-    classTeacher?: Teacher;
+    teacher?: Teacher;
     classLetter?: string;
     classNumber?: number;
 }
 
-export interface File {
+export interface UploadFile {
     filename?: string;
     publicUrl?: string;
 }
@@ -86,7 +88,7 @@ export interface Message {
     toUser?: User[];
     toClasses?: Class[];
     data?: string;
-    files?: File[];
+    files?: UploadFile[];
     type?: MessageType;
     assignmentType?: AssignmentType;
     status?: MessageStatus;
@@ -112,4 +114,18 @@ export interface StudentDossier {
     fromUser?: User;
     subject?: Subject;
     dossierMessage?: string;
+    studentFiles: UploadFile[];
+}
+
+export interface Grade {
+    id?: string;
+    createdAt?: Date;
+    updatedAt?: Date;
+    message?: string;
+    type?: GradeTypes;
+    grade?: number;
+    gradeWithWords?: string;
+    fromUser?: User;
+    student?: Student;
+    subject?: Subject;
 }

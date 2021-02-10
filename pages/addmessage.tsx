@@ -28,6 +28,10 @@ import {
 } from '@material-ui/pickers';
 import DateFnsUtils from '@date-io/date-fns';
 import graphQLClient from 'utils/graphqlclient';
+import Drawer from 'components/Drawer';
+import { DropzoneArea } from 'material-ui-dropzone';
+import { AssignmentType, MessageType } from 'utils/enums';
+import { getAssignmentType, getMessageType } from 'utils/helpers';
 
 const AddMessage: FunctionComponent = () => {
     const router = useRouter();
@@ -35,33 +39,15 @@ const AddMessage: FunctionComponent = () => {
     const [toUsersUUIDs, setToUsersUUIDs] = useState<string[]>([]);
     const [toClassUUIDs, setToClassUUIDs] = useState<string[]>([]);
     const [messageData, setMessageData] = useState('');
-    const [type, setType] = useState<string | undefined>('MESSAGE');
+    const [type, setType] = useState('MESSAGE');
     const [error, setError] = useState('');
-    const [files, setFiles] = useState<FileList | null>(null);
+    const [files, setFiles] = useState<File[]>([]);
 
-    const [subjectUUID, setSubjectUUID] = useState<string | undefined>(
-        undefined
-    );
-    const [assignmentType, setAssignmentType] = useState<string | undefined>(
-        undefined
-    );
+    const [subjectUUID, setSubjectUUID] = useState('');
+    const [assignmentType, setAssignmentType] = useState('');
     const [assignmentDueDate, setAssignmentDueDate] = useState<Date | null>(
         new Date()
     );
-    const messageTypes = [
-        { value: 'MESSAGE', content: 'Съобщениe' },
-        { value: 'ASSIGNMENT', content: 'Заданиe' },
-    ];
-    // const messageStatus = [
-    //     { value: 'CREATED', content: 'Създадени' },
-    //     { value: 'PUBLISHED', content: 'Изпратени' },
-    // ];
-
-    const assignmentTypes = [
-        { value: 'HOMEWORK', content: 'Домашно' },
-        { value: 'CLASSWORK', content: 'Работа в час' },
-        { value: 'EXAM', content: 'Тест' },
-    ];
 
     const { data } = useSWR(gql`
         query {
@@ -90,51 +76,51 @@ const AddMessage: FunctionComponent = () => {
         }
     }, [user, status]);
 
-    const gqlMutation = gql`
-        mutation(
-            $toUserUUIDs: [String!]
-            $toClassUUIDs: [String!]
-            $data: String
-            $assignmentType: AssignmentType
-            $type: MessageType!
-            $subjectUUID: String
-            $assignmentDueDate: Date
-        ) {
-            createMessage(
-                createMessageInput: {
-                    toUserUUIDs: $toUserUUIDs
-                    toClassUUIDs: $toClassUUIDs
-                    data: $data
-                    assignmentType: $assignmentType
-                    type: $type
-                    subjectUUID: $subjectUUID
-                    assignmentDueDate: $assignmentDueDate
-                }
-            ) {
-                messageId
-            }
-        }
-    `;
-
     const addMessage = async (e: FormEvent) => {
         e.preventDefault();
         try {
-            await graphQLClient.request(gqlMutation, {
-                toUserUUIDs: toUsersUUIDs,
-                toClassUUIDs: toClassUUIDs,
-                data: messageData,
-                assignmentType: assignmentType,
-                type: type,
-                subjectUUID: subjectUUID,
-                assignmentDueDate: assignmentDueDate,
-            });
+            await graphQLClient.request(
+                gql`
+                    mutation(
+                        $toUserUUIDs: [String!]
+                        $toClassUUIDs: [String!]
+                        $data: String
+                        $assignmentType: AssignmentType
+                        $type: MessageType!
+                        $subjectUUID: String
+                        $assignmentDueDate: Date
+                        $files: [Upload!]
+                    ) {
+                        createMessage(
+                            createMessageInput: {
+                                toUserUUIDs: $toUserUUIDs
+                                toClassUUIDs: $toClassUUIDs
+                                data: $data
+                                assignmentType: $assignmentType
+                                type: $type
+                                subjectUUID: $subjectUUID
+                                assignmentDueDate: $assignmentDueDate
+                                files: $files
+                            }
+                        ) {
+                            messageId
+                        }
+                    }
+                `,
+                {
+                    toUserUUIDs: toUsersUUIDs,
+                    toClassUUIDs: toClassUUIDs,
+                    data: messageData,
+                    assignmentType: assignmentType || null,
+                    type: type,
+                    subjectUUID: subjectUUID,
+                    assignmentDueDate: assignmentDueDate,
+                    files,
+                }
+            );
             router.push('/dashboard');
-        } catch ({ response }) {
-            if (
-                response.errors[0].message.includes('This Class already exists')
-            ) {
-                setError('Има съобщение вече на това място');
-            }
+        } catch (error) {
+            console.log(error);
             setError('Неизвестна грешка');
         }
     };
@@ -144,6 +130,7 @@ const AddMessage: FunctionComponent = () => {
             <Head>
                 <title>Добави съобщение &#8226; Heggyo</title>
             </Head>
+            <Drawer />
             <Container
                 className='main-container'
                 maxWidth={false}
@@ -287,37 +274,12 @@ const AddMessage: FunctionComponent = () => {
                             }}
                             variant='outlined'
                         >
-                            {messageTypes &&
-                                messageTypes.map((msgType) => (
-                                    <MenuItem
-                                        key={msgType.value}
-                                        value={msgType.value}
-                                    >
-                                        {msgType.content}
-                                    </MenuItem>
-                                ))}
+                            {Object.values(MessageType).map((type) => (
+                                <MenuItem key={type} value={type}>
+                                    {getMessageType(type)}
+                                </MenuItem>
+                            ))}
                         </TextField>
-                        <input
-                            accept='image/*'
-                            className={styles['upload-files']}
-                            style={{ display: 'none' }}
-                            id='raised-button-file'
-                            multiple
-                            type='file'
-                            // value={files?.map((file) => file.name) ?? ''}
-                            onChange={(e) => {
-                                console.log(e.target.files);
-                            }}
-                        />
-                        <label htmlFor='raised-button-file'>
-                            <Button
-                                variant='contained'
-                                component='span'
-                                className={styles['upload-files-button']}
-                            >
-                                Upload
-                            </Button>
-                        </label>
                         {type && type === 'ASSIGNMENT' && (
                             <>
                                 <TextField
@@ -332,15 +294,13 @@ const AddMessage: FunctionComponent = () => {
                                     }}
                                     variant='outlined'
                                 >
-                                    {assignmentTypes &&
-                                        assignmentTypes.map((assType) => (
-                                            <MenuItem
-                                                key={assType.value}
-                                                value={assType.value}
-                                            >
-                                                {assType.content}
+                                    {Object.values(AssignmentType).map(
+                                        (type) => (
+                                            <MenuItem key={type} value={type}>
+                                                {getAssignmentType(type)}
                                             </MenuItem>
-                                        ))}
+                                        )
+                                    )}
                                 </TextField>
                                 <TextField
                                     select
@@ -391,6 +351,22 @@ const AddMessage: FunctionComponent = () => {
                                 setMessageData(e.target.value as string);
                             }}
                             variant='outlined'
+                        />
+                    </div>
+                    <div className={styles['input-fields']}>
+                        <DropzoneArea
+                            showAlerts={['error']}
+                            showFileNames
+                            previewGridProps={{
+                                item: { xs: false, md: true },
+                            }}
+                            previewGridClasses={{
+                                container: 'upload-grid-container',
+                                item: 'item',
+                            }}
+                            maxFileSize={40000000}
+                            filesLimit={10}
+                            onChange={(files) => setFiles(files)}
                         />
                     </div>
                 </div>

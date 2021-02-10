@@ -170,7 +170,7 @@ const EditForeignUser: FunctionComponent = () => {
                         $tchId: String!
                         $userId: String!
                         $userStatus: UserStatus!
-                        $contractType: ContractType!
+                        $contractType: ContractType
                     ) {
                         updateTeacher(
                             updateTeacherInput: {
@@ -200,6 +200,7 @@ const EditForeignUser: FunctionComponent = () => {
             );
             router.push('/users');
         } catch (error) {
+            console.log(error);
             setError('Неизвестна грешка');
         }
     };
@@ -220,7 +221,7 @@ const EditForeignUser: FunctionComponent = () => {
                     <div className={styles['profile-container']}>
                         <Avatar
                             className={styles.avatar}
-                            src='https://www.w3schools.com/howto/img_avatar.png'
+                            src='https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png'
                             alt='profile'
                         />
                         <div className={styles['profile-info']}>

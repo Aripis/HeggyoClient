@@ -5,7 +5,41 @@ import {
     EducationStage,
     ContractType,
     AssignmentType,
+    MessageType,
 } from './enums';
+
+export const getGradeName = (
+    name: string | undefined,
+    short = false
+): string | undefined => {
+    switch (name) {
+        case 'BAD':
+            return short ? 'сл.' : 'слаб';
+        case 'AVERAGE':
+            return short ? 'ср.' : 'среден';
+        case 'GOOD':
+            return short ? 'доб.' : 'добър';
+        case 'VERY GOOD':
+            return short ? 'мн. доб.' : 'мн. добър';
+        case 'EXCELLENT':
+            return short ? 'отл.' : 'отличен';
+        default:
+            return undefined;
+    }
+};
+
+export const getMessageType = (
+    type: MessageType | string | undefined
+): string | undefined => {
+    switch (type) {
+        case 'MESSAGE':
+            return 'Съобщениe';
+        case 'ASSIGNMENT':
+            return 'Заданиe';
+        default:
+            return undefined;
+    }
+};
 
 export const getAssignmentType = (
     type: AssignmentType | string | undefined

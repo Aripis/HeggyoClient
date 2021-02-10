@@ -1,4 +1,4 @@
-import { useEffect, FunctionComponent, useState, FormEvent } from 'react';
+import { useEffect, FunctionComponent, useState, Fragment } from 'react';
 import Head from 'next/head';
 import {
     Avatar,
@@ -15,7 +15,6 @@ import {
     ListItemText,
     ListItemAvatar,
     Link,
-    CardActions,
     Typography,
 } from '@material-ui/core';
 import styles from 'styles/Dashboard.module.scss';
@@ -251,24 +250,34 @@ const Dashboard: FunctionComponent = () => {
                                                         { locale: bg }
                                                     )}
                                                 />
-                                                <CardContent>
+                                                <CardContent
+                                                    className={
+                                                        styles['card-content']
+                                                    }
+                                                >
                                                     <Typography>
                                                         {`${message?.data}`}
-                                                    </Typography>{' '}
+                                                    </Typography>
+                                                    <br />
                                                     <Typography>
                                                         {message?.files?.map(
-                                                            (file) => (
-                                                                <Link
-                                                                    key={
-                                                                        file.publicUrl
-                                                                    }
-                                                                    href={
-                                                                        file.publicUrl
-                                                                    }
-                                                                    target='_blank'
+                                                            (
+                                                                file,
+                                                                i: number
+                                                            ) => (
+                                                                <Fragment
+                                                                    key={i}
                                                                 >
-                                                                    {`${file.filename}`}
-                                                                </Link>
+                                                                    <Link
+                                                                        href={
+                                                                            file.publicUrl
+                                                                        }
+                                                                        target='_blank'
+                                                                    >
+                                                                        {`${file.filename}`}
+                                                                    </Link>
+                                                                    <br />
+                                                                </Fragment>
                                                             )
                                                         )}
                                                     </Typography>
