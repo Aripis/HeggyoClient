@@ -72,6 +72,11 @@ export interface Class {
     classNumber?: number;
 }
 
+export interface File {
+    filename?: string;
+    publicUrl?: string;
+}
+
 export interface Message {
     id?: string;
     createdAt?: Date;
@@ -81,7 +86,7 @@ export interface Message {
     toUser?: User[];
     toClasses?: Class[];
     data?: string;
-    filePath?: string;
+    files?: File[];
     type?: MessageType;
     assignmentType?: AssignmentType;
     status?: MessageStatus;

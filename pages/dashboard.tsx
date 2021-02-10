@@ -1,4 +1,4 @@
-import { useEffect, FunctionComponent, useState } from 'react';
+import { useEffect, FunctionComponent, useState, FormEvent } from 'react';
 import Head from 'next/head';
 import {
     Avatar,
@@ -14,6 +14,9 @@ import {
     ListItem,
     ListItemText,
     ListItemAvatar,
+    Link,
+    CardActions,
+    Typography,
 } from '@material-ui/core';
 import styles from 'styles/Dashboard.module.scss';
 import Navbar from 'components/Navbar';
@@ -75,6 +78,10 @@ const Dashboard: FunctionComponent = () => {
                     updatedAt
                     type
                     status
+                    files {
+                        filename
+                        publicUrl
+                    }
                 }
 
                 classes {
@@ -216,45 +223,60 @@ const Dashboard: FunctionComponent = () => {
                                         Добави
                                     </Button>
                                 </div>
-                                {data?.messagesByCriteria &&
-                                    data?.messagesByCriteria?.map(
-                                        (message: Message, i: number) => {
-                                            const date = new Date(
-                                                message?.updatedAt as Date
-                                            );
-                                            return (
-                                                <Card
-                                                    className={styles['card']}
-                                                    key={i}
-                                                >
-                                                    <CardHeader
-                                                        className={
-                                                            styles[
-                                                                'card-header'
-                                                            ]
-                                                        }
-                                                        avatar={
-                                                            <Avatar>
-                                                                {message?.from?.firstName?.charAt(
-                                                                    0
-                                                                )}
-                                                            </Avatar>
-                                                        }
-                                                        title={`${message?.from?.firstName} ${message?.from?.lastName}`}
-                                                        subheader={format(
-                                                            date,
-                                                            'do MMM yyyy k:m',
-                                                            { locale: bg }
+                                {messagesByCriteria?.map(
+                                    (message: Message, i: number) => {
+                                        const date = new Date(
+                                            message?.updatedAt as Date
+                                        );
+                                        return (
+                                            <Card
+                                                className={styles['card']}
+                                                key={i}
+                                            >
+                                                <CardHeader
+                                                    className={
+                                                        styles['card-header']
+                                                    }
+                                                    avatar={
+                                                        <Avatar>
+                                                            {message?.from?.firstName?.charAt(
+                                                                0
+                                                            )}
+                                                        </Avatar>
+                                                    }
+                                                    title={`${message?.from?.firstName} ${message?.from?.lastName}`}
+                                                    subheader={format(
+                                                        date,
+                                                        'do MMM yyyy k:m',
+                                                        { locale: bg }
+                                                    )}
+                                                />
+                                                <CardContent>
+                                                    <Typography>
+                                                        {`${message?.data}`}
+                                                    </Typography>{' '}
+                                                    <Typography>
+                                                        {message?.files?.map(
+                                                            (file) => (
+                                                                <Link
+                                                                    key={
+                                                                        file.publicUrl
+                                                                    }
+                                                                    href={
+                                                                        file.publicUrl
+                                                                    }
+                                                                    target='_blank'
+                                                                >
+                                                                    {`${file.filename}`}
+                                                                </Link>
+                                                            )
                                                         )}
-                                                    />
-                                                    <CardContent>
-                                                        {message?.data}
-                                                        {/* TODO: check if there is file and do some work */}
-                                                    </CardContent>
-                                                </Card>
-                                            );
-                                        }
-                                    )}
+                                                    </Typography>
+                                                </CardContent>
+                                            </Card>
+                                        );
+                                    }
+                                )}
                             </div>
                             {user.userRole === 'ADMIN' && (
                                 <Card

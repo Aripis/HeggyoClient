@@ -137,15 +137,6 @@ const AddMessage: FunctionComponent = () => {
             }
             setError('Неизвестна грешка');
         }
-        graphQLClient.request(
-            gql`
-                query ($firstName: String! $middleName: String! $lastName: String! $email: String!){
-                    updateUser(updateUserInput: {firstName: $firstName middleName: $middleName lastName: $lastName email: $email}){
-                        
-                    }
-                }
-            `
-        );
     };
 
     return (
