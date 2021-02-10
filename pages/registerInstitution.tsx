@@ -221,7 +221,7 @@ const Register: FunctionComponent = () => {
                                     label='Вид'
                                     variant='outlined'
                                     labelId='institution-educational-stage'
-                                    value={educationalStage}
+                                    value={educationalStage ?? ''}
                                     onChange={(e) => {
                                         setEducationalStage(
                                             e.target.value as string
@@ -252,7 +252,7 @@ const Register: FunctionComponent = () => {
                                     label='Тип'
                                     variant='outlined'
                                     labelId='institution-type'
-                                    value={type}
+                                    value={type ?? ''}
                                     onChange={(e) => {
                                         setType(e.target.value as string);
                                     }}

@@ -42,7 +42,7 @@ const Navbar: FunctionComponent<NavbarProps> = (props) => {
                             <Link
                                 underline='none'
                                 className={styles.link}
-                                href='/registerInstitution'
+                                href='/register'
                             >
                                 <Button
                                     disableElevation
