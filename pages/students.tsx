@@ -30,6 +30,7 @@ import {
     Select,
     MenuItem,
     DialogActions,
+    IconButton,
 } from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';
 import {
@@ -173,6 +174,209 @@ const UsersComponent: FunctionComponent<UsersProps> = (props) => {
     );
 };
 
+interface GradeDialog {
+    studentId: string | undefined;
+    subjectId: string | undefined;
+}
+
+const GradeDialog: FunctionComponent<GradeDialog> = (props) => {
+    const [open, setOpen] = useState(false);
+    const [message, setMessage] = useState('');
+    const [grade, setGrade] = useState(6);
+    const [gradeType, setGradeType] = useState('');
+    const [gradeWithWords, setGradeWithWords] = useState('');
+
+    const addGrade = async () => {
+        try {
+            await graphQLClient.request(
+                gql`
+                    mutation(
+                        $studentId: String!
+                        $subjectUUID: String!
+                        $grade: Float!
+                        $message: String!
+                        $gradeWithWords: String!
+                        $type: GradeTypes!
+                    ) {
+                        addGrade(
+                            input: {
+                                studentId: $studentId
+                                subjectUUID: $subjectUUID
+                                message: $message
+                                grade: $grade
+                                gradeWithWords: $gradeWithWords
+                                type: $type
+                            }
+                        ) {
+                            gradeId
+                        }
+                    }
+                `,
+                {
+                    studentId: props.studentId,
+                    subjectUUID: props.subjectId,
+                    message,
+                    grade,
+                    gradeWithWords: getGradeForBackEnd(grade),
+                    type: gradeType,
+                }
+            );
+            setOpen(false);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    return (
+        <>
+            <IconButton
+                className={styles['add-grade-button']}
+                onClick={() => setOpen(true)}
+                color='primary'
+            >
+                <AddOutlined />
+            </IconButton>
+            <Dialog
+                fullWidth
+                maxWidth='lg'
+                className={styles['dialog']}
+                open={open}
+                onClose={() => setOpen(false)}
+            >
+                <DialogTitle className={styles['dialog-title']}>
+                    Добави оценка
+                </DialogTitle>
+                <DialogContent className={styles['dialog-content']}>
+                    <div className={styles['input-container']}>
+                        <TextField
+                            label='Основание за оценката'
+                            variant='outlined'
+                            fullWidth
+                            value={message}
+                            multiline
+                            rows={7}
+                            rowsMax={9}
+                            onChange={(e) => setMessage(e.target.value)}
+                        />
+                        <div className={styles['grade-options']}>
+                            <FormControl
+                                variant='outlined'
+                                className={styles['grade-select']}
+                            >
+                                <InputLabel id='grade-select-label'>
+                                    Оценка
+                                </InputLabel>
+                                <Select
+                                    label='Оценка'
+                                    labelId='grade-select-label'
+                                    value={grade}
+                                    onChange={(e) => {
+                                        setGrade(
+                                            parseInt(e.target.value as string)
+                                        );
+                                    }}
+                                    renderValue={(selected) =>
+                                        selected as string
+                                    }
+                                >
+                                    {[2, 3, 4, 5, 6].map((grade) => (
+                                        <MenuItem key={grade} value={grade}>
+                                            {grade}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                            <FormControl
+                                variant='outlined'
+                                className={styles['grade-w-words-select']}
+                            >
+                                <InputLabel id='grade-w-words-select-label'>
+                                    Оценка с думи
+                                </InputLabel>
+                                <Select
+                                    label='Оценка'
+                                    labelId='grade-w-words-select-label'
+                                    value={gradeWithWords}
+                                    onChange={(e) => {
+                                        setGradeWithWords(
+                                            e.target.value as string
+                                        );
+                                    }}
+                                    renderValue={(selected) =>
+                                        selected as string
+                                    }
+                                >
+                                    {[2, 3, 4, 5, 6].map((grade) => (
+                                        <MenuItem
+                                            key={grade}
+                                            value={getGradeForBackEnd(grade)}
+                                        >
+                                            {getGradeName(grade.toString())}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                            <FormControl
+                                variant='outlined'
+                                className={styles['grade-type-select']}
+                            >
+                                <InputLabel id='grade-type-select-label'>
+                                    Вид на оценката
+                                </InputLabel>
+                                <Select
+                                    label='Оценка'
+                                    labelId='grade-type-select-label'
+                                    value={gradeType}
+                                    onChange={(e) => {
+                                        setGradeType(e.target.value as string);
+                                    }}
+                                    renderValue={(selected) =>
+                                        selected as string
+                                    }
+                                >
+                                    {Object.values(GradeTypes).map(
+                                        (gradeType) => (
+                                            <MenuItem
+                                                key={gradeType}
+                                                value={gradeType}
+                                            >
+                                                {getGradeType(
+                                                    gradeType.toString()
+                                                )}
+                                            </MenuItem>
+                                        )
+                                    )}
+                                </Select>
+                            </FormControl>
+                        </div>
+                    </div>
+                </DialogContent>
+                <DialogActions className={styles['dialog-actions']}>
+                    <Button
+                        onClick={() => setOpen(false)}
+                        disableElevation
+                        variant='outlined'
+                        color='secondary'
+                        endIcon={<CloseOutlined />}
+                    >
+                        Отказ
+                    </Button>
+
+                    <Button
+                        onClick={addGrade}
+                        disableElevation
+                        variant='contained'
+                        color='primary'
+                        endIcon={<DoneOutlined />}
+                    >
+                        Потвърди
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        </>
+    );
+};
+
 interface GradeTableProps {
     students: Student[];
     subjectId: string | undefined;
@@ -182,13 +386,6 @@ interface GradeTableProps {
 const GradeTable: FunctionComponent<GradeTableProps> = (props) => {
     const [grades, setGrades] = useState<Grade[]>([]);
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
-
-    const [addDialog, setAddDialog] = useState(false);
-    const [message, setMessage] = useState('');
-    const [grade, setGrade] = useState(6);
-    const [gradeType, setGradeType] = useState('');
-    const [error, setError] = useState('');
-    const [gradeWithWords, setGradeWithWords] = useState('');
 
     useEffect(() => {
         (async () => {
@@ -221,47 +418,6 @@ const GradeTable: FunctionComponent<GradeTableProps> = (props) => {
         })();
     }, []);
 
-    const addGrade = async (studentId: string | undefined) => {
-        try {
-            await graphQLClient.request(
-                gql`
-                    mutation(
-                        $studentId: String!
-                        $subjectUUID: String!
-                        $grade: Float!
-                        $message: String!
-                        $gradeWithWords: String!
-                        $type: GradeTypes!
-                    ) {
-                        addGrade(
-                            input: {
-                                studentId: $studentId
-                                subjectUUID: $subjectUUID
-                                message: $message
-                                grade: $grade
-                                gradeWithWords: $gradeWithWords
-                                type: $type
-                            }
-                        ) {
-                            gradeId
-                        }
-                    }
-                `,
-                {
-                    studentId,
-                    subjectUUID: props.subjectId,
-                    message,
-                    grade,
-                    gradeWithWords: getGradeForBackEnd(grade),
-                    type: gradeType,
-                }
-            );
-            setAddDialog(false);
-        } catch (error) {
-            console.log(error);
-            setError('Неизвестна грешка');
-        }
-    };
     return (
         <div className={styles['grades-container']}>
             <div className={styles['grade-row']}>
@@ -292,19 +448,14 @@ const GradeTable: FunctionComponent<GradeTableProps> = (props) => {
                             } ${student?.user?.middleName?.charAt(0)}. ${
                                 student?.user?.lastName
                             }`}</span>
+                            <GradeDialog
+                                studentId={student.id}
+                                subjectId={props.subjectId}
+                            />
                         </div>
                         <div
                             className={`${styles['grade-field']} ${styles['grade-field-grades']}`}
                         >
-                            <Button
-                                onClick={() => setAddDialog(true)}
-                                disableElevation
-                                variant='outlined'
-                                color='primary'
-                                endIcon={<AddOutlined />}
-                            >
-                                Добави
-                            </Button>
                             {grades
                                 .filter(
                                     (grade) => grade?.student?.id === student.id
@@ -355,162 +506,7 @@ const GradeTable: FunctionComponent<GradeTableProps> = (props) => {
                                     </Fragment>
                                 ))}
                         </div>
-
-                        <Snackbar
-                            open={Boolean(error)}
-                            autoHideDuration={6000}
-                            onClose={() => setError('')}
-                        >
-                            <Alert
-                                elevation={6}
-                                variant='filled'
-                                onClose={() => setError('')}
-                                severity='error'
-                            >
-                                {error}
-                            </Alert>
-                        </Snackbar>
                     </div>
-                    <Dialog
-                        fullWidth
-                        maxWidth='lg'
-                        className={styles['dialog']}
-                        open={addDialog}
-                        onClose={() => setAddDialog(false)}
-                    >
-                        <DialogTitle className={styles['dialog-title']}>
-                            Добави оценка
-                        </DialogTitle>
-                        <DialogContent className={styles['dialog-content']}>
-                            <div className={styles['input-container']}>
-                                <TextField
-                                    label='Основание за оценката'
-                                    variant='outlined'
-                                    fullWidth
-                                    value={message}
-                                    multiline
-                                    rows={7}
-                                    rowsMax={9}
-                                    onChange={(e) => setMessage(e.target.value)}
-                                />
-                                <FormControl
-                                    variant='outlined'
-                                    className={styles['grade-select']}
-                                >
-                                    <InputLabel id='grade-select-label'>
-                                        Оценка
-                                    </InputLabel>
-                                    <Select
-                                        label='Оценка'
-                                        labelId='grade-select-label'
-                                        value={grade}
-                                        onChange={(e) => {
-                                            setGrade(
-                                                parseInt(
-                                                    e.target.value as string
-                                                )
-                                            );
-                                        }}
-                                        renderValue={(selected) =>
-                                            selected as string
-                                        }
-                                    >
-                                        {[2, 3, 4, 5, 6].map((grade) => (
-                                            <MenuItem key={grade} value={grade}>
-                                                {grade}
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
-                                </FormControl>
-                                <FormControl
-                                    variant='outlined'
-                                    className={styles['grade-w-words-select']}
-                                >
-                                    <InputLabel id='grade-w-words-select-label'>
-                                        Оценка с думи
-                                    </InputLabel>
-                                    <Select
-                                        label='Оценка'
-                                        labelId='grade-w-words-select-label'
-                                        value={gradeWithWords}
-                                        onChange={(e) => {
-                                            setGradeWithWords(
-                                                e.target.value as string
-                                            );
-                                        }}
-                                        renderValue={(selected) =>
-                                            selected as string
-                                        }
-                                    >
-                                        {[2, 3, 4, 5, 6].map((grade) => (
-                                            <MenuItem
-                                                key={grade}
-                                                value={getGradeForBackEnd(
-                                                    grade
-                                                )}
-                                            >
-                                                {getGradeName(grade.toString())}
-                                            </MenuItem>
-                                        ))}
-                                    </Select>
-                                </FormControl>
-                                <FormControl
-                                    variant='outlined'
-                                    className={styles['grade-type-select']}
-                                >
-                                    <InputLabel id='grade-type-select-label'>
-                                        Вид на оценката
-                                    </InputLabel>
-                                    <Select
-                                        label='Оценка'
-                                        labelId='grade-type-select-label'
-                                        value={gradeType}
-                                        onChange={(e) => {
-                                            setGradeType(
-                                                e.target.value as string
-                                            );
-                                        }}
-                                        renderValue={(selected) =>
-                                            selected as string
-                                        }
-                                    >
-                                        {Object.values(GradeTypes).map(
-                                            (gradeType) => (
-                                                <MenuItem
-                                                    key={gradeType}
-                                                    value={gradeType}
-                                                >
-                                                    {getGradeType(
-                                                        gradeType.toString()
-                                                    )}
-                                                </MenuItem>
-                                            )
-                                        )}
-                                    </Select>
-                                </FormControl>
-                            </div>
-                        </DialogContent>
-                        <DialogActions className={styles['dialog-actions']}>
-                            <Button
-                                onClick={() => setAddDialog(false)}
-                                disableElevation
-                                variant='outlined'
-                                color='secondary'
-                                endIcon={<CloseOutlined />}
-                            >
-                                Отказ
-                            </Button>
-                            <Button
-                                onClick={() => addGrade(student.id)}
-                                disableElevation
-                                variant='contained'
-                                color='primary'
-                                endIcon={<DoneOutlined />}
-                            >
-                                Потвърди
-                            </Button>
-                        </DialogActions>
-                    </Dialog>
                 </Fragment>
             ))}
         </div>

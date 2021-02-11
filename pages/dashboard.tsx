@@ -24,7 +24,6 @@ import {
     Typography,
     Dialog,
     DialogContent,
-    DialogContentText,
     DialogTitle,
     Snackbar,
     DialogActions,
