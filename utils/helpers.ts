@@ -8,6 +8,38 @@ import {
     MessageType,
 } from './enums';
 
+export const getGradeType = (gradeType: string): string | undefined => {
+    switch (gradeType) {
+        case 'TURM_1':
+            return '1 срок';
+        case 'TURM_2':
+            return '2 срок';
+        case 'ONGOING':
+            return 'текуща';
+        case 'YEAR':
+            return 'годишна';
+        default:
+            return undefined;
+    }
+};
+
+export const getGradeForBackEnd = (grade: number): string | undefined => {
+    switch (grade) {
+        case 2:
+            return 'bad';
+        case 3:
+            return 'average';
+        case 4:
+            return 'good';
+        case 5:
+            return 'very good';
+        case 6:
+            return 'excellent';
+        default:
+            return undefined;
+    }
+};
+
 export const getGradeName = (
     name: string | undefined,
     short = false
