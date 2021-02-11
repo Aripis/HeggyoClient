@@ -346,11 +346,7 @@ const Students: FunctionComponent = () => {
         if (status === 'REDIRECT') {
             router.push('/login');
         }
-        if (
-            user &&
-            user?.userRole !== 'ADMIN' &&
-            user?.userRole !== 'TEACHER'
-        ) {
+        if (user && user.userRole !== 'ADMIN' && user.userRole !== 'TEACHER') {
             router.back();
         }
     }, [user, status, data]);
@@ -374,176 +370,267 @@ const Students: FunctionComponent = () => {
             >
                 <Navbar title='Ученици' />
                 <div className={styles.content}>
-                    <AppBar position='static' color='transparent' elevation={0}>
-                        <Tabs
-                            indicatorColor='primary'
-                            value={value}
-                            onChange={(_e, newValue) => setValue(newValue)}
-                        >
-                            {data?.classes?.filter(
-                                (cls: Class) =>
-                                    cls?.teacher?.user?.id === user?.id
-                            ).length && <Tab disableRipple label='Моят клас' />}
+                    {data && user.userRole === 'ADMIN' && (
+                        <div className={styles['users-container']}>
+                            {data.students.map(
+                                (student: Student, i: number) => (
+                                    <UsersComponent
+                                        key={i}
+                                        id={student?.id}
+                                        userRole={UserRoles['STUDENT']}
+                                        firstName={student?.user?.firstName}
+                                        middleName={student?.user?.middleName}
+                                        lastName={student?.user?.lastName}
+                                        email={student?.user?.email}
+                                        status={student?.user?.status}
+                                        recordMessage={student?.recordMessage}
+                                        prevEducation={student?.prevEducation}
+                                        classLetter={
+                                            student?.class?.classLetter
+                                        }
+                                        classNumber={
+                                            student?.class?.classNumber
+                                        }
+                                        studentDossier={student?.dossier}
+                                    />
+                                )
+                            )}
+                        </div>
+                    )}
 
+                    {user && user.userRole === 'TEACHER' && (
+                        <>
+                            <AppBar
+                                position='static'
+                                color='transparent'
+                                elevation={0}
+                            >
+                                <Tabs
+                                    indicatorColor='primary'
+                                    value={value}
+                                    onChange={(_e, newValue) =>
+                                        setValue(newValue)
+                                    }
+                                >
+                                    {data?.classes?.filter(
+                                        (cls: Class) =>
+                                            cls?.teacher?.user?.id === user?.id
+                                    ).length && (
+                                        <Tab disableRipple label='Моят клас' />
+                                    )}
+
+                                    {data?.classes?.map((cls: Class) =>
+                                        cls?.subjects?.map(
+                                            (subject: Subject) => (
+                                                <Tab
+                                                    disableRipple
+                                                    key={subject.id}
+                                                    label={`${cls.classNumber}${cls.classLetter} ${subject.name}`}
+                                                />
+                                            )
+                                        )
+                                    )}
+                                </Tabs>
+                            </AppBar>
+                            <TabPanel value={value} index={0}>
+                                {data && (
+                                    <div className={styles['users-container']}>
+                                        {data.students &&
+                                            data.students
+                                                .filter((student: Student) => {
+                                                    if (
+                                                        data.classes
+                                                            .filter(
+                                                                (
+                                                                    cls: Class
+                                                                ) => {
+                                                                    if (
+                                                                        cls
+                                                                            ?.teacher
+                                                                            ?.user
+                                                                            ?.id ===
+                                                                        user?.id
+                                                                    ) {
+                                                                        tabCounter = 1;
+                                                                        return true;
+                                                                    }
+                                                                }
+                                                            )
+                                                            .map(
+                                                                (cls: Class) =>
+                                                                    cls.id
+                                                            )
+                                                            .includes(
+                                                                student?.class
+                                                                    ?.id
+                                                            )
+                                                    ) {
+                                                        return student;
+                                                    }
+                                                })
+                                                .map(
+                                                    (
+                                                        student: Student,
+                                                        i: number
+                                                    ) => (
+                                                        <UsersComponent
+                                                            key={i}
+                                                            id={student?.id}
+                                                            userRole={
+                                                                UserRoles[
+                                                                    'STUDENT'
+                                                                ]
+                                                            }
+                                                            firstName={
+                                                                student?.user
+                                                                    ?.firstName
+                                                            }
+                                                            middleName={
+                                                                student?.user
+                                                                    ?.middleName
+                                                            }
+                                                            lastName={
+                                                                student?.user
+                                                                    ?.lastName
+                                                            }
+                                                            email={
+                                                                student?.user
+                                                                    ?.email
+                                                            }
+                                                            status={
+                                                                student?.user
+                                                                    ?.status
+                                                            }
+                                                            recordMessage={
+                                                                student?.recordMessage
+                                                            }
+                                                            prevEducation={
+                                                                student?.prevEducation
+                                                            }
+                                                            classLetter={
+                                                                student?.class
+                                                                    ?.classLetter
+                                                            }
+                                                            classNumber={
+                                                                student?.class
+                                                                    ?.classNumber
+                                                            }
+                                                            studentDossier={
+                                                                student?.dossier
+                                                            }
+                                                        />
+                                                    )
+                                                )}
+                                    </div>
+                                )}
+                            </TabPanel>
                             {data?.classes?.map((cls: Class) =>
                                 cls?.subjects?.map((subject: Subject) => (
-                                    <Tab
-                                        disableRipple
+                                    <TabPanel
                                         key={subject.id}
-                                        label={`${cls.classNumber}${cls.classLetter} ${subject.name}`}
-                                    />
+                                        value={value}
+                                        index={tabCounter++}
+                                    >
+                                        <AppBar
+                                            position='static'
+                                            color='transparent'
+                                            elevation={0}
+                                        >
+                                            <Tabs
+                                                indicatorColor='primary'
+                                                value={innerValue}
+                                                onChange={(_e, newValue) =>
+                                                    setInnerValue(newValue)
+                                                }
+                                            >
+                                                <Tab
+                                                    disableRipple
+                                                    label='Ученици'
+                                                />
+                                                <Tab
+                                                    disableRipple
+                                                    label='Оценки'
+                                                />
+                                            </Tabs>
+                                        </AppBar>
+                                        <TabPanel value={innerValue} index={0}>
+                                            {' '}
+                                            <div
+                                                className={
+                                                    styles['users-container']
+                                                }
+                                            >
+                                                {data.students
+                                                    .filter(
+                                                        (student: Student) =>
+                                                            student?.class
+                                                                ?.id === cls.id
+                                                    )
+                                                    .map((student: Student) => (
+                                                        <UsersComponent
+                                                            key={student?.id}
+                                                            id={student?.id}
+                                                            userRole={
+                                                                UserRoles[
+                                                                    'STUDENT'
+                                                                ]
+                                                            }
+                                                            firstName={
+                                                                student?.user
+                                                                    ?.firstName
+                                                            }
+                                                            middleName={
+                                                                student?.user
+                                                                    ?.middleName
+                                                            }
+                                                            lastName={
+                                                                student?.user
+                                                                    ?.lastName
+                                                            }
+                                                            email={
+                                                                student?.user
+                                                                    ?.email
+                                                            }
+                                                            status={
+                                                                student?.user
+                                                                    ?.status
+                                                            }
+                                                            recordMessage={
+                                                                student?.recordMessage
+                                                            }
+                                                            prevEducation={
+                                                                student?.prevEducation
+                                                            }
+                                                            classLetter={
+                                                                student?.class
+                                                                    ?.classLetter
+                                                            }
+                                                            classNumber={
+                                                                student?.class
+                                                                    ?.classNumber
+                                                            }
+                                                            studentDossier={
+                                                                student?.dossier
+                                                            }
+                                                        />
+                                                    ))}
+                                            </div>
+                                        </TabPanel>
+                                        <TabPanel value={innerValue} index={1}>
+                                            <GradeTable
+                                                students={data.students.filter(
+                                                    (student: Student) =>
+                                                        student?.class?.id ===
+                                                        cls.id
+                                                )}
+                                                subjectId={subject.id}
+                                                classId={cls.id}
+                                            />
+                                        </TabPanel>
+                                    </TabPanel>
                                 ))
                             )}
-                        </Tabs>
-                    </AppBar>
-                    <TabPanel value={value} index={0}>
-                        {data && (
-                            <div className={styles['users-container']}>
-                                {data.students &&
-                                    data.students
-                                        .filter((student: Student) => {
-                                            if (
-                                                data.classes
-                                                    .filter((cls: Class) => {
-                                                        if (
-                                                            cls?.teacher?.user
-                                                                ?.id ===
-                                                            user?.id
-                                                        ) {
-                                                            tabCounter = 1;
-                                                            return true;
-                                                        }
-                                                    })
-                                                    .map((cls: Class) => cls.id)
-                                                    .includes(
-                                                        student?.class?.id
-                                                    )
-                                            ) {
-                                                return student;
-                                            }
-                                        })
-                                        .map((student: Student, i: number) => (
-                                            <UsersComponent
-                                                key={i}
-                                                id={student?.id}
-                                                userRole={UserRoles['STUDENT']}
-                                                firstName={
-                                                    student?.user?.firstName
-                                                }
-                                                middleName={
-                                                    student?.user?.middleName
-                                                }
-                                                lastName={
-                                                    student?.user?.lastName
-                                                }
-                                                email={student?.user?.email}
-                                                status={student?.user?.status}
-                                                recordMessage={
-                                                    student?.recordMessage
-                                                }
-                                                prevEducation={
-                                                    student?.prevEducation
-                                                }
-                                                classLetter={
-                                                    student?.class?.classLetter
-                                                }
-                                                classNumber={
-                                                    student?.class?.classNumber
-                                                }
-                                                studentDossier={
-                                                    student?.dossier
-                                                }
-                                            />
-                                        ))}
-                            </div>
-                        )}
-                    </TabPanel>
-                    {data?.classes?.map((cls: Class) =>
-                        cls?.subjects?.map((subject: Subject) => (
-                            <TabPanel
-                                key={subject.id}
-                                value={value}
-                                index={tabCounter++}
-                            >
-                                <AppBar
-                                    position='static'
-                                    color='transparent'
-                                    elevation={0}
-                                >
-                                    <Tabs
-                                        indicatorColor='primary'
-                                        value={innerValue}
-                                        onChange={(_e, newValue) =>
-                                            setInnerValue(newValue)
-                                        }
-                                    >
-                                        <Tab disableRipple label='Ученици' />
-                                        <Tab disableRipple label='Оценки' />
-                                    </Tabs>
-                                </AppBar>
-                                <TabPanel value={innerValue} index={0}>
-                                    {' '}
-                                    <div className={styles['users-container']}>
-                                        {data.students
-                                            .filter(
-                                                (student: Student) =>
-                                                    student?.class?.id ===
-                                                    cls.id
-                                            )
-                                            .map((student: Student) => (
-                                                <UsersComponent
-                                                    key={student?.id}
-                                                    id={student?.id}
-                                                    userRole={
-                                                        UserRoles['STUDENT']
-                                                    }
-                                                    firstName={
-                                                        student?.user?.firstName
-                                                    }
-                                                    middleName={
-                                                        student?.user
-                                                            ?.middleName
-                                                    }
-                                                    lastName={
-                                                        student?.user?.lastName
-                                                    }
-                                                    email={student?.user?.email}
-                                                    status={
-                                                        student?.user?.status
-                                                    }
-                                                    recordMessage={
-                                                        student?.recordMessage
-                                                    }
-                                                    prevEducation={
-                                                        student?.prevEducation
-                                                    }
-                                                    classLetter={
-                                                        student?.class
-                                                            ?.classLetter
-                                                    }
-                                                    classNumber={
-                                                        student?.class
-                                                            ?.classNumber
-                                                    }
-                                                    studentDossier={
-                                                        student?.dossier
-                                                    }
-                                                />
-                                            ))}
-                                    </div>
-                                </TabPanel>
-                                <TabPanel value={innerValue} index={1}>
-                                    <GradeTable
-                                        students={data.students.filter(
-                                            (student: Student) =>
-                                                student?.class?.id === cls.id
-                                        )}
-                                        subjectId={subject.id}
-                                        classId={cls.id}
-                                    />
-                                </TabPanel>
-                            </TabPanel>
-                        ))
+                        </>
                     )}
                 </div>
                 <Snackbar
