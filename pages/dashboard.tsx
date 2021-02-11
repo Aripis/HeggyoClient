@@ -1,4 +1,10 @@
-import { useEffect, FunctionComponent, useState, Fragment } from 'react';
+import {
+    useEffect,
+    FunctionComponent,
+    useState,
+    Fragment,
+    FormEvent,
+} from 'react';
 import Head from 'next/head';
 import {
     Avatar,
@@ -16,6 +22,16 @@ import {
     ListItemAvatar,
     Link,
     Typography,
+    Dialog,
+    DialogContent,
+    DialogContentText,
+    DialogTitle,
+    Snackbar,
+    DialogActions,
+    FormControl,
+    InputLabel,
+    Select,
+    Checkbox,
 } from '@material-ui/core';
 import styles from 'styles/Dashboard.module.scss';
 import Navbar from 'components/Navbar';
@@ -25,7 +41,7 @@ import { useRouter } from 'next/router';
 import Loader from 'components/Loader';
 import useSWR from 'swr';
 import { gql } from 'graphql-request';
-import { Message } from 'utils/interfaces';
+import { Class, Message, Subject, User } from 'utils/interfaces';
 import AddOutlinedIcon from '@material-ui/icons/AddOutlined';
 import {
     PeopleOutlined,
@@ -34,11 +50,27 @@ import {
     BusinessOutlined,
     ApartmentOutlined,
     SupervisorAccountOutlined,
+    CloseOutlined,
+    DoneOutlined,
 } from '@material-ui/icons';
-import { getInstitutionType, getEducationStage } from 'utils/helpers';
+import {
+    getInstitutionType,
+    getEducationStage,
+    getMessageType,
+    getAssignmentType,
+} from 'utils/helpers';
+import Alert from '@material-ui/lab/Alert';
 
 import { format } from 'date-fns';
 import { bg } from 'date-fns/locale';
+import graphQLClient from 'utils/graphqlclient';
+import { AssignmentType, MessageType } from 'utils/enums';
+import {
+    KeyboardDateTimePicker,
+    MuiPickersUtilsProvider,
+} from '@material-ui/pickers';
+import DateFnsUtils from '@date-io/date-fns';
+import { DropzoneArea } from 'material-ui-dropzone';
 
 const Dashboard: FunctionComponent = () => {
     const router = useRouter();
@@ -50,6 +82,20 @@ const Dashboard: FunctionComponent = () => {
         undefined
     );
     const [messagesByCriteria, setMessagesByCriteria] = useState([]);
+    const [toUsersUUIDs, setToUsersUUIDs] = useState<string[]>([]);
+    const [toClassUUIDs, setToClassUUIDs] = useState<string[]>([]);
+    const [messageData, setMessageData] = useState('');
+    const [type, setType] = useState('MESSAGE');
+    const [files, setFiles] = useState<File[]>([]);
+    const [addDialog, setAddDialog] = useState(false);
+    const [subjectUUID, setSubjectUUID] = useState('');
+    const [assignmentType, setAssignmentType] = useState('');
+    const [assignmentDueDate, setAssignmentDueDate] = useState<Date | null>(
+        new Date()
+    );
+
+    const [error, setError] = useState('');
+
     const messageTypes = [
         { value: 'MESSAGE', content: 'Съобщения' },
         { value: 'ASSIGNMENT', content: 'Задания' },
@@ -83,6 +129,15 @@ const Dashboard: FunctionComponent = () => {
                     }
                 }
 
+                subjects {
+                    id
+                    name
+                    class {
+                        classNumber
+                        classLetter
+                    }
+                }
+
                 classes {
                     id
                     classNumber
@@ -91,6 +146,8 @@ const Dashboard: FunctionComponent = () => {
 
                 users {
                     id
+                    firstName
+                    lastName
                     userRole
                 }
 
@@ -135,6 +192,54 @@ const Dashboard: FunctionComponent = () => {
             )
         );
     }, [data]);
+
+    const addMessage = async (e: FormEvent) => {
+        e.preventDefault();
+        try {
+            await graphQLClient.request(
+                gql`
+                    mutation(
+                        $toUserUUIDs: [String!]
+                        $toClassUUIDs: [String!]
+                        $data: String
+                        $assignmentType: AssignmentType
+                        $type: MessageType!
+                        $subjectUUID: String
+                        $assignmentDueDate: Date
+                        $files: [Upload!]
+                    ) {
+                        createMessage(
+                            createMessageInput: {
+                                toUserUUIDs: $toUserUUIDs
+                                toClassUUIDs: $toClassUUIDs
+                                data: $data
+                                assignmentType: $assignmentType
+                                type: $type
+                                subjectUUID: $subjectUUID
+                                assignmentDueDate: $assignmentDueDate
+                                files: $files
+                            }
+                        ) {
+                            messageId
+                        }
+                    }
+                `,
+                {
+                    toUserUUIDs: toUsersUUIDs,
+                    toClassUUIDs: toClassUUIDs,
+                    data: messageData,
+                    assignmentType: assignmentType || null,
+                    type: type,
+                    subjectUUID: subjectUUID,
+                    assignmentDueDate: assignmentDueDate,
+                    files,
+                }
+            );
+            setAddDialog(false);
+        } catch (error) {
+            setError('Неизвестна грешка');
+        }
+    };
 
     if (!user) {
         return <Loader />;
@@ -215,13 +320,371 @@ const Dashboard: FunctionComponent = () => {
                                         color='primary'
                                         className={styles['add-button']}
                                         startIcon={<AddOutlinedIcon />}
-                                        onClick={() =>
-                                            router.push('/addmessage')
-                                        }
+                                        onClick={() => setAddDialog(true)}
                                     >
                                         Добави
                                     </Button>
                                 </div>
+                                <Dialog
+                                    fullWidth
+                                    maxWidth='lg'
+                                    className={styles['dialog']}
+                                    open={addDialog}
+                                    onClose={() => setAddDialog(false)}
+                                >
+                                    <DialogTitle
+                                        className={styles['dialog-title']}
+                                    >
+                                        Добави събощение
+                                    </DialogTitle>
+                                    <DialogContent
+                                        className={styles['dialog-content']}
+                                    >
+                                        <div
+                                            className={
+                                                styles['input-container']
+                                            }
+                                        >
+                                            <FormControl
+                                                fullWidth
+                                                variant='outlined'
+                                                className={
+                                                    styles['users-select']
+                                                }
+                                            >
+                                                <InputLabel id='users-select-label'>
+                                                    Потребители
+                                                </InputLabel>
+                                                <Select
+                                                    label='Потребители'
+                                                    labelId='users-select-label'
+                                                    multiple
+                                                    value={toUsersUUIDs}
+                                                    onChange={(e) =>
+                                                        setToUsersUUIDs(
+                                                            e.target
+                                                                .value as string[]
+                                                        )
+                                                    }
+                                                    renderValue={(selected) =>
+                                                        (selected as string[])
+                                                            .map(
+                                                                (selection) =>
+                                                                    data &&
+                                                                    data.users?.find(
+                                                                        (
+                                                                            user: User
+                                                                        ) =>
+                                                                            user.id ===
+                                                                            selection
+                                                                    )
+                                                            )
+                                                            .map(
+                                                                (user) =>
+                                                                    `${user.firstName} ${user.lastName}`
+                                                            )
+                                                            .join(', ')
+                                                    }
+                                                >
+                                                    {data &&
+                                                        data?.users &&
+                                                        data?.users.map(
+                                                            (
+                                                                user: User,
+                                                                i: number
+                                                            ) => (
+                                                                <MenuItem
+                                                                    key={i}
+                                                                    value={
+                                                                        user.id
+                                                                    }
+                                                                >
+                                                                    <Checkbox
+                                                                        color='primary'
+                                                                        checked={
+                                                                            toUsersUUIDs.indexOf(
+                                                                                user.id as string
+                                                                            ) >
+                                                                            -1
+                                                                        }
+                                                                    />
+                                                                    <ListItemText
+                                                                        primary={`${user.firstName} ${user.lastName}`}
+                                                                    />
+                                                                </MenuItem>
+                                                            )
+                                                        )}
+                                                </Select>
+                                            </FormControl>
+                                            <FormControl
+                                                fullWidth
+                                                variant='outlined'
+                                                className={
+                                                    styles['class-select']
+                                                }
+                                            >
+                                                <InputLabel id='class-select-label'>
+                                                    Класове
+                                                </InputLabel>
+                                                <Select
+                                                    label='Класове'
+                                                    labelId='class-select-label'
+                                                    multiple
+                                                    value={toClassUUIDs}
+                                                    onChange={(e) =>
+                                                        setToClassUUIDs(
+                                                            e.target
+                                                                .value as string[]
+                                                        )
+                                                    }
+                                                    renderValue={(selected) =>
+                                                        (selected as string[])
+                                                            .map(
+                                                                (selection) =>
+                                                                    data &&
+                                                                    data.classes?.find(
+                                                                        (
+                                                                            cls: Class
+                                                                        ) =>
+                                                                            cls.id ===
+                                                                            selection
+                                                                    )
+                                                            )
+                                                            .map(
+                                                                (cls) =>
+                                                                    `${cls?.classNumber} ${cls?.classLetter}`
+                                                            )
+                                                            .join(', ')
+                                                    }
+                                                >
+                                                    {data &&
+                                                        data?.classes &&
+                                                        data?.classes.map(
+                                                            (
+                                                                cls: Class,
+                                                                i: number
+                                                            ) => (
+                                                                <MenuItem
+                                                                    key={i}
+                                                                    value={
+                                                                        cls.id
+                                                                    }
+                                                                >
+                                                                    <Checkbox
+                                                                        color='primary'
+                                                                        checked={
+                                                                            toClassUUIDs.indexOf(
+                                                                                cls.id as string
+                                                                            ) >
+                                                                            -1
+                                                                        }
+                                                                    />
+                                                                    <ListItemText
+                                                                        primary={`${cls?.classNumber} ${cls?.classLetter}`}
+                                                                    />
+                                                                </MenuItem>
+                                                            )
+                                                        )}
+                                                </Select>
+                                            </FormControl>
+                                            <TextField
+                                                fullWidth
+                                                select
+                                                className={
+                                                    styles['user-select']
+                                                }
+                                                label='Тип'
+                                                value={type}
+                                                onChange={(e) => {
+                                                    setType(
+                                                        e.target.value as string
+                                                    );
+                                                }}
+                                                variant='outlined'
+                                            >
+                                                {Object.values(MessageType).map(
+                                                    (type) => (
+                                                        <MenuItem
+                                                            key={type}
+                                                            value={type}
+                                                        >
+                                                            {getMessageType(
+                                                                type
+                                                            )}
+                                                        </MenuItem>
+                                                    )
+                                                )}
+                                            </TextField>
+                                            {type && type === 'ASSIGNMENT' && (
+                                                <>
+                                                    <TextField
+                                                        select
+                                                        className={
+                                                            styles[
+                                                                'class-select'
+                                                            ]
+                                                        }
+                                                        fullWidth
+                                                        label='Вид задание'
+                                                        value={assignmentType}
+                                                        onChange={(e) => {
+                                                            setAssignmentType(
+                                                                e.target
+                                                                    .value as string
+                                                            );
+                                                        }}
+                                                        variant='outlined'
+                                                    >
+                                                        {Object.values(
+                                                            AssignmentType
+                                                        ).map((type) => (
+                                                            <MenuItem
+                                                                key={type}
+                                                                value={type}
+                                                            >
+                                                                {getAssignmentType(
+                                                                    type
+                                                                )}
+                                                            </MenuItem>
+                                                        ))}
+                                                    </TextField>
+                                                    <TextField
+                                                        select
+                                                        fullWidth
+                                                        className={
+                                                            styles[
+                                                                'subject-select'
+                                                            ]
+                                                        }
+                                                        label='Предмет'
+                                                        value={subjectUUID}
+                                                        onChange={(e) => {
+                                                            setSubjectUUID(
+                                                                e.target
+                                                                    .value as string
+                                                            );
+                                                        }}
+                                                        variant='outlined'
+                                                    >
+                                                        {data &&
+                                                            data?.subjects &&
+                                                            data?.subjects?.map(
+                                                                (
+                                                                    subject: Subject
+                                                                ) => (
+                                                                    <MenuItem
+                                                                        key={
+                                                                            subject.id
+                                                                        }
+                                                                        value={
+                                                                            subject.id
+                                                                        }
+                                                                    >
+                                                                        {`
+                                                                            ${subject.class?.classNumber}${subject.class?.classLetter} ${subject.name}
+                                                                            `}
+                                                                    </MenuItem>
+                                                                )
+                                                            )}
+                                                    </TextField>
+                                                    <MuiPickersUtilsProvider
+                                                        utils={DateFnsUtils}
+                                                    >
+                                                        <KeyboardDateTimePicker
+                                                            fullWidth
+                                                            inputVariant='outlined'
+                                                            ampm={false}
+                                                            className={
+                                                                styles[
+                                                                    'date-time-select'
+                                                                ]
+                                                            }
+                                                            autoOk
+                                                            invalidDateMessage='Невалиден формат'
+                                                            label='Краен срок'
+                                                            value={
+                                                                assignmentDueDate
+                                                            }
+                                                            onChange={(
+                                                                date
+                                                            ) => {
+                                                                setAssignmentDueDate(
+                                                                    date
+                                                                );
+                                                            }}
+                                                        />
+                                                    </MuiPickersUtilsProvider>
+                                                </>
+                                            )}
+                                            <TextField
+                                                className={
+                                                    styles['msg-data-select']
+                                                }
+                                                multiline
+                                                fullWidth
+                                                rows={7}
+                                                rowsMax={9}
+                                                label='Съобщение'
+                                                value={messageData}
+                                                onChange={(e) => {
+                                                    setMessageData(
+                                                        e.target.value as string
+                                                    );
+                                                }}
+                                                variant='outlined'
+                                            />
+                                        </div>
+                                        <div
+                                            className={
+                                                styles['input-container']
+                                            }
+                                        >
+                                            <DropzoneArea
+                                                showAlerts={['error']}
+                                                showFileNames
+                                                dropzoneClass={`dropzone ${styles['message-dropzone']}`}
+                                                previewGridProps={{
+                                                    item: {
+                                                        xs: false,
+                                                        md: true,
+                                                    },
+                                                }}
+                                                previewGridClasses={{
+                                                    container:
+                                                        'upload-grid-container',
+                                                    item: 'upload-grid-item',
+                                                }}
+                                                maxFileSize={40000000}
+                                                filesLimit={10}
+                                                onChange={(files) =>
+                                                    setFiles(files)
+                                                }
+                                            />
+                                        </div>
+                                    </DialogContent>
+                                    <DialogActions
+                                        className={styles['dialog-actions']}
+                                    >
+                                        <Button
+                                            onClick={() => setAddDialog(false)}
+                                            disableElevation
+                                            variant='outlined'
+                                            color='secondary'
+                                            endIcon={<CloseOutlined />}
+                                        >
+                                            Отказ
+                                        </Button>
+                                        <Button
+                                            onClick={addMessage}
+                                            disableElevation
+                                            variant='contained'
+                                            color='primary'
+                                            endIcon={<DoneOutlined />}
+                                        >
+                                            Потвърди
+                                        </Button>
+                                    </DialogActions>
+                                </Dialog>
                                 {messagesByCriteria?.map(
                                     (message: Message, i: number) => {
                                         const date = new Date(
@@ -397,6 +860,20 @@ const Dashboard: FunctionComponent = () => {
                         </>
                     )}
                 </div>
+                <Snackbar
+                    open={Boolean(error)}
+                    autoHideDuration={6000}
+                    onClose={() => setError('')}
+                >
+                    <Alert
+                        elevation={6}
+                        variant='filled'
+                        onClose={() => setError('')}
+                        severity='error'
+                    >
+                        {error}
+                    </Alert>
+                </Snackbar>
             </Container>
         </>
     );

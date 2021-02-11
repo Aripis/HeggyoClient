@@ -9,6 +9,58 @@
     cursor: pointer;
 }
 
+.dialog {
+    .dialog-content {
+        display: flex;
+        flex-direction: row;
+
+        & > *:nth-child(even) {
+            margin-left: 10px;
+        }
+
+        & > *:nth-child(odd) {
+            margin-right: 10px;
+        }
+
+        & > * {
+            width: 100%;
+        }
+
+        .input-container {
+            & > *:not(:first-child) {
+                margin-top: 20px;
+            }
+
+            .message-dropzone {
+                height: 100%;
+            }
+        }
+    }
+
+    .dialog-actions {
+        display: flex;
+        flex-direction: row;
+        margin-top: 10px;
+        margin-left: 0;
+        width: 100%;
+        margin-bottom: 15px;
+
+        & > * {
+            width: 100%;
+
+            &:nth-child(even) {
+                margin-left: 10px;
+                margin-right: 15px;
+            }
+
+            &:nth-child(odd) {
+                margin-left: 15px;
+                margin-right: 10px;
+            }
+        }
+    }
+}
+
 .content {
     display: flex;
     flex-direction: row;

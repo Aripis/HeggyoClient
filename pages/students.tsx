@@ -349,6 +349,7 @@ const Students: FunctionComponent = () => {
         if (user && user.userRole !== 'ADMIN' && user.userRole !== 'TEACHER') {
             router.back();
         }
+        console.log(data);
     }, [user, status, data]);
 
     if (!user) {
@@ -370,9 +371,9 @@ const Students: FunctionComponent = () => {
             >
                 <Navbar title='Ученици' />
                 <div className={styles.content}>
-                    {data && user.userRole === 'ADMIN' && (
+                    {user.userRole === 'ADMIN' && (
                         <div className={styles['users-container']}>
-                            {data.students.map(
+                            {data?.students?.map(
                                 (student: Student, i: number) => (
                                     <UsersComponent
                                         key={i}
@@ -398,7 +399,7 @@ const Students: FunctionComponent = () => {
                         </div>
                     )}
 
-                    {user && user.userRole === 'TEACHER' && (
+                    {user?.userRole === 'TEACHER' && (
                         <>
                             <AppBar
                                 position='static'
