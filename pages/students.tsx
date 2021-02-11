@@ -21,9 +21,22 @@ import {
     Tabs,
     Tab,
     Popover,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    TextField,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
+    DialogActions,
 } from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';
-import { ExpandMoreOutlined } from '@material-ui/icons';
+import {
+    CloseOutlined,
+    DoneOutlined,
+    ExpandMoreOutlined,
+} from '@material-ui/icons';
 import { useAuth } from 'utils/useAuth';
 import { useRouter } from 'next/router';
 import Loader from 'components/Loader';
@@ -37,9 +50,17 @@ import {
     Grade,
 } from 'utils/interfaces';
 import useSWR from 'swr';
-import { ContractType, UserStatus, UserRoles } from 'utils/enums';
-import { getUserStatus, getUserRole, getGradeName } from 'utils/helpers';
+import { ContractType, UserStatus, UserRoles, GradeTypes } from 'utils/enums';
+import {
+    getUserStatus,
+    getUserRole,
+    getGradeName,
+    getGradeForBackEnd,
+    getGradeType,
+} from 'utils/helpers';
 import graphQLClient from 'utils/graphqlclient';
+import { DropzoneArea } from 'material-ui-dropzone';
+import AddOutlined from '@material-ui/icons/AddOutlined';
 
 interface UsersProps {
     id: string | undefined;
@@ -163,6 +184,13 @@ const GradeTable: FunctionComponent<GradeTableProps> = (props) => {
     const [grades, setGrades] = useState<Grade[]>([]);
     const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 
+    const [addDialog, setAddDialog] = useState(false);
+    const [message, setMessage] = useState('');
+    const [grade, setGrade] = useState(6);
+    const [gradeType, setGradeType] = useState('');
+    const [error, setError] = useState('');
+    const [gradeWithWords, setGradeWithWords] = useState('');
+
     useEffect(() => {
         (async () => {
             try {
@@ -194,6 +222,47 @@ const GradeTable: FunctionComponent<GradeTableProps> = (props) => {
         })();
     }, []);
 
+    const addGrade = async (studentId: string | undefined) => {
+        try {
+            await graphQLClient.request(
+                gql`
+                    mutation(
+                        $studentId: String!
+                        $subjectUUID: String!
+                        $grade: Float!
+                        $message: String!
+                        $gradeWithWords: String!
+                        $type: GradeTypes!
+                    ) {
+                        addGrade(
+                            input: {
+                                studentId: $studentId
+                                subjectUUID: $subjectUUID
+                                message: $message
+                                grade: $grade
+                                gradeWithWords: $gradeWithWords
+                                type: $type
+                            }
+                        ) {
+                            gradeId
+                        }
+                    }
+                `,
+                {
+                    studentId,
+                    subjectUUID: props.subjectId,
+                    message,
+                    grade,
+                    gradeWithWords: getGradeForBackEnd(grade),
+                    type: gradeType,
+                }
+            );
+            setAddDialog(false);
+        } catch (error) {
+            console.log(error);
+            setError('Неизвестна грешка');
+        }
+    };
     return (
         <div className={styles['grades-container']}>
             <div className={styles['grade-row']}>
@@ -214,67 +283,236 @@ const GradeTable: FunctionComponent<GradeTableProps> = (props) => {
                 </div>
             </div>
             {props.students.map((student) => (
-                <div key={student.id} className={styles['grade-row']}>
-                    <div
-                        className={`${styles['grade-field']} ${styles['grade-field-name']}`}
-                    >
-                        <span>{`${
-                            student?.user?.firstName
-                        } ${student?.user?.middleName?.charAt(0)}. ${
-                            student?.user?.lastName
-                        }`}</span>
+                <Fragment key={student.id}>
+                    <div className={styles['grade-row']}>
+                        <div
+                            className={`${styles['grade-field']} ${styles['grade-field-name']}`}
+                        >
+                            <span>{`${
+                                student?.user?.firstName
+                            } ${student?.user?.middleName?.charAt(0)}. ${
+                                student?.user?.lastName
+                            }`}</span>
+                        </div>
+                        <div
+                            className={`${styles['grade-field']} ${styles['grade-field-grades']}`}
+                        >
+                            <Button
+                                onClick={() => setAddDialog(true)}
+                                disableElevation
+                                variant='outlined'
+                                color='primary'
+                                endIcon={<AddOutlined />}
+                            >
+                                Добави
+                            </Button>
+                            {grades
+                                .filter(
+                                    (grade) => grade?.student?.id === student.id
+                                )
+                                .sort((a: Grade, b: Grade) =>
+                                    (a.createdAt as Date) >
+                                    (b.createdAt as Date)
+                                        ? 1
+                                        : (a.createdAt as Date) <
+                                          (b.createdAt as Date)
+                                        ? -1
+                                        : 0
+                                )
+                                .map((grade) => (
+                                    <Fragment key={grade.id}>
+                                        <span
+                                            aria-haspopup='true'
+                                            className={styles.grade}
+                                            onMouseEnter={(
+                                                e: MouseEvent<HTMLButtonElement>
+                                            ) => setAnchorEl(e.currentTarget)}
+                                            onMouseLeave={() =>
+                                                setAnchorEl(null)
+                                            }
+                                            key={grade.id}
+                                        >{`${getGradeName(
+                                            grade.gradeWithWords?.toUpperCase(),
+                                            true
+                                        )} ${grade.grade}`}</span>
+                                        <Popover
+                                            style={{ pointerEvents: 'none' }}
+                                            open={Boolean(anchorEl)}
+                                            anchorEl={anchorEl}
+                                            onClose={() => setAnchorEl(null)}
+                                            anchorOrigin={{
+                                                vertical: 'bottom',
+                                                horizontal: 'center',
+                                            }}
+                                            transformOrigin={{
+                                                vertical: 'top',
+                                                horizontal: 'center',
+                                            }}
+                                        >
+                                            <Typography className='grade-message'>
+                                                {grade.message}
+                                            </Typography>
+                                        </Popover>
+                                    </Fragment>
+                                ))}
+                        </div>
+
+                        <Snackbar
+                            open={Boolean(error)}
+                            autoHideDuration={6000}
+                            onClose={() => setError('')}
+                        >
+                            <Alert
+                                elevation={6}
+                                variant='filled'
+                                onClose={() => setError('')}
+                                severity='error'
+                            >
+                                {error}
+                            </Alert>
+                        </Snackbar>
                     </div>
-                    <div
-                        className={`${styles['grade-field']} ${styles['grade-field-grades']}`}
+                    <Dialog
+                        fullWidth
+                        maxWidth='lg'
+                        className={styles['dialog']}
+                        open={addDialog}
+                        onClose={() => setAddDialog(false)}
                     >
-                        {grades
-                            .filter(
-                                (grade) => grade?.student?.id === student.id
-                            )
-                            .sort((a: Grade, b: Grade) =>
-                                (a.createdAt as Date) > (b.createdAt as Date)
-                                    ? 1
-                                    : (a.createdAt as Date) <
-                                      (b.createdAt as Date)
-                                    ? -1
-                                    : 0
-                            )
-                            .map((grade) => (
-                                <Fragment key={grade.id}>
-                                    <span
-                                        aria-haspopup='true'
-                                        className={styles.grade}
-                                        onMouseEnter={(
-                                            e: MouseEvent<HTMLButtonElement>
-                                        ) => setAnchorEl(e.currentTarget)}
-                                        onMouseLeave={() => setAnchorEl(null)}
-                                        key={grade.id}
-                                    >{`${getGradeName(
-                                        grade.gradeWithWords?.toUpperCase(),
-                                        true
-                                    )} ${grade.grade}`}</span>
-                                    <Popover
-                                        style={{ pointerEvents: 'none' }}
-                                        open={Boolean(anchorEl)}
-                                        anchorEl={anchorEl}
-                                        onClose={() => setAnchorEl(null)}
-                                        anchorOrigin={{
-                                            vertical: 'bottom',
-                                            horizontal: 'center',
+                        <DialogTitle className={styles['dialog-title']}>
+                            Добави оценка
+                        </DialogTitle>
+                        <DialogContent className={styles['dialog-content']}>
+                            <div className={styles['input-container']}>
+                                <TextField
+                                    label='Основание за оценката'
+                                    variant='outlined'
+                                    fullWidth
+                                    value={message}
+                                    multiline
+                                    rows={7}
+                                    rowsMax={9}
+                                    onChange={(e) => setMessage(e.target.value)}
+                                />
+                                <FormControl
+                                    variant='outlined'
+                                    className={styles['grade-select']}
+                                >
+                                    <InputLabel id='grade-select-label'>
+                                        Оценка
+                                    </InputLabel>
+                                    <Select
+                                        label='Оценка'
+                                        labelId='grade-select-label'
+                                        value={grade}
+                                        onChange={(e) => {
+                                            setGrade(
+                                                parseInt(
+                                                    e.target.value as string
+                                                )
+                                            );
                                         }}
-                                        transformOrigin={{
-                                            vertical: 'top',
-                                            horizontal: 'center',
-                                        }}
+                                        renderValue={(selected) =>
+                                            selected as string
+                                        }
                                     >
-                                        <Typography className='grade-message'>
-                                            {grade.message}
-                                        </Typography>
-                                    </Popover>
-                                </Fragment>
-                            ))}
-                    </div>
-                </div>
+                                        {[2, 3, 4, 5, 6].map((grade) => (
+                                            <MenuItem key={grade} value={grade}>
+                                                {grade}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                                <FormControl
+                                    variant='outlined'
+                                    className={styles['grade-w-words-select']}
+                                >
+                                    <InputLabel id='grade-w-words-select-label'>
+                                        Оценка с думи
+                                    </InputLabel>
+                                    <Select
+                                        label='Оценка'
+                                        labelId='grade-w-words-select-label'
+                                        value={gradeWithWords}
+                                        onChange={(e) => {
+                                            setGradeWithWords(
+                                                e.target.value as string
+                                            );
+                                        }}
+                                        renderValue={(selected) =>
+                                            selected as string
+                                        }
+                                    >
+                                        {[2, 3, 4, 5, 6].map((grade) => (
+                                            <MenuItem
+                                                key={grade}
+                                                value={getGradeForBackEnd(
+                                                    grade
+                                                )}
+                                            >
+                                                {getGradeName(grade.toString())}
+                                            </MenuItem>
+                                        ))}
+                                    </Select>
+                                </FormControl>
+                                <FormControl
+                                    variant='outlined'
+                                    className={styles['grade-type-select']}
+                                >
+                                    <InputLabel id='grade-type-select-label'>
+                                        Вид на оценката
+                                    </InputLabel>
+                                    <Select
+                                        label='Оценка'
+                                        labelId='grade-type-select-label'
+                                        value={gradeType}
+                                        onChange={(e) => {
+                                            setGradeType(
+                                                e.target.value as string
+                                            );
+                                        }}
+                                        renderValue={(selected) =>
+                                            selected as string
+                                        }
+                                    >
+                                        {Object.values(GradeTypes).map(
+                                            (gradeType) => (
+                                                <MenuItem
+                                                    key={gradeType}
+                                                    value={gradeType}
+                                                >
+                                                    {getGradeType(
+                                                        gradeType.toString()
+                                                    )}
+                                                </MenuItem>
+                                            )
+                                        )}
+                                    </Select>
+                                </FormControl>
+                            </div>
+                        </DialogContent>
+                        <DialogActions className={styles['dialog-actions']}>
+                            <Button
+                                onClick={() => setAddDialog(false)}
+                                disableElevation
+                                variant='outlined'
+                                color='secondary'
+                                endIcon={<CloseOutlined />}
+                            >
+                                Отказ
+                            </Button>
+                            <Button
+                                onClick={() => addGrade(student.id)}
+                                disableElevation
+                                variant='contained'
+                                color='primary'
+                                endIcon={<DoneOutlined />}
+                            >
+                                Потвърди
+                            </Button>
+                        </DialogActions>
+                    </Dialog>
+                </Fragment>
             ))}
         </div>
     );
@@ -287,6 +525,8 @@ const Students: FunctionComponent = () => {
     const [value, setValue] = useState(0);
     const [innerValue, setInnerValue] = useState(0);
     const [error, setError] = useState('');
+
+    let tabCounter = 0;
 
     const { data } = useSWR(gql`
         query {
@@ -355,8 +595,6 @@ const Students: FunctionComponent = () => {
         return <Loader />;
     }
 
-    let tabCounter = 0;
-
     return (
         <>
             <Head>
@@ -397,7 +635,6 @@ const Students: FunctionComponent = () => {
                             )}
                         </div>
                     )}
-
                     {user && user.userRole === 'TEACHER' && (
                         <>
                             <AppBar
