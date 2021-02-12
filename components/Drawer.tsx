@@ -98,7 +98,7 @@ const Drawer: FunctionComponent = () => {
                         </Button>
                     </Link>
 
-                    {user?.userRole === 'ADMIN' && (
+                    {user?.role === 'ADMIN' && (
                         <Link
                             underline='none'
                             className={styles.link}
@@ -109,8 +109,7 @@ const Drawer: FunctionComponent = () => {
                             </Button>
                         </Link>
                     )}
-                    {(user?.userRole === 'ADMIN' ||
-                        user?.userRole === 'TEACHER') && (
+                    {(user?.role === 'ADMIN' || user?.role === 'TEACHER') && (
                         <Link
                             underline='none'
                             className={styles.link}
@@ -131,7 +130,7 @@ const Drawer: FunctionComponent = () => {
                             Предмети
                         </Button>
                     </Link>
-                    {user?.userRole === 'ADMIN' && (
+                    {user?.role === 'ADMIN' && (
                         <Link
                             underline='none'
                             className={styles.link}
@@ -150,7 +149,7 @@ const Drawer: FunctionComponent = () => {
                     >
                         <Button>
                             <DescriptionOutlined />
-                            {user?.userRole === 'STUDENT'
+                            {user?.role === 'STUDENT'
                                 ? 'Учебна програма'
                                 : 'Учебни програми'}
                         </Button>

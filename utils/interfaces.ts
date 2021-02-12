@@ -2,13 +2,14 @@ import {
     InstitutionType,
     EducationStage,
     UserStatus,
-    UserRoles,
+    UserRole,
     ContractType,
     AssignmentType,
     MessageType,
     MessageStatus,
     WeekDays,
-    GradeTypes,
+    GradeType,
+    GradeWord,
 } from './enums';
 
 export interface Institution {
@@ -27,7 +28,7 @@ export interface User {
     middleName?: string;
     lastName?: string;
     email?: string;
-    userRole?: UserRoles;
+    role?: UserRole;
     status?: UserStatus;
     institution?: Institution[];
 }
@@ -70,8 +71,8 @@ export interface Class {
     endYear?: number;
     totalStudentCount?: number;
     teacher?: Teacher;
-    classLetter?: string;
-    classNumber?: number;
+    letter?: string;
+    number?: number;
 }
 
 export interface UploadFile {
@@ -84,12 +85,12 @@ export interface Message {
     createdAt?: Date;
     updatedAt?: Date;
     assignmentDueDate?: Date;
-    from?: User;
-    toUser?: User[];
+    fromUser?: User;
+    toUsers?: User[];
     toClasses?: Class[];
     data?: string;
     files?: UploadFile[];
-    type?: MessageType;
+    messageType?: MessageType;
     assignmentType?: AssignmentType;
     status?: MessageStatus;
     subject?: Subject;
@@ -113,8 +114,9 @@ export interface StudentDossier {
     updatedAt?: Date;
     fromUser?: User;
     subject?: Subject;
-    dossierMessage?: string;
-    studentFiles: UploadFile[];
+    student?: Student;
+    message?: string;
+    files: UploadFile[];
 }
 
 export interface Grade {
@@ -122,9 +124,9 @@ export interface Grade {
     createdAt?: Date;
     updatedAt?: Date;
     message?: string;
-    type?: GradeTypes;
+    type?: GradeType;
     grade?: number;
-    gradeWithWords?: string;
+    gradeWithWords?: GradeWord;
     fromUser?: User;
     student?: Student;
     subject?: Subject;

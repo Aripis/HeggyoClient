@@ -45,7 +45,7 @@ interface DossierProps {
     updatedAt: Date | undefined;
     fromUser: User | undefined;
     subject?: Subject | undefined;
-    dossierMessage?: string | undefined;
+    message?: string | undefined;
     studentFiles: UploadFile[];
     date: Date | undefined;
 }
@@ -70,7 +70,7 @@ const StudentsComponent: FunctionComponent<DossierProps> = (props) => {
                 }
             />
             <CardContent className={styles['card-content']}>
-                <Typography>{`${props.dossierMessage || ''}`}</Typography>
+                <Typography>{`${props.message || ''}`}</Typography>
                 <br />
                 <Typography>
                     {props.studentFiles?.map((file, i: number) => (
@@ -92,15 +92,15 @@ const ViewStudent: FunctionComponent = () => {
     const { user, status } = useAuth();
 
     const [addDialog, setAddDialog] = useState(false);
-    const [dossierMessage, setDossierMessage] = useState('');
+    const [message, setMessage] = useState('');
     const [files, setFiles] = useState<File[]>([]);
-    const [subjectUUID, setSubjectUUID] = useState('');
+    const [subjectId, setSubjectId] = useState('');
     const [error, setError] = useState('');
 
     const { data } = useSWR([
         gql`
-            query($studentUUID: String!) {
-                student(id: $studentUUID) {
+            query($studentId: String!) {
+                getStudent(id: $studentId) {
                     id
                     user {
                         id
@@ -109,12 +109,12 @@ const ViewStudent: FunctionComponent = () => {
                         lastName
                         email
                         status
-                        userRole
+                        role
                     }
                     class {
                         id
-                        classNumber
-                        classLetter
+                        number
+                        letter
                     }
                     prevEducation
                     recordMessage
@@ -132,7 +132,7 @@ const ViewStudent: FunctionComponent = () => {
                             id
                             name
                         }
-                        dossierMessage
+                        message
                         studentFiles {
                             filename
                             publicUrl
@@ -147,20 +147,20 @@ const ViewStudent: FunctionComponent = () => {
                     endYear
                     class {
                         id
-                        classNumber
-                        classLetter
+                        number
+                        letter
                     }
                 }
             }
         `,
-        JSON.stringify({ studentUUID: router.query.id || '' }),
+        JSON.stringify({ studentId: router.query.id || '' }),
     ]);
 
     useEffect(() => {
         if (status === 'REDIRECT') {
             router.push('/login');
         }
-        if (user && user?.userRole !== 'ADMIN') {
+        if (user && user?.role !== 'ADMIN') {
             router.back();
         }
     }, [data, status, router]);
@@ -171,16 +171,16 @@ const ViewStudent: FunctionComponent = () => {
                 gql`
                     mutation(
                         $studentId: String!
-                        $subjectUUID: String!
+                        $subjectId: String!
                         $files: [Upload!]
-                        $dossierMessage: String!
+                        $message: String!
                     ) {
-                        createStudentDossier(
+                        addStudentDossier(
                             input: {
                                 studentId: $studentId
-                                subjectUUID: $subjectUUID
+                                subjectId: $subjectId
                                 files: $files
-                                dossierMessage: $dossierMessage
+                                message: $message
                             }
                         ) {
                             dossierId
@@ -189,9 +189,9 @@ const ViewStudent: FunctionComponent = () => {
                 `,
                 {
                     studentId: router.query.id,
-                    subjectUUID,
+                    subjectId,
                     files,
-                    dossierMessage,
+                    message,
                 }
             );
             setAddDialog(false);
@@ -235,16 +235,16 @@ const ViewStudent: FunctionComponent = () => {
                                     {data &&
                                         data?.student &&
                                         data?.student?.user &&
-                                        getUserRole(data.student.user.userRole)}
+                                        getUserRole(data.student.user.role)}
                                 </Typography>
                                 {data &&
                                     data?.student &&
                                     data?.student?.class &&
-                                    data.student.class.classNumber &&
-                                    data.student.class.classLetter && (
+                                    data.student.class.number &&
+                                    data.student.class.letter && (
                                         <Typography>
-                                            {data.student.class.classNumber}
-                                            {data.student.class.classLetter}
+                                            {data.student.class.number}
+                                            {data.student.class.letter}
                                         </Typography>
                                     )}
                             </Breadcrumbs>
@@ -281,9 +281,9 @@ const ViewStudent: FunctionComponent = () => {
                                 createdAt={new Date(dossier?.createdAt as Date)}
                                 updatedAt={new Date(dossier?.updatedAt as Date)}
                                 fromUser={dossier.fromUser}
-                                dossierMessage={dossier.dossierMessage}
+                                message={dossier.message}
                                 subject={dossier.subject}
-                                studentFiles={dossier.studentFiles}
+                                studentFiles={dossier.files}
                                 date={dossier.updatedAt}
                             ></StudentsComponent>
                         ))}
@@ -304,13 +304,11 @@ const ViewStudent: FunctionComponent = () => {
                                 label='Коментар под бележката'
                                 variant='outlined'
                                 fullWidth
-                                value={dossierMessage}
+                                value={message}
                                 multiline
                                 rows={7}
                                 rowsMax={9}
-                                onChange={(e) =>
-                                    setDossierMessage(e.target.value)
-                                }
+                                onChange={(e) => setMessage(e.target.value)}
                             />
                             <FormControl
                                 variant='outlined'
@@ -322,11 +320,9 @@ const ViewStudent: FunctionComponent = () => {
                                 <Select
                                     label='Предмет'
                                     labelId='subject-select-label'
-                                    value={subjectUUID}
+                                    value={subjectId}
                                     onChange={(e) => {
-                                        setSubjectUUID(
-                                            e.target.value as string
-                                        );
+                                        setSubjectId(e.target.value as string);
                                     }}
                                     renderValue={(selected) => {
                                         const selectedSubject:
@@ -335,7 +331,7 @@ const ViewStudent: FunctionComponent = () => {
                                             (subject: Subject) =>
                                                 subject.id === selected
                                         );
-                                        return `${selectedSubject?.class?.classNumber}${selectedSubject?.class?.classLetter} ${selectedSubject?.name}`;
+                                        return `${selectedSubject?.class?.number}${selectedSubject?.class?.letter} ${selectedSubject?.name}`;
                                     }}
                                 >
                                     <MenuItem value=''>Без</MenuItem>
@@ -350,7 +346,7 @@ const ViewStudent: FunctionComponent = () => {
                                                 key={subject.id}
                                                 value={subject.id}
                                             >
-                                                {`${subject?.class?.classNumber}${subject?.class?.classLetter} ${subject?.name}`}
+                                                {`${subject?.class?.number}${subject?.class?.letter} ${subject?.name}`}
                                             </MenuItem>
                                         ))}
                                 </Select>

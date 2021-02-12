@@ -80,7 +80,7 @@ const Register: FunctionComponent = () => {
                         $alias: String!
                     ) {
                         addInstitution(
-                            createInstitutionInput: {
+                            input: {
                                 name: $name
                                 email: $email
                                 type: $type
@@ -119,7 +119,7 @@ const Register: FunctionComponent = () => {
                         $registerToken: String!
                     ) {
                         register(
-                            createUserInput: {
+                            input: {
                                 firstName: $firstName
                                 middleName: $middleName
                                 lastName: $lastName

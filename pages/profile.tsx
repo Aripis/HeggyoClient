@@ -96,7 +96,7 @@ const Profile: FunctionComponent<User> = () => {
                         $email: String!
                     ) {
                         updateUser(
-                            updateUserInput: {
+                            input: {
                                 firstName: $firstName
                                 middleName: $middleName
                                 lastName: $lastName
@@ -150,7 +150,7 @@ const Profile: FunctionComponent<User> = () => {
                                             }
                                         >
                                             <PersonOutlineOutlined />
-                                            {getUserRole(user.userRole)}
+                                            {getUserRole(user.role)}
                                         </Typography>
                                         <Typography
                                             className={

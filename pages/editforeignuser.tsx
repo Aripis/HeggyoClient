@@ -25,7 +25,7 @@ import graphQLClient from 'utils/graphqlclient';
 const EditForeignUser: FunctionComponent = () => {
     const router = useRouter();
     const { user, status } = useAuth();
-    const [uuid, setUUID] = useState('');
+    const [id, setId] = useState('');
     const [role, setRole] = useState('');
     const [error, setError] = useState('');
     const [userStatus, setUserStatus] = useState('');
@@ -35,8 +35,8 @@ const EditForeignUser: FunctionComponent = () => {
     const [teacherContract, setTeacherContract] = useState('');
 
     const forStudent = gql`
-        query student($uuid: String!) {
-            student(id: $uuid) {
+        query($id: String!) {
+            getStudent(id: $id) {
                 id
                 user {
                     id
@@ -45,11 +45,11 @@ const EditForeignUser: FunctionComponent = () => {
                     lastName
                     email
                     status
-                    userRole
+                    role
                 }
                 class {
-                    classNumber
-                    classLetter
+                    number
+                    letter
                 }
                 prevEducation
                 recordMessage
@@ -57,8 +57,8 @@ const EditForeignUser: FunctionComponent = () => {
         }
     `;
     const forTeacher = gql`
-        query teacher($uuid: String!) {
-            teacher(id: $uuid) {
+        query($id: String!) {
+            getTeacher(id: $id) {
                 id
                 user {
                     id
@@ -67,7 +67,7 @@ const EditForeignUser: FunctionComponent = () => {
                     lastName
                     email
                     status
-                    userRole
+                    role
                 }
                 education
                 yearsExperience
@@ -82,7 +82,7 @@ const EditForeignUser: FunctionComponent = () => {
             }
         }
     `);
-    const { data } = useSWR([swrReq, JSON.stringify({ uuid })]);
+    const { data } = useSWR([swrReq, JSON.stringify({ id })]);
 
     const contractTypes = [
         { value: 'PART_TIME', content: 'Хоноруван' },
@@ -100,21 +100,21 @@ const EditForeignUser: FunctionComponent = () => {
         if (status === 'REDIRECT') {
             router.push('/login');
         }
-        if (user && user?.userRole !== 'ADMIN') {
+        if (user && user?.role !== 'ADMIN') {
             router.back();
         }
         setRole(router.query.r as string);
-        setUUID(router.query.id as string);
+        setId(router.query.id as string);
         if (router.query.r === 'TEACHER') {
             setSwrReq(forTeacher);
-            setUserStatus(data?.teacher?.user?.status as string);
-            setTeacherContract(data?.teacher?.contractType as string);
-            setUserId(data?.teacher?.user?.id as string);
+            setUserStatus(data?.getTeacher?.user?.status as string);
+            setTeacherContract(data?.getTeacher?.contractType as string);
+            setUserId(data?.getTeacher?.user?.id as string);
         } else if (router.query.r === 'STUDENT') {
             setSwrReq(forStudent);
-            setUserStatus(data?.student?.user?.status as string);
-            setUserId(data?.student?.user?.id as string);
-            setRecordMessage(data?.student?.recordMessage as string);
+            setUserStatus(data?.getStudent?.user?.status as string);
+            setUserId(data?.getStudent?.user?.id as string);
+            setRecordMessage(data?.getStudent?.recordMessage as string);
         }
     }, [data, status, router]);
 
@@ -130,19 +130,13 @@ const EditForeignUser: FunctionComponent = () => {
                         $userStatus: UserStatus!
                     ) {
                         updateStudentRecord(
-                            updateStudentRecordInput: {
-                                uuid: $stId
-                                recordMessage: $recordMessage
-                            }
+                            input: { id: $stId, recordMessage: $recordMessage }
                         ) {
                             studentId
                         }
 
                         updateUserStatus(
-                            updateUserStatus: {
-                                id: $userId
-                                userStatus: $userStatus
-                            }
+                            input: { id: $userId, userStatus: $userStatus }
                         ) {
                             userId
                         }
@@ -173,19 +167,13 @@ const EditForeignUser: FunctionComponent = () => {
                         $contractType: ContractType
                     ) {
                         updateTeacher(
-                            updateTeacherInput: {
-                                id: $tchId
-                                contractType: $contractType
-                            }
+                            input: { id: $tchId, contractType: $contractType }
                         ) {
                             teacherId
                         }
 
                         updateUserStatus(
-                            updateUserStatus: {
-                                id: $userId
-                                userStatus: $userStatus
-                            }
+                            input: { id: $userId, userStatus: $userStatus }
                         ) {
                             userId
                         }
@@ -225,13 +213,13 @@ const EditForeignUser: FunctionComponent = () => {
                             alt='profile'
                         />
                         <div className={styles['profile-info']}>
-                            {data && role === 'STUDENT' && data?.student && (
+                            {data && role === 'STUDENT' && data?.getStudent && (
                                 <>
                                     <Typography
                                         className={styles['name']}
                                         variant='h4'
                                     >
-                                        {`${data.student.user.firstName} ${data.student.user.middleName} ${data.student.user.lastName}`}
+                                        {`${data.getStudent.user.firstName} ${data.getStudent.user.middleName} ${data.getStudent.user.lastName}`}
                                     </Typography>
                                     <Breadcrumbs
                                         className={styles['additional-info']}
@@ -243,19 +231,19 @@ const EditForeignUser: FunctionComponent = () => {
                                         >
                                             <PersonOutlineOutlined />
                                             {getUserRole(
-                                                data.student.user.userRole
+                                                data.getStudent.user.role
                                             )}
                                         </Typography>
-                                        {data.student.class.classNumber &&
-                                            data.student.class.classLetter && (
+                                        {data.getStudent.class.number &&
+                                            data.getStudent.class.letter && (
                                                 <Typography>
                                                     {
-                                                        data.student.class
-                                                            .classNumber
+                                                        data.getStudent.class
+                                                            .number
                                                     }
                                                     {
-                                                        data.student.class
-                                                            .classLetter
+                                                        data.getStudent.class
+                                                            .letter
                                                     }
                                                 </Typography>
                                             )}
@@ -263,18 +251,18 @@ const EditForeignUser: FunctionComponent = () => {
                                     <Typography
                                         className={styles['record-message']}
                                     >
-                                        {data.student.recordMessage}
+                                        {data.getStudent.recordMessage}
                                     </Typography>
                                 </>
                             )}
-                            {data && role === 'TEACHER' && data?.teacher && (
+                            {data && role === 'TEACHER' && data?.getTeacher && (
                                 <>
                                     <Typography
                                         className={styles['name']}
                                         variant='h4'
                                     >
-                                        {data.teacher.user.firstName}
-                                        {data.teacher.user.lastName}
+                                        {data.getTeacher.user.firstName}
+                                        {data.getTeacher.user.lastName}
                                     </Typography>
                                     <Breadcrumbs
                                         className={styles['additional-info']}
@@ -286,11 +274,11 @@ const EditForeignUser: FunctionComponent = () => {
                                         >
                                             <PersonOutlineOutlined />
                                             {getUserRole(
-                                                data.teacher.user.userRole
+                                                data.getTeacher.user.role
                                             )}
                                         </Typography>
                                         <Typography>
-                                            {data.teacher.contractType}
+                                            {data.getTeacher.contractType}
                                         </Typography>
                                     </Breadcrumbs>
                                 </>
@@ -298,7 +286,7 @@ const EditForeignUser: FunctionComponent = () => {
                         </div>
                     </div>
                     <div className={styles['edit-fields']}>
-                        {data && role === 'STUDENT' && data?.student && (
+                        {data && role === 'STUDENT' && data?.getStudent && (
                             <>
                                 <TextField
                                     label='Коментар'
@@ -369,7 +357,7 @@ const EditForeignUser: FunctionComponent = () => {
                             </TextField>
                         )}
                     </div>
-                    {data && role === 'TEACHER' && data?.teacher && (
+                    {data && role === 'TEACHER' && data?.getTeacher && (
                         <div className={styles['actions']}>
                             <Button
                                 color='primary'
@@ -382,7 +370,7 @@ const EditForeignUser: FunctionComponent = () => {
                             </Button>
                         </div>
                     )}
-                    {data && role === 'STUDENT' && data?.student && (
+                    {data && role === 'STUDENT' && data?.getStudent && (
                         <div className={styles['actions']}>
                             <Button
                                 color='primary'

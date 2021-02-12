@@ -39,9 +39,7 @@ const Login: FunctionComponent = () => {
             await graphQLClient.request(
                 gql`
                     query($email: String!, $password: String!) {
-                        login(
-                            loginInput: { email: $email, password: $password }
-                        ) {
+                        login(input: { email: $email, password: $password }) {
                             id
                         }
                     }

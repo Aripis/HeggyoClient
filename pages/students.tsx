@@ -51,7 +51,7 @@ import {
     Grade,
 } from 'utils/interfaces';
 import useSWR from 'swr';
-import { ContractType, UserStatus, UserRoles, GradeTypes } from 'utils/enums';
+import { ContractType, UserStatus, UserRole, GradeType } from 'utils/enums';
 import {
     getUserStatus,
     getUserRole,
@@ -64,7 +64,7 @@ import AddOutlined from '@material-ui/icons/AddOutlined';
 
 interface UsersProps {
     id: string | undefined;
-    userRole: UserRoles | undefined;
+    role: UserRole | undefined;
     firstName: string | undefined;
     middleName: string | undefined;
     lastName: string | undefined;
@@ -123,7 +123,7 @@ const UsersComponent: FunctionComponent<UsersProps> = (props) => {
                 </Typography>
                 <Typography variant='body1' className={styles['role-text']}>
                     <strong>Роля: </strong>
-                    {getUserRole(props.userRole) || '--'}
+                    {getUserRole(props.role) || '--'}
                 </Typography>
                 <Typography variant='body1' className={styles['status']}>
                     <strong>Статус: </strong>
@@ -139,7 +139,7 @@ const UsersComponent: FunctionComponent<UsersProps> = (props) => {
                         <strong>Имейл: </strong>
                         {props.email || '--'}
                     </Typography>
-                    {props.userRole === 'STUDENT' && (
+                    {props.role === 'STUDENT' && (
                         <>
                             <Typography className={styles['class']}>
                                 <strong>Клас: </strong>
@@ -163,7 +163,7 @@ const UsersComponent: FunctionComponent<UsersProps> = (props) => {
                     className={styles['button-view-more']}
                     onClick={() =>
                         router.push(
-                            `/viewstudent?r=${props.userRole}&id=${props.id}`
+                            `/viewstudent?r=${props.role}&id=${props.id}`
                         )
                     }
                 >
@@ -196,7 +196,7 @@ const GradeDialog: FunctionComponent<GradeDialog> = (props) => {
                         $grade: Float!
                         $message: String!
                         $gradeWithWords: String!
-                        $type: GradeTypes!
+                        $type: GradeType!
                     ) {
                         addGrade(
                             input: {
@@ -334,7 +334,7 @@ const GradeDialog: FunctionComponent<GradeDialog> = (props) => {
                                         selected as string
                                     }
                                 >
-                                    {Object.values(GradeTypes).map(
+                                    {Object.values(GradeType).map(
                                         (gradeType) => (
                                             <MenuItem
                                                 key={gradeType}
@@ -393,7 +393,7 @@ const GradeTable: FunctionComponent<GradeTableProps> = (props) => {
                 const data = await graphQLClient.request(
                     gql`
                         query($subjectId: String!, $classId: String!) {
-                            gradesPerClassPerSubject(
+                            getAllGradesPerClassPerSubject(
                                 subjectId: $subjectId
                                 classId: $classId
                             ) {
@@ -411,7 +411,7 @@ const GradeTable: FunctionComponent<GradeTableProps> = (props) => {
                     `,
                     { subjectId: props.subjectId, classId: props.classId }
                 );
-                setGrades(data.gradesPerClassPerSubject);
+                setGrades(data.getAllGradesPerClassPerSubject);
             } catch (error) {
                 console.log(error);
             }
@@ -525,10 +525,10 @@ const Students: FunctionComponent = () => {
 
     const { data } = useSWR(gql`
         query {
-            classes {
+            getAllClasses {
                 id
-                classNumber
-                classLetter
+                number
+                letter
                 subjects {
                     id
                     name
@@ -541,7 +541,7 @@ const Students: FunctionComponent = () => {
                 }
             }
 
-            students {
+            getAllStudents {
                 id
                 user {
                     firstName
@@ -552,8 +552,8 @@ const Students: FunctionComponent = () => {
                 }
                 class {
                     id
-                    classNumber
-                    classLetter
+                    number
+                    letter
                 }
                 prevEducation
                 recordMessage
@@ -571,7 +571,7 @@ const Students: FunctionComponent = () => {
                         id
                         name
                     }
-                    dossierMessage
+                    message
                 }
             }
         }
@@ -581,7 +581,7 @@ const Students: FunctionComponent = () => {
         if (status === 'REDIRECT') {
             router.push('/login');
         }
-        if (user && user.userRole !== 'ADMIN' && user.userRole !== 'TEACHER') {
+        if (user && user.role !== 'ADMIN' && user.role !== 'TEACHER') {
             router.back();
         }
         console.log(data);
@@ -604,14 +604,14 @@ const Students: FunctionComponent = () => {
             >
                 <Navbar title='Ученици' />
                 <div className={styles.content}>
-                    {user.userRole === 'ADMIN' && (
+                    {user.role === 'ADMIN' && (
                         <div className={styles['users-container']}>
-                            {data?.students?.map(
+                            {data?.getAllStudents?.map(
                                 (student: Student, i: number) => (
                                     <UsersComponent
                                         key={i}
                                         id={student?.id}
-                                        userRole={UserRoles['STUDENT']}
+                                        role={UserRole['STUDENT']}
                                         firstName={student?.user?.firstName}
                                         middleName={student?.user?.middleName}
                                         lastName={student?.user?.lastName}
@@ -619,12 +619,8 @@ const Students: FunctionComponent = () => {
                                         status={student?.user?.status}
                                         recordMessage={student?.recordMessage}
                                         prevEducation={student?.prevEducation}
-                                        classLetter={
-                                            student?.class?.classLetter
-                                        }
-                                        classNumber={
-                                            student?.class?.classNumber
-                                        }
+                                        classLetter={student?.class?.letter}
+                                        classNumber={student?.class?.number}
                                         studentDossier={student?.dossier}
                                     />
                                 )
@@ -632,7 +628,7 @@ const Students: FunctionComponent = () => {
                         </div>
                     )}
 
-                    {user?.userRole === 'TEACHER' && (
+                    {user?.role === 'TEACHER' && (
                         <>
                             <AppBar
                                 position='static'
@@ -646,20 +642,20 @@ const Students: FunctionComponent = () => {
                                         setValue(newValue)
                                     }
                                 >
-                                    {data?.classes?.filter(
+                                    {data?.getAllClasses?.filter(
                                         (cls: Class) =>
                                             cls?.teacher?.user?.id === user?.id
                                     ).length && (
                                         <Tab disableRipple label='Моят клас' />
                                     )}
 
-                                    {data?.classes?.map((cls: Class) =>
+                                    {data?.getAllClasses?.map((cls: Class) =>
                                         cls?.subjects?.map(
                                             (subject: Subject) => (
                                                 <Tab
                                                     disableRipple
                                                     key={subject.id}
-                                                    label={`${cls.classNumber}${cls.classLetter} ${subject.name}`}
+                                                    label={`${cls.number}${cls.letter} ${subject.name}`}
                                                 />
                                             )
                                         )
@@ -669,11 +665,11 @@ const Students: FunctionComponent = () => {
                             <TabPanel value={value} index={0}>
                                 {data && (
                                     <div className={styles['users-container']}>
-                                        {data.students &&
-                                            data.students
+                                        {data.getAllStudents &&
+                                            data.getAllStudents
                                                 .filter((student: Student) => {
                                                     if (
-                                                        data.classes
+                                                        data.getAllClasses
                                                             .filter(
                                                                 (
                                                                     cls: Class
@@ -710,8 +706,8 @@ const Students: FunctionComponent = () => {
                                                         <UsersComponent
                                                             key={i}
                                                             id={student?.id}
-                                                            userRole={
-                                                                UserRoles[
+                                                            role={
+                                                                UserRole[
                                                                     'STUDENT'
                                                                 ]
                                                             }
@@ -743,11 +739,11 @@ const Students: FunctionComponent = () => {
                                                             }
                                                             classLetter={
                                                                 student?.class
-                                                                    ?.classLetter
+                                                                    ?.letter
                                                             }
                                                             classNumber={
                                                                 student?.class
-                                                                    ?.classNumber
+                                                                    ?.number
                                                             }
                                                             studentDossier={
                                                                 student?.dossier
@@ -758,7 +754,7 @@ const Students: FunctionComponent = () => {
                                     </div>
                                 )}
                             </TabPanel>
-                            {data?.classes?.map((cls: Class) =>
+                            {data?.getAllClasses?.map((cls: Class) =>
                                 cls?.subjects?.map((subject: Subject) => (
                                     <TabPanel
                                         key={subject.id}
@@ -794,7 +790,7 @@ const Students: FunctionComponent = () => {
                                                     styles['users-container']
                                                 }
                                             >
-                                                {data.students
+                                                {data.getAllStudents
                                                     .filter(
                                                         (student: Student) =>
                                                             student?.class
@@ -804,8 +800,8 @@ const Students: FunctionComponent = () => {
                                                         <UsersComponent
                                                             key={student?.id}
                                                             id={student?.id}
-                                                            userRole={
-                                                                UserRoles[
+                                                            role={
+                                                                UserRole[
                                                                     'STUDENT'
                                                                 ]
                                                             }
@@ -837,11 +833,11 @@ const Students: FunctionComponent = () => {
                                                             }
                                                             classLetter={
                                                                 student?.class
-                                                                    ?.classLetter
+                                                                    ?.letter
                                                             }
                                                             classNumber={
                                                                 student?.class
-                                                                    ?.classNumber
+                                                                    ?.number
                                                             }
                                                             studentDossier={
                                                                 student?.dossier
@@ -852,7 +848,7 @@ const Students: FunctionComponent = () => {
                                         </TabPanel>
                                         <TabPanel value={innerValue} index={1}>
                                             <GradeTable
-                                                students={data.students.filter(
+                                                students={data.getAllStudents.filter(
                                                     (student: Student) =>
                                                         student?.class?.id ===
                                                         cls.id

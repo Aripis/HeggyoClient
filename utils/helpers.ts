@@ -1,6 +1,6 @@
 import {
     UserStatus,
-    UserRoles,
+    UserRole,
     InstitutionType,
     EducationStage,
     ContractType,
@@ -163,7 +163,7 @@ export const getEducationStage = (
 };
 
 export const getUserRole = (
-    role: UserRoles | string | undefined
+    role: UserRole | string | undefined
 ): string | undefined => {
     switch (role) {
         case 'ADMIN':

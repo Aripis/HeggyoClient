@@ -23,7 +23,7 @@ import useSWR from 'swr';
 import { gql } from 'graphql-request';
 import { Subject } from 'utils/interfaces';
 import { Class } from 'utils/interfaces';
-import { UserRoles } from 'utils/enums';
+import { UserRole } from 'utils/enums';
 
 interface SubjectCardProps {
     id?: string;
@@ -32,7 +32,7 @@ interface SubjectCardProps {
     startYear?: number;
     endYear?: number;
     class?: Class;
-    role?: UserRoles;
+    role?: UserRole;
 }
 
 const SubjectCard: FunctionComponent<SubjectCardProps> = (props) => {
@@ -48,7 +48,7 @@ const SubjectCard: FunctionComponent<SubjectCardProps> = (props) => {
                         <MoreHorizOutlined />
                     </IconButton>
                 }
-                title={`${props.class?.classNumber}${props.class?.classLetter} ${props.name}`}
+                title={`${props.class?.number}${props.class?.letter} ${props.name}`}
                 subheader={`${props.startYear} - ${props.endYear}`}
             />
             {props.role === 'ADMIN' && (
@@ -81,15 +81,15 @@ const Subjects: FunctionComponent = () => {
     const { user, status } = useAuth();
     const { data } = useSWR(gql`
         query {
-            subjects {
+            getAllSubjects {
                 id
                 name
                 description
                 startYear
                 endYear
                 class {
-                    classNumber
-                    classLetter
+                    number
+                    letter
                 }
             }
         }
@@ -119,7 +119,7 @@ const Subjects: FunctionComponent = () => {
                 <Navbar title='Предмети' />
                 <div className={styles.content}>
                     <div className={styles['actions-container']}>
-                        {user.userRole === 'ADMIN' && (
+                        {user.role === 'ADMIN' && (
                             <Link
                                 className={styles['subject-add']}
                                 underline='none'
@@ -138,16 +138,16 @@ const Subjects: FunctionComponent = () => {
                     </div>
                     <div className={styles['subjects-container']}>
                         {data &&
-                            data.subjects?.map(
+                            data.getAllSubjects?.map(
                                 (subject: Subject, i: number) => (
                                     <SubjectCard
                                         key={i}
-                                        role={user.userRole}
+                                        role={user.role}
                                         {...subject}
                                     />
                                 )
                             )}
-                        {data && !data.subjects && (
+                        {data && !data.getAllSubjects && (
                             <div className={styles['no-subjects']}>
                                 <Typography color='textSecondary'>
                                     Няма съществуващи предмети. За да добавите

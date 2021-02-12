@@ -23,12 +23,12 @@ import { gql } from 'graphql-request';
 import { Class, Student, StudentDossier, Teacher } from 'utils/interfaces';
 import graphQLClient from 'utils/graphqlclient';
 import useSWR from 'swr';
-import { ContractType, UserStatus, UserRoles } from 'utils/enums';
+import { ContractType, UserStatus, UserRole } from 'utils/enums';
 import { getUserRole, getContractType, getUserStatus } from 'utils/helpers';
 
 interface UsersProps {
     id: string | undefined;
-    userRole: UserRoles | undefined;
+    role: UserRole | undefined;
     firstName: string | undefined;
     middleName: string | undefined;
     lastName: string | undefined;
@@ -71,7 +71,7 @@ const UsersComponent: FunctionComponent<UsersProps> = (props) => {
                 </Typography>
                 <Typography variant='body1' className={styles['role-text']}>
                     <strong>Роля: </strong>
-                    {getUserRole(props.userRole) || '--'}
+                    {getUserRole(props.role) || '--'}
                 </Typography>
                 <Typography variant='body1' className={styles['status']}>
                     <strong>Статус: </strong>
@@ -87,7 +87,7 @@ const UsersComponent: FunctionComponent<UsersProps> = (props) => {
                         <strong>Имейл: </strong>
                         {props.email || '--'}
                     </Typography>
-                    {props.userRole === 'STUDENT' && (
+                    {props.role === 'STUDENT' && (
                         <>
                             <Typography className={styles['class']}>
                                 <strong>Клас: </strong>
@@ -102,7 +102,7 @@ const UsersComponent: FunctionComponent<UsersProps> = (props) => {
                             </Typography>
                         </>
                     )}
-                    {props.userRole === 'TEACHER' && (
+                    {props.role === 'TEACHER' && (
                         <>
                             <Typography className={styles['years-experience']}>
                                 <strong>Стаж: </strong>
@@ -126,7 +126,7 @@ const UsersComponent: FunctionComponent<UsersProps> = (props) => {
                     className={styles['button-view-more']}
                     onClick={() =>
                         router.push(
-                            `/editforeignuser?r=${props.userRole}&id=${props.id}`
+                            `/editforeignuser?r=${props.role}&id=${props.id}`
                         )
                     }
                 >
@@ -143,17 +143,17 @@ const Users: FunctionComponent = () => {
 
     const [role, setRole] = useState('');
     const [token, setToken] = useState('');
-    const [classUUID, setClassUUID] = useState('');
+    const [classId, setClassId] = useState('');
     const [error, setError] = useState('');
     const { data } = useSWR(gql`
         query {
-            classes {
+            getAllClasses {
                 id
-                classNumber
-                classLetter
+                number
+                letter
             }
 
-            students {
+            getAllStudents {
                 id
                 user {
                     firstName
@@ -163,8 +163,8 @@ const Users: FunctionComponent = () => {
                     status
                 }
                 class {
-                    classNumber
-                    classLetter
+                    number
+                    letter
                 }
                 prevEducation
                 recordMessage
@@ -182,11 +182,11 @@ const Users: FunctionComponent = () => {
                         id
                         name
                     }
-                    dossierMessage
+                    message
                 }
             }
 
-            teachers {
+            getAllTeachers {
                 id
                 user {
                     firstName
@@ -206,7 +206,7 @@ const Users: FunctionComponent = () => {
         if (status === 'REDIRECT') {
             router.push('/login');
         }
-        if (user && user?.userRole !== 'ADMIN') {
+        if (user && user?.role !== 'ADMIN') {
             router.back();
         }
     }, [user, status, data]);
@@ -220,23 +220,20 @@ const Users: FunctionComponent = () => {
         try {
             const res = await graphQLClient.request(
                 gql`
-                    query($classUUID: String, $userRole: UserRoles!) {
+                    query($classId: String, $role: UserRole!) {
                         generateUserToken(
-                            tokenpreferences: {
-                                classUUID: $classUUID
-                                userRole: $userRole
-                            }
+                            input: { classId: $classId, role: $role }
                         ) {
-                            userRoleToken
+                            token
                         }
                     }
                 `,
                 {
-                    classUUID,
-                    userRole: role,
+                    classId,
+                    role: role,
                 }
             );
-            setToken(res.generateUserToken.userRoleToken);
+            setToken(res.generateUserToken.token);
         } catch (error) {
             setError('Неизвестна грешка');
         }
@@ -283,11 +280,11 @@ const Users: FunctionComponent = () => {
                                 value={role}
                                 onChange={(e) => {
                                     setRole(e.target.value);
-                                    setClassUUID('');
+                                    setClassId('');
                                     setToken('');
                                 }}
                             >
-                                {Object.values(UserRoles).map((role) => (
+                                {Object.values(UserRole).map((role) => (
                                     <MenuItem key={role} value={role}>
                                         {getUserRole(role)}
                                     </MenuItem>
@@ -304,20 +301,20 @@ const Users: FunctionComponent = () => {
                                     }
                                     required={role === 'STUDENT'}
                                     variant='outlined'
-                                    value={classUUID}
-                                    onChange={(e) =>
-                                        setClassUUID(e.target.value)
-                                    }
+                                    value={classId}
+                                    onChange={(e) => setClassId(e.target.value)}
                                 >
                                     <MenuItem value=''>Без</MenuItem>
-                                    {data?.classes?.map((currClass: Class) => (
-                                        <MenuItem
-                                            key={currClass.id}
-                                            value={currClass.id}
-                                        >
-                                            {`${currClass.classNumber}${currClass.classLetter}`}
-                                        </MenuItem>
-                                    ))}
+                                    {data?.getAllClasses?.map(
+                                        (currClass: Class) => (
+                                            <MenuItem
+                                                key={currClass.id}
+                                                value={currClass.id}
+                                            >
+                                                {`${currClass.number}${currClass.letter}`}
+                                            </MenuItem>
+                                        )
+                                    )}
                                 </TextField>
                             )}
                             <TextField
@@ -332,11 +329,11 @@ const Users: FunctionComponent = () => {
                     </form>
                     {data && (
                         <div className={styles['users-container']}>
-                            {data?.students?.map((student: Student) => (
+                            {data?.getAllStudents?.map((student: Student) => (
                                 <UsersComponent
                                     key={student?.id}
                                     id={student?.id}
-                                    userRole={UserRoles['STUDENT']}
+                                    role={UserRole['STUDENT']}
                                     firstName={student?.user?.firstName}
                                     middleName={student?.user?.middleName}
                                     lastName={student?.user?.lastName}
@@ -344,18 +341,18 @@ const Users: FunctionComponent = () => {
                                     status={student?.user?.status}
                                     recordMessage={student?.recordMessage}
                                     prevEducation={student?.prevEducation}
-                                    classLetter={student?.class?.classLetter}
-                                    classNumber={student?.class?.classNumber}
+                                    classLetter={student?.class?.letter}
+                                    classNumber={student?.class?.number}
                                     studentDossier={student?.dossier}
                                 />
                             ))}
-                            {data?.teachers &&
-                                data?.teachers?.map(
+                            {data?.getAllTeachers &&
+                                data?.getAllTteachers?.map(
                                     (teacher: Teacher, i: number) => (
                                         <UsersComponent
                                             key={i}
                                             id={teacher?.id}
-                                            userRole={UserRoles['TEACHER']}
+                                            role={UserRole['TEACHER']}
                                             firstName={teacher?.user?.firstName}
                                             middleName={
                                                 teacher?.user?.middleName

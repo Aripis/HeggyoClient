@@ -29,8 +29,8 @@ interface ScheduleCardProps {
     id?: string;
     startYear?: number;
     endYear?: number;
-    classNumber?: number;
-    classLetter?: string;
+    number?: number;
+    letter?: string;
     role?: string;
 }
 
@@ -41,7 +41,7 @@ const ScheduleCard: FunctionComponent<ScheduleCardProps> = (props) => {
         <Card className={styles['card']}>
             <CardHeader
                 className={styles['card-header']}
-                avatar={<Avatar>{props.classLetter}</Avatar>}
+                avatar={<Avatar>{props.letter}</Avatar>}
                 action={
                     <>
                         <IconButton onClick={(e) => setMenu(e.currentTarget)}>
@@ -55,7 +55,7 @@ const ScheduleCard: FunctionComponent<ScheduleCardProps> = (props) => {
                         ></Link>
                     </>
                 }
-                title={`Програма на ${props.classNumber}${props.classLetter}`}
+                title={`Програма на ${props.number}${props.letter}`}
                 subheader={`${props.startYear} - ${props.endYear}`}
             />
             {props.role === 'ADMIN' && (
@@ -90,12 +90,12 @@ const Schedule: FunctionComponent = () => {
     const [error, setError] = useState('');
     const { data } = useSWR(gql`
         query {
-            classes {
+            getAllClasses {
                 id
                 startYear
                 endYear
-                classNumber
-                classLetter
+                number
+                letter
             }
         }
     `);
@@ -124,7 +124,7 @@ const Schedule: FunctionComponent = () => {
                 <Navbar title='Учебни програми' />
                 <div className={styles.content}>
                     <div className={styles['actions-container']}>
-                        {user.userRole === 'ADMIN' && (
+                        {user.role === 'ADMIN' && (
                             <Link
                                 className={styles['schedule-add']}
                                 underline='none'
@@ -143,14 +143,16 @@ const Schedule: FunctionComponent = () => {
                     </div>
                     <div className={styles['schedules-container']}>
                         {data &&
-                            data.classes?.map((currClass: Class, i: number) => (
-                                <ScheduleCard
-                                    key={i}
-                                    role={user.userRole}
-                                    {...currClass}
-                                />
-                            ))}
-                        {data && !data.classes && (
+                            data.getAllClasses?.map(
+                                (currClass: Class, i: number) => (
+                                    <ScheduleCard
+                                        key={i}
+                                        role={user.role}
+                                        {...currClass}
+                                    />
+                                )
+                            )}
+                        {data && !data.getAllClasses && (
                             <div className={styles['no-classes']}>
                                 <Typography color='textSecondary'>
                                     Няма съществуващи програми. За да добавите

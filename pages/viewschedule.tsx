@@ -34,7 +34,7 @@ const ViewSchedule: FunctionComponent = () => {
     const { data } = useSWR([
         gql`
             query($classId: String!) {
-                schedulesByClass(classId: $classId) {
+                getAllSchedulesByClass(classId: $classId) {
                     id
                     startTime
                     endTime
@@ -80,8 +80,8 @@ const ViewSchedule: FunctionComponent = () => {
                                 views={['week']}
                                 localizer={localizer}
                                 events={
-                                    data.schedulesByClass &&
-                                    data.schedulesByClass?.map(
+                                    data.getAllSchedulesByClass &&
+                                    data.getAllSchedulesByClass?.map(
                                         (event: Schedule) => {
                                             const startTime = new Date(
                                                 event.startTime as Date

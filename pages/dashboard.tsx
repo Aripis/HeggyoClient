@@ -81,13 +81,13 @@ const Dashboard: FunctionComponent = () => {
         undefined
     );
     const [messagesByCriteria, setMessagesByCriteria] = useState([]);
-    const [toUsersUUIDs, setToUsersUUIDs] = useState<string[]>([]);
-    const [toClassUUIDs, setToClassUUIDs] = useState<string[]>([]);
+    const [toUserIds, setToUserIds] = useState<string[]>([]);
+    const [toClassIds, setToClassUUIDs] = useState<string[]>([]);
     const [messageData, setMessageData] = useState('');
-    const [type, setType] = useState('MESSAGE');
+    const [messageType, setType] = useState('MESSAGE');
     const [files, setFiles] = useState<File[]>([]);
     const [addDialog, setAddDialog] = useState(false);
-    const [subjectUUID, setSubjectUUID] = useState('');
+    const [subjectId, setSubjectUUID] = useState('');
     const [assignmentType, setAssignmentType] = useState('');
     const [assignmentDueDate, setAssignmentDueDate] = useState<Date | null>(
         new Date()
@@ -107,20 +107,20 @@ const Dashboard: FunctionComponent = () => {
     const { data, mutate } = useSWR([
         gql`
             query($filterByStatus: MessageStatus, $filterByType: MessageType) {
-                messagesByCriteria(
-                    criteria: {
+                getAllMessagesByCriteria(
+                    input: {
                         messageStatus: $filterByStatus
                         messageType: $filterByType
                     }
                 ) {
                     id
                     data
-                    from {
+                    fromUser {
                         firstName
                         lastName
                     }
                     updatedAt
-                    type
+                    messageType
                     status
                     files {
                         filename
@@ -128,41 +128,41 @@ const Dashboard: FunctionComponent = () => {
                     }
                 }
 
-                subjects {
+                getAllSubjects {
                     id
                     name
                     class {
-                        classNumber
-                        classLetter
+                        number
+                        letter
                     }
                 }
 
-                classes {
+                getAllClasses {
                     id
-                    classNumber
-                    classLetter
+                    number
+                    letter
                 }
 
-                users {
+                getAllUsers {
                     id
                     firstName
                     lastName
-                    userRole
+                    role
                 }
 
-                students {
+                getAllStudents {
                     id
                 }
 
-                teachers {
+                getAllTeachers {
                     id
                 }
 
-                parents {
+                getAllParents {
                     id
                 }
 
-                institution {
+                getInstitution {
                     name
                     email
                     type
@@ -182,7 +182,7 @@ const Dashboard: FunctionComponent = () => {
 
     useEffect(() => {
         setMessagesByCriteria(
-            data?.messagesByCriteria.sort((a: Message, b: Message) =>
+            data?.getAllMessagesByCriteria.sort((a: Message, b: Message) =>
                 (a.updatedAt as Date) > (b.updatedAt as Date)
                     ? -1
                     : (a.updatedAt as Date) < (b.updatedAt as Date)
@@ -198,23 +198,23 @@ const Dashboard: FunctionComponent = () => {
             await graphQLClient.request(
                 gql`
                     mutation(
-                        $toUserUUIDs: [String!]
-                        $toClassUUIDs: [String!]
+                        $toUserIds: [String!]
+                        $toClassIds: [String!]
                         $data: String
                         $assignmentType: AssignmentType
-                        $type: MessageType!
-                        $subjectUUID: String
+                        $messageType: MessageType!
+                        $subjectId: String
                         $assignmentDueDate: Date
                         $files: [Upload!]
                     ) {
-                        createMessage(
-                            createMessageInput: {
-                                toUserUUIDs: $toUserUUIDs
-                                toClassUUIDs: $toClassUUIDs
+                        addMessage(
+                            input: {
+                                toUserIds: $toUserIds
+                                toClassIds: $toClassIds
                                 data: $data
                                 assignmentType: $assignmentType
-                                type: $type
-                                subjectUUID: $subjectUUID
+                                messageType: $messageType
+                                subjectId: $subjectId
                                 assignmentDueDate: $assignmentDueDate
                                 files: $files
                             }
@@ -224,12 +224,12 @@ const Dashboard: FunctionComponent = () => {
                     }
                 `,
                 {
-                    toUserUUIDs: toUsersUUIDs,
-                    toClassUUIDs: toClassUUIDs,
+                    toUserIds: toUserIds,
+                    toClassIds: toClassIds,
                     data: messageData,
                     assignmentType: assignmentType || null,
-                    type: type,
-                    subjectUUID: subjectUUID,
+                    messageType: messageType,
+                    subjectId: subjectId,
                     assignmentDueDate: assignmentDueDate,
                     files,
                 }
@@ -358,9 +358,9 @@ const Dashboard: FunctionComponent = () => {
                                                     label='Потребители'
                                                     labelId='users-select-label'
                                                     multiple
-                                                    value={toUsersUUIDs}
+                                                    value={toUserIds}
                                                     onChange={(e) =>
-                                                        setToUsersUUIDs(
+                                                        setToUserIds(
                                                             e.target
                                                                 .value as string[]
                                                         )
@@ -370,7 +370,7 @@ const Dashboard: FunctionComponent = () => {
                                                             .map(
                                                                 (selection) =>
                                                                     data &&
-                                                                    data.users?.find(
+                                                                    data.getAllUsers?.find(
                                                                         (
                                                                             user: User
                                                                         ) =>
@@ -386,8 +386,8 @@ const Dashboard: FunctionComponent = () => {
                                                     }
                                                 >
                                                     {data &&
-                                                        data?.users &&
-                                                        data?.users.map(
+                                                        data?.getAllUsers &&
+                                                        data?.getAllUsers.map(
                                                             (
                                                                 user: User,
                                                                 i: number
@@ -401,7 +401,7 @@ const Dashboard: FunctionComponent = () => {
                                                                     <Checkbox
                                                                         color='primary'
                                                                         checked={
-                                                                            toUsersUUIDs.indexOf(
+                                                                            toUserIds.indexOf(
                                                                                 user.id as string
                                                                             ) >
                                                                             -1
@@ -429,7 +429,7 @@ const Dashboard: FunctionComponent = () => {
                                                     label='Класове'
                                                     labelId='class-select-label'
                                                     multiple
-                                                    value={toClassUUIDs}
+                                                    value={toClassIds}
                                                     onChange={(e) =>
                                                         setToClassUUIDs(
                                                             e.target
@@ -441,7 +441,7 @@ const Dashboard: FunctionComponent = () => {
                                                             .map(
                                                                 (selection) =>
                                                                     data &&
-                                                                    data.classes?.find(
+                                                                    data.getAllClasses?.find(
                                                                         (
                                                                             cls: Class
                                                                         ) =>
@@ -451,14 +451,14 @@ const Dashboard: FunctionComponent = () => {
                                                             )
                                                             .map(
                                                                 (cls) =>
-                                                                    `${cls?.classNumber} ${cls?.classLetter}`
+                                                                    `${cls?.number} ${cls?.letter}`
                                                             )
                                                             .join(', ')
                                                     }
                                                 >
                                                     {data &&
-                                                        data?.classes &&
-                                                        data?.classes.map(
+                                                        data?.getAllClasses &&
+                                                        data?.getAllClasses.map(
                                                             (
                                                                 cls: Class,
                                                                 i: number
@@ -472,14 +472,14 @@ const Dashboard: FunctionComponent = () => {
                                                                     <Checkbox
                                                                         color='primary'
                                                                         checked={
-                                                                            toClassUUIDs.indexOf(
+                                                                            toClassIds.indexOf(
                                                                                 cls.id as string
                                                                             ) >
                                                                             -1
                                                                         }
                                                                     />
                                                                     <ListItemText
-                                                                        primary={`${cls?.classNumber} ${cls?.classLetter}`}
+                                                                        primary={`${cls?.number} ${cls?.letter}`}
                                                                     />
                                                                 </MenuItem>
                                                             )
@@ -493,7 +493,7 @@ const Dashboard: FunctionComponent = () => {
                                                     styles['user-select']
                                                 }
                                                 label='Тип'
-                                                value={type}
+                                                value={messageType}
                                                 onChange={(e) => {
                                                     setType(
                                                         e.target.value as string
@@ -514,107 +514,111 @@ const Dashboard: FunctionComponent = () => {
                                                     )
                                                 )}
                                             </TextField>
-                                            {type && type === 'ASSIGNMENT' && (
-                                                <>
-                                                    <TextField
-                                                        select
-                                                        className={
-                                                            styles[
-                                                                'class-select'
-                                                            ]
-                                                        }
-                                                        fullWidth
-                                                        label='Вид задание'
-                                                        value={assignmentType}
-                                                        onChange={(e) => {
-                                                            setAssignmentType(
-                                                                e.target
-                                                                    .value as string
-                                                            );
-                                                        }}
-                                                        variant='outlined'
-                                                    >
-                                                        {Object.values(
-                                                            AssignmentType
-                                                        ).map((type) => (
-                                                            <MenuItem
-                                                                key={type}
-                                                                value={type}
-                                                            >
-                                                                {getAssignmentType(
-                                                                    type
-                                                                )}
-                                                            </MenuItem>
-                                                        ))}
-                                                    </TextField>
-                                                    <TextField
-                                                        select
-                                                        fullWidth
-                                                        className={
-                                                            styles[
-                                                                'subject-select'
-                                                            ]
-                                                        }
-                                                        label='Предмет'
-                                                        value={subjectUUID}
-                                                        onChange={(e) => {
-                                                            setSubjectUUID(
-                                                                e.target
-                                                                    .value as string
-                                                            );
-                                                        }}
-                                                        variant='outlined'
-                                                    >
-                                                        {data &&
-                                                            data?.subjects &&
-                                                            data?.subjects?.map(
-                                                                (
-                                                                    subject: Subject
-                                                                ) => (
-                                                                    <MenuItem
-                                                                        key={
-                                                                            subject.id
-                                                                        }
-                                                                        value={
-                                                                            subject.id
-                                                                        }
-                                                                    >
-                                                                        {`
-                                                                            ${subject.class?.classNumber}${subject.class?.classLetter} ${subject.name}
-                                                                            `}
-                                                                    </MenuItem>
-                                                                )
-                                                            )}
-                                                    </TextField>
-                                                    <MuiPickersUtilsProvider
-                                                        utils={DateFnsUtils}
-                                                    >
-                                                        <KeyboardDateTimePicker
-                                                            fullWidth
-                                                            inputVariant='outlined'
-                                                            ampm={false}
+                                            {messageType &&
+                                                messageType ===
+                                                    'ASSIGNMENT' && (
+                                                    <>
+                                                        <TextField
+                                                            select
                                                             className={
                                                                 styles[
-                                                                    'date-time-select'
+                                                                    'class-select'
                                                                 ]
                                                             }
-                                                            autoOk
-                                                            invalidDateMessage='Невалиден формат'
-                                                            label='Краен срок'
+                                                            fullWidth
+                                                            label='Вид задание'
                                                             value={
-                                                                assignmentDueDate
+                                                                assignmentType
                                                             }
-                                                            onChange={(
-                                                                date
-                                                            ) => {
-                                                                setAssignmentDueDate(
-                                                                    date
+                                                            onChange={(e) => {
+                                                                setAssignmentType(
+                                                                    e.target
+                                                                        .value as string
                                                                 );
                                                             }}
-                                                        />
-                                                    </MuiPickersUtilsProvider>
-                                                </>
-                                            )}
+                                                            variant='outlined'
+                                                        >
+                                                            {Object.values(
+                                                                AssignmentType
+                                                            ).map((type) => (
+                                                                <MenuItem
+                                                                    key={type}
+                                                                    value={type}
+                                                                >
+                                                                    {getAssignmentType(
+                                                                        type
+                                                                    )}
+                                                                </MenuItem>
+                                                            ))}
+                                                        </TextField>
+                                                        <TextField
+                                                            select
+                                                            fullWidth
+                                                            className={
+                                                                styles[
+                                                                    'subject-select'
+                                                                ]
+                                                            }
+                                                            label='Предмет'
+                                                            value={subjectId}
+                                                            onChange={(e) => {
+                                                                setSubjectUUID(
+                                                                    e.target
+                                                                        .value as string
+                                                                );
+                                                            }}
+                                                            variant='outlined'
+                                                        >
+                                                            {data &&
+                                                                data?.getAllSubjects &&
+                                                                data?.getAllSubjects?.map(
+                                                                    (
+                                                                        subject: Subject
+                                                                    ) => (
+                                                                        <MenuItem
+                                                                            key={
+                                                                                subject.id
+                                                                            }
+                                                                            value={
+                                                                                subject.id
+                                                                            }
+                                                                        >
+                                                                            {`
+                                                                            ${subject.class?.number}${subject.class?.letter} ${subject.name}
+                                                                            `}
+                                                                        </MenuItem>
+                                                                    )
+                                                                )}
+                                                        </TextField>
+                                                        <MuiPickersUtilsProvider
+                                                            utils={DateFnsUtils}
+                                                        >
+                                                            <KeyboardDateTimePicker
+                                                                fullWidth
+                                                                inputVariant='outlined'
+                                                                ampm={false}
+                                                                className={
+                                                                    styles[
+                                                                        'date-time-select'
+                                                                    ]
+                                                                }
+                                                                autoOk
+                                                                invalidDateMessage='Невалиден формат'
+                                                                label='Краен срок'
+                                                                value={
+                                                                    assignmentDueDate
+                                                                }
+                                                                onChange={(
+                                                                    date
+                                                                ) => {
+                                                                    setAssignmentDueDate(
+                                                                        date
+                                                                    );
+                                                                }}
+                                                            />
+                                                        </MuiPickersUtilsProvider>
+                                                    </>
+                                                )}
                                             <TextField
                                                 className={
                                                     styles['msg-data-select']
@@ -700,12 +704,12 @@ const Dashboard: FunctionComponent = () => {
                                                     }
                                                     avatar={
                                                         <Avatar>
-                                                            {message?.from?.firstName?.charAt(
+                                                            {message?.fromUser?.firstName?.charAt(
                                                                 0
                                                             )}
                                                         </Avatar>
                                                     }
-                                                    title={`${message?.from?.firstName} ${message?.from?.lastName}`}
+                                                    title={`${message?.fromUser?.firstName} ${message?.fromUser?.lastName}`}
                                                     subheader={format(
                                                         date,
                                                         'do MMM yyyy k:m',
@@ -749,20 +753,20 @@ const Dashboard: FunctionComponent = () => {
                                     }
                                 )}
                             </div>
-                            {user.userRole === 'ADMIN' && (
+                            {user.role === 'ADMIN' && (
                                 <Card
                                     elevation={0}
                                     className={`${styles['card']} ${styles['statistics']}`}
                                 >
                                     <CardHeader
-                                        title={data?.institution?.name}
-                                        subheader={`${data?.institution?.email}`}
+                                        title={data?.getInstitution?.name}
+                                        subheader={`${data?.getInstitution?.email}`}
                                     />
                                     <CardContent>
-                                        {data?.users &&
-                                            data?.students &&
-                                            data?.teachers &&
-                                            data?.parents && (
+                                        {data?.getAllUsers &&
+                                            data?.getAllStudents &&
+                                            data?.getAllTeachers &&
+                                            data?.getAllParents && (
                                                 <List
                                                     className={
                                                         styles[
@@ -814,7 +818,7 @@ const Dashboard: FunctionComponent = () => {
                                                             </Avatar>
                                                         </ListItemAvatar>
                                                         <ListItemText
-                                                            primary={`${data?.users.length}`}
+                                                            primary={`${data?.getAllUsers.length}`}
                                                             secondary='Общо потребители'
                                                         />
                                                     </ListItem>
@@ -825,7 +829,7 @@ const Dashboard: FunctionComponent = () => {
                                                             </Avatar>
                                                         </ListItemAvatar>
                                                         <ListItemText
-                                                            primary={`${data?.students.length}`}
+                                                            primary={`${data?.getAllStudents.length}`}
                                                             secondary='Ученици'
                                                         />
                                                     </ListItem>
@@ -836,7 +840,7 @@ const Dashboard: FunctionComponent = () => {
                                                             </Avatar>
                                                         </ListItemAvatar>
                                                         <ListItemText
-                                                            primary={`${data?.teachers.length}`}
+                                                            primary={`${data?.getAllTeachers.length}`}
                                                             secondary='Учители'
                                                         />
                                                     </ListItem>
@@ -847,7 +851,7 @@ const Dashboard: FunctionComponent = () => {
                                                             </Avatar>
                                                         </ListItemAvatar>
                                                         <ListItemText
-                                                            primary={`${data?.parents.length}`}
+                                                            primary={`${data?.getAllParents.length}`}
                                                             secondary='Родители'
                                                         />
                                                     </ListItem>

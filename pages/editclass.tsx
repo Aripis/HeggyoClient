@@ -31,12 +31,12 @@ const EditClass: FunctionComponent = () => {
     const [classNumber, setClassNumber] = useState(0);
     const [classLetter, setClassLetter] = useState('');
     const [totalStudentCount, setTotalStudentCount] = useState(0);
-    const [teacherUUID, setTeacherUUID] = useState('');
+    const [teacherId, setTeacherId] = useState('');
     const [error, setError] = useState('');
     const { data } = useSWR([
         gql`
-            query($includeClassId: String) {
-                availableClassTeachers(includeClassId: $includeClassId) {
+            query($classId: String) {
+                getAllAvailableClassTeachers(classId: $classId) {
                     id
                     user {
                         firstName
@@ -45,14 +45,14 @@ const EditClass: FunctionComponent = () => {
                 }
             }
         `,
-        JSON.stringify({ includeClassId: router.query.id }),
+        JSON.stringify({ classId: router.query.id }),
     ]);
 
     useEffect(() => {
         if (status === 'REDIRECT') {
             router.push('/login');
         }
-        if (user && user?.userRole !== 'ADMIN') {
+        if (user && user?.role !== 'ADMIN') {
             router.back();
         }
     }, [user, status]);
@@ -63,7 +63,7 @@ const EditClass: FunctionComponent = () => {
                 const classData = await graphQLClient.request(
                     gql`
                         query($id: String!) {
-                            class(id: $id) {
+                            getClass(id: $id) {
                                 id
                                 totalStudentCount
                                 teacher {
@@ -73,8 +73,8 @@ const EditClass: FunctionComponent = () => {
                                         lastName
                                     }
                                 }
-                                classLetter
-                                classNumber
+                                letter
+                                number
                             }
                         }
                     `,
@@ -82,10 +82,10 @@ const EditClass: FunctionComponent = () => {
                         id: router.query.id,
                     }
                 );
-                setClassNumber(classData.class.classNumber);
-                setClassLetter(classData.class.classLetter);
+                setClassNumber(classData.class.number);
+                setClassLetter(classData.class.letter);
                 setTotalStudentCount(classData.class.totalStudentCount);
-                setTeacherUUID(
+                setTeacherId(
                     classData.class.teacher ? classData.class.teacher.id : ''
                 );
             } catch (error) {
@@ -102,17 +102,17 @@ const EditClass: FunctionComponent = () => {
                     mutation(
                         $id: String!
                         $totalStudentCount: Int!
-                        $teacherUUID: String!
+                        $teacherId: String!
                         $classLetter: String!
                         $classNumber: Int!
                     ) {
                         updateClass(
-                            updateClassInput: {
+                            input: {
                                 id: $id
                                 totalStudentCount: $totalStudentCount
-                                teacherUUID: $teacherUUID
-                                classLetter: $classLetter
-                                classNumber: $classNumber
+                                teacherId: $teacherId
+                                letter: $classLetter
+                                number: $classNumber
                             }
                         ) {
                             classId
@@ -122,7 +122,7 @@ const EditClass: FunctionComponent = () => {
                 {
                     id: router.query.id,
                     totalStudentCount,
-                    teacherUUID,
+                    teacherId,
                     classLetter,
                     classNumber,
                 }
@@ -236,12 +236,12 @@ const EditClass: FunctionComponent = () => {
                                 <Select
                                     label='Класен ръководител'
                                     labelId='teacher-select-label'
-                                    value={teacherUUID}
+                                    value={teacherId}
                                     onChange={(e) =>
-                                        setTeacherUUID(e.target.value as string)
+                                        setTeacherId(e.target.value as string)
                                     }
                                     renderValue={(selected) => {
-                                        const selectedTeacher: Teacher = data?.availableClassTeachers.find(
+                                        const selectedTeacher: Teacher = data?.getAllAvailableClassTeachers.find(
                                             (teacher: Teacher) =>
                                                 teacher.id === selected
                                         );
@@ -250,8 +250,8 @@ const EditClass: FunctionComponent = () => {
                                 >
                                     <MenuItem value=''>Без</MenuItem>
                                     {data &&
-                                        data?.availableClassTeachers &&
-                                        data?.availableClassTeachers?.map(
+                                        data?.getAllAvailableClassTeachers &&
+                                        data?.getAllAvailableClassTeachers?.map(
                                             (teacher: Teacher, i: number) => (
                                                 <MenuItem
                                                     key={i}

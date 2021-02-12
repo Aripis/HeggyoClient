@@ -23,7 +23,7 @@ const Register: FunctionComponent = () => {
     const [firstName, setFirstName] = useState('');
     const [middleName, setMiddleName] = useState('');
     const [lastName, setLastName] = useState('');
-    const [userEmail, setUserEmail] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [registerToken, setRegisterToken] = useState('');
     const [revealPassword, setRevealPassword] = useState(false);
@@ -37,16 +37,16 @@ const Register: FunctionComponent = () => {
                         $firstName: String!
                         $middleName: String!
                         $lastName: String!
-                        $userEmail: String!
+                        $email: String!
                         $password: String!
                         $registerToken: String!
                     ) {
                         register(
-                            createUserInput: {
+                            input: {
                                 firstName: $firstName
                                 middleName: $middleName
                                 lastName: $lastName
-                                email: $userEmail
+                                email: $email
                                 password: $password
                                 registerToken: $registerToken
                             }
@@ -59,7 +59,7 @@ const Register: FunctionComponent = () => {
                     firstName,
                     middleName,
                     lastName,
-                    userEmail,
+                    email,
                     password,
                     registerToken,
                 }
@@ -116,9 +116,9 @@ const Register: FunctionComponent = () => {
                             className={styles.textfield}
                             variant='outlined'
                             type='email'
-                            value={userEmail}
+                            value={email}
                             required
-                            onChange={(e) => setUserEmail(e.target.value)}
+                            onChange={(e) => setEmail(e.target.value)}
                         />
                         <TextField
                             label='Регистрационен код'

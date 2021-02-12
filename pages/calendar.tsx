@@ -59,25 +59,15 @@ const CalendarComponent: FunctionComponent = () => {
     const { data, mutate } = useSWR([
         gql`
             query($filterByType: MessageType) {
-                messagesByCriteria(criteria: { messageType: $filterByType }) {
+                getAllMessagesByCriteria(
+                    input: { messageType: $filterByType }
+                ) {
                     id
                     createdAt
                     assignmentType
                     assignmentDueDate
                     subject {
                         name
-                    }
-                }
-                classes {
-                    id
-                    classNumber
-                    classLetter
-                }
-                teachers {
-                    id
-                    user {
-                        firstName
-                        lastName
                     }
                 }
             }
@@ -105,7 +95,7 @@ const CalendarComponent: FunctionComponent = () => {
             const data = await graphQLClient.request(
                 gql`
                     query($id: String!) {
-                        message(id: $id) {
+                        getMessage(id: $id) {
                             id
                             createdAt
                             assignmentType
@@ -120,7 +110,7 @@ const CalendarComponent: FunctionComponent = () => {
                 `,
                 { id }
             );
-            setEditDialog(data.message);
+            setEditDialog(data.getMessage);
         } catch (error) {
             setError('Неизвестна грешка');
         }
@@ -137,7 +127,7 @@ const CalendarComponent: FunctionComponent = () => {
                         $status: MessageStatus!
                     ) {
                         updateMessage(
-                            updateMessageInput: {
+                            input: {
                                 id: $id
                                 data: $data
                                 assignmentDueDate: $assignmentDueDate
@@ -199,8 +189,8 @@ const CalendarComponent: FunctionComponent = () => {
                             <Calendar
                                 localizer={localizer}
                                 events={
-                                    data.messagesByCriteria &&
-                                    data.messagesByCriteria?.map(
+                                    data.getAllMessagesByCriteria &&
+                                    data.getAllMessagesByCriteria?.map(
                                         (event: Message) => ({
                                             id: event.id,
                                             title: `${

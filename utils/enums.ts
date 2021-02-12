@@ -23,7 +23,7 @@ export enum UserStatus {
     UNVERIFIED = 'UNVERIFIED',
 }
 
-export enum UserRoles {
+export enum UserRole {
     ADMIN = 'ADMIN',
     PARENT = 'PARENT',
     STUDENT = 'STUDENT',
@@ -62,9 +62,17 @@ export enum AssignmentType {
     EXAM = 'EXAM',
 }
 
-export enum GradeTypes {
+export enum GradeType {
     YEAR = 'YEAR',
     TURM_1 = 'TURM_1',
     TURM_2 = 'TURM_2',
     ONGOING = 'ONGOING',
+}
+
+export enum GradeWord {
+    BAD = 'BAD',
+    AVERAGE = 'AVERAGE',
+    GOOD = 'GOOD',
+    VERY_GOOD = 'VERY_GOOD',
+    EXCELLENT = 'EXCELLENT',
 }

@@ -48,8 +48,8 @@ interface ScheduleField {
     weekDay: string;
     startTime: Date | null;
     endTime: Date | null;
-    subjectUUID: string;
-    teachersUUIDs: string[];
+    subjectId: string;
+    teachersIds: string[];
     room: string;
 }
 
@@ -73,9 +73,9 @@ const ScheduleField: FunctionComponent<ScheduleFieldProps> = (props) => {
     const [weekDay, setWeekDay] = useState('');
     const [startTime, setStartTime] = useState<Date | null>(new Date());
     const [endTime, setEndTime] = useState<Date | null>(new Date());
-    const [subjectUUID, setSubjectUUID] = useState('');
+    const [subjectId, setSubjectId] = useState('');
     const [room, setRoom] = useState('');
-    const [teachersUUIDs, setTeachersUUIDs] = useState<string[]>([]);
+    const [teachersIds, setTeachersIds] = useState<string[]>([]);
     const weekDays = [
         { value: 'MONDAY', content: 'Понеделник' },
         { value: 'TUESDAY', content: 'Вторник' },
@@ -112,8 +112,8 @@ const ScheduleField: FunctionComponent<ScheduleFieldProps> = (props) => {
                         weekDay: e.target.value,
                         startTime: startTime,
                         endTime: endTime,
-                        subjectUUID: subjectUUID,
-                        teachersUUIDs: teachersUUIDs,
+                        subjectId: subjectId,
+                        teachersIds: teachersIds,
                         room: room,
                     });
                 }}
@@ -143,8 +143,8 @@ const ScheduleField: FunctionComponent<ScheduleFieldProps> = (props) => {
                             weekDay: weekDay,
                             startTime: date && new Date(date.setSeconds(0, 0)),
                             endTime: endTime,
-                            subjectUUID: subjectUUID,
-                            teachersUUIDs: teachersUUIDs,
+                            subjectId: subjectId,
+                            teachersIds: teachersIds,
                             room: room,
                         });
                     }}
@@ -165,8 +165,8 @@ const ScheduleField: FunctionComponent<ScheduleFieldProps> = (props) => {
                             weekDay: weekDay,
                             startTime: startTime,
                             endTime: date && new Date(date.setSeconds(0, 0)),
-                            subjectUUID: subjectUUID,
-                            teachersUUIDs: teachersUUIDs,
+                            subjectId: subjectId,
+                            teachersIds: teachersIds,
                             room: room,
                         });
                     }}
@@ -181,16 +181,16 @@ const ScheduleField: FunctionComponent<ScheduleFieldProps> = (props) => {
                 <Select
                     label='Предмет'
                     labelId='subject-select-label'
-                    value={subjectUUID}
+                    value={subjectId}
                     onChange={(e) => {
-                        setSubjectUUID(e.target.value as string);
+                        setSubjectId(e.target.value as string);
                         updateSubject({
                             id: props.id,
                             weekDay: weekDay,
                             startTime: startTime,
                             endTime: endTime,
-                            subjectUUID: e.target.value as string,
-                            teachersUUIDs: teachersUUIDs,
+                            subjectId: e.target.value as string,
+                            teachersIds: teachersIds,
                             room: room,
                         });
                     }}
@@ -200,13 +200,13 @@ const ScheduleField: FunctionComponent<ScheduleFieldProps> = (props) => {
                             | undefined = props.subjects.find(
                             (subject: Subject) => subject.id === selected
                         );
-                        return `${selectedSubject?.class?.classNumber}${selectedSubject?.class?.classLetter} ${selectedSubject?.name}`;
+                        return `${selectedSubject?.class?.number}${selectedSubject?.class?.letter} ${selectedSubject?.name}`;
                     }}
                 >
                     {props.subjects &&
                         props.subjects?.map((subject: Subject, i: number) => (
                             <MenuItem key={i} value={subject.id}>
-                                {`${subject?.class?.classNumber}${subject?.class?.classLetter} ${subject?.name}`}
+                                {`${subject?.class?.number}${subject?.class?.letter} ${subject?.name}`}
                             </MenuItem>
                         ))}
                 </Select>
@@ -223,16 +223,16 @@ const ScheduleField: FunctionComponent<ScheduleFieldProps> = (props) => {
                     label='Преподаватели'
                     labelId='teachers-select-label'
                     multiple
-                    value={teachersUUIDs}
+                    value={teachersIds}
                     onChange={(e) => {
-                        setTeachersUUIDs(e.target.value as string[]);
+                        setTeachersIds(e.target.value as string[]);
                         updateSubject({
                             id: props.id,
                             weekDay: weekDay,
                             startTime: startTime,
                             endTime: endTime,
-                            subjectUUID: subjectUUID,
-                            teachersUUIDs: e.target.value as string[],
+                            subjectId: subjectId,
+                            teachersIds: e.target.value as string[],
                             room: room,
                         });
                     }}
@@ -251,14 +251,14 @@ const ScheduleField: FunctionComponent<ScheduleFieldProps> = (props) => {
                             .join(', ')
                     }
                 >
-                    {teachersUUIDs &&
+                    {teachersIds &&
                         props.teachers &&
                         props.teachers.map((teacher: Teacher, i: number) => (
                             <MenuItem key={i} value={teacher.id}>
                                 <Checkbox
                                     color='primary'
                                     checked={
-                                        teachersUUIDs.indexOf(
+                                        teachersIds.indexOf(
                                             teacher.id as string
                                         ) > -1
                                     }
@@ -282,8 +282,8 @@ const ScheduleField: FunctionComponent<ScheduleFieldProps> = (props) => {
                         weekDay: weekDay,
                         startTime: startTime,
                         endTime: endTime,
-                        subjectUUID: subjectUUID,
-                        teachersUUIDs: teachersUUIDs,
+                        subjectId: subjectId,
+                        teachersIds: teachersIds,
                         room: e.target.value,
                     });
                 }}
@@ -298,34 +298,34 @@ const AddSchedule: FunctionComponent = () => {
     const { user, status } = useAuth();
 
     const [error, setError] = useState('');
-    const [classUUID, setClassUUID] = useState('');
+    const [classId, setClassId] = useState('');
     const [fields, setFields] = useState<ScheduleField[]>([
         {
             id: 0,
             startTime: new Date(new Date().setSeconds(0, 0)),
             endTime: new Date(new Date().setSeconds(0, 0)),
             weekDay: '',
-            subjectUUID: '',
-            teachersUUIDs: [],
+            subjectId: '',
+            teachersIds: [],
             room: '',
         },
     ]);
 
     const { data } = useSWR(gql`
         query {
-            classes {
+            getAllClasses {
                 id
-                classNumber
-                classLetter
+                number
+                letter
             }
-            teachers {
+            getAllTeachers {
                 id
                 user {
                     firstName
                     lastName
                 }
             }
-            subjects {
+            getAllSubjects {
                 id
                 name
                 description
@@ -333,8 +333,8 @@ const AddSchedule: FunctionComponent = () => {
                 endYear
                 class {
                     id
-                    classNumber
-                    classLetter
+                    number
+                    letter
                 }
             }
         }
@@ -344,7 +344,7 @@ const AddSchedule: FunctionComponent = () => {
         if (status === 'REDIRECT') {
             router.push('/login');
         }
-        if (user && user?.userRole !== 'ADMIN') {
+        if (user && user?.role !== 'ADMIN') {
             router.back();
         }
     }, [user, status]);
@@ -359,19 +359,19 @@ const AddSchedule: FunctionComponent = () => {
                             $startTime: Date!
                             $endTime: Date!
                             $day: WeekDays!
-                            $subjectUUID: String!
-                            $classUUID: String!
-                            $teachersUUIDs: [String!]!
+                            $subjectId: String!
+                            $classId: String!
+                            $teachersIds: [String!]!
                             $room: String!
                         ) {
-                            createSchedule(
-                                createScheduleInput: {
+                            addSchedule(
+                                input: {
                                     startTime: $startTime
                                     endTime: $endTime
                                     day: $day
-                                    subjectUUID: $subjectUUID
-                                    classUUID: $classUUID
-                                    teachersUUIDs: $teachersUUIDs
+                                    subjectId: $subjectId
+                                    classId: $classId
+                                    teachersIds: $teachersIds
                                     room: $room
                                 }
                             ) {
@@ -383,9 +383,9 @@ const AddSchedule: FunctionComponent = () => {
                         startTime: field.startTime,
                         endTime: field.endTime,
                         day: field.weekDay,
-                        subjectUUID: field.subjectUUID,
-                        classUUID: classUUID,
-                        teachersUUIDs: field.teachersUUIDs,
+                        subjectId: field.subjectId,
+                        classId: classId,
+                        teachersIds: field.teachersIds,
                         room: field.room,
                     }
                 );
@@ -413,8 +413,8 @@ const AddSchedule: FunctionComponent = () => {
                 startTime: new Date(),
                 endTime: new Date(),
                 weekDay: '',
-                subjectUUID: '',
-                teachersUUIDs: [],
+                subjectId: '',
+                teachersIds: [],
                 room: '',
             },
         ]);
@@ -489,23 +489,21 @@ const AddSchedule: FunctionComponent = () => {
                                     <Select
                                         label='Клас'
                                         labelId='class-select-label'
-                                        value={classUUID}
+                                        value={classId}
                                         onChange={(e) =>
-                                            setClassUUID(
-                                                e.target.value as string
-                                            )
+                                            setClassId(e.target.value as string)
                                         }
                                         renderValue={(selected) => {
-                                            const selectedClass: Class = data.classes.find(
+                                            const selectedClass: Class = data.getAllClasses.find(
                                                 (currClass: Class) =>
                                                     currClass.id === selected
                                             );
-                                            return `${selectedClass.classNumber} ${selectedClass.classLetter}`;
+                                            return `${selectedClass.number} ${selectedClass.letter}`;
                                         }}
                                     >
                                         {data &&
-                                            data?.classes &&
-                                            data?.classes?.map(
+                                            data?.getAllClasses &&
+                                            data?.getAllClasses?.map(
                                                 (
                                                     currClass: Class,
                                                     i: number
@@ -514,14 +512,14 @@ const AddSchedule: FunctionComponent = () => {
                                                         key={i}
                                                         value={currClass.id}
                                                     >
-                                                        {`${currClass.classNumber} ${currClass.classLetter}`}
+                                                        {`${currClass.number} ${currClass.letter}`}
                                                     </MenuItem>
                                                 )
                                             )}
                                     </Select>
                                 </FormControl>
                             </div>
-                            {classUUID && data && (
+                            {classId && data && (
                                 <>
                                     <MuiPickersUtilsProvider
                                         utils={DateFnsUtils}
@@ -532,12 +530,13 @@ const AddSchedule: FunctionComponent = () => {
                                                     key={field.id}
                                                     id={field.id}
                                                     onDelete={removeSubject}
-                                                    teachers={data?.teachers}
-                                                    subjects={data?.subjects.filter(
+                                                    teachers={
+                                                        data?.getAllTeachers
+                                                    }
+                                                    subjects={data?.getAllSubjects.filter(
                                                         (subject: Subject) =>
                                                             subject.class
-                                                                ?.id ===
-                                                            classUUID
+                                                                ?.id === classId
                                                     )}
                                                 />
                                             ))}
