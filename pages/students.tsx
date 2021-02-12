@@ -276,42 +276,24 @@ const GradeDialog: FunctionComponent<GradeDialog> = (props) => {
                                         );
                                     }}
                                     renderValue={(selected) =>
-                                        selected as string
+                                        ((getGradeName(
+                                            getGradeForBackEnd(
+                                                grade
+                                            )?.toUpperCase()
+                                        ) as string) +
+                                            ' ' +
+                                            selected) as string
                                     }
                                 >
                                     {[2, 3, 4, 5, 6].map((grade) => (
                                         <MenuItem key={grade} value={grade}>
-                                            {grade}
-                                        </MenuItem>
-                                    ))}
-                                </Select>
-                            </FormControl>
-                            <FormControl
-                                variant='outlined'
-                                className={styles['grade-w-words-select']}
-                            >
-                                <InputLabel id='grade-w-words-select-label'>
-                                    Оценка с думи
-                                </InputLabel>
-                                <Select
-                                    label='Оценка'
-                                    labelId='grade-w-words-select-label'
-                                    value={gradeWithWords}
-                                    onChange={(e) => {
-                                        setGradeWithWords(
-                                            e.target.value as string
-                                        );
-                                    }}
-                                    renderValue={(selected) =>
-                                        selected as string
-                                    }
-                                >
-                                    {[2, 3, 4, 5, 6].map((grade) => (
-                                        <MenuItem
-                                            key={grade}
-                                            value={getGradeForBackEnd(grade)}
-                                        >
-                                            {getGradeName(grade.toString())}
+                                            {(getGradeName(
+                                                getGradeForBackEnd(
+                                                    grade
+                                                )?.toUpperCase()
+                                            ) as string) +
+                                                ' ' +
+                                                grade}
                                         </MenuItem>
                                     ))}
                                 </Select>
