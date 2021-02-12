@@ -55,6 +55,10 @@
         display: flex;
         flex-direction: row;
 
+        .contract-type {
+            width: 200px;
+        }
+
         & > * {
             margin-right: 20px;
         }

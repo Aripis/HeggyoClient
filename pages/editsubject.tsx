@@ -94,13 +94,13 @@ const EditSubject: FunctionComponent = () => {
                         id: router.query.id,
                     }
                 );
-                setName(subjectData.subject.name);
-                setDescription(subjectData.subject.description);
-                setStartYear(subjectData.subject.startYear);
-                setEndYear(subjectData.subject.endYear);
-                setClassId(subjectData.subject.class.id);
+                setName(subjectData.getSubject.name);
+                setDescription(subjectData.getSubject.description);
+                setStartYear(subjectData.getSubject.startYear);
+                setEndYear(subjectData.getSubject.endYear);
+                setClassId(subjectData.getSubject.class.id);
                 setTeachersIds(
-                    subjectData.subject.teachers.map(
+                    subjectData.getSubject.teachers.map(
                         (teacher: Teacher) => teacher.id
                     )
                 );

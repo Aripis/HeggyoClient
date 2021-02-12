@@ -32,7 +32,7 @@ const EditForeignUser: FunctionComponent = () => {
     const [userId, setUserId] = useState('');
 
     const [recordMessage, setRecordMessage] = useState('');
-    const [teacherContract, setTeacherContract] = useState('');
+    const [contractType, setContractType] = useState('');
     const { r: role, id } = router.query;
 
     const forStudent = gql`
@@ -78,7 +78,17 @@ const EditForeignUser: FunctionComponent = () => {
     `;
 
     const { data } = useSWR([
-        role === 'STUDENT' ? forStudent : forTeacher,
+        id
+            ? role === 'STUDENT'
+                ? forStudent
+                : forTeacher
+            : gql`
+                  query {
+                      getProfile {
+                          id
+                      }
+                  }
+              `,
         JSON.stringify({ id }),
     ]);
 
@@ -91,7 +101,7 @@ const EditForeignUser: FunctionComponent = () => {
         }
         if (role === 'TEACHER') {
             setUserStatus(data?.getTeacher?.user?.status as string);
-            setTeacherContract(data?.getTeacher?.contractType as string);
+            setContractType(data?.getTeacher?.contractType as string);
             setUserId(data?.getTeacher?.user?.id as string);
         } else if (role === 'STUDENT') {
             setUserStatus(data?.getStudent?.user?.status as string);
@@ -163,14 +173,13 @@ const EditForeignUser: FunctionComponent = () => {
                 `,
                 {
                     tchId: id,
-                    contractType: teacherContract,
+                    contractType,
                     userId,
                     userStatus,
                 }
             );
             router.push('/users');
         } catch (error) {
-            console.log(error);
             setError('Неизвестна грешка');
         }
     };
@@ -290,16 +299,16 @@ const EditForeignUser: FunctionComponent = () => {
                                 />
                             </>
                         )}
-                        {role === 'TEACHER' && teacherContract && (
+                        {role === 'TEACHER' && (
                             <>
                                 <TextField
                                     select
                                     label='Договор'
-                                    value={teacherContract}
+                                    value={contractType || ''}
                                     variant='outlined'
                                     className={styles['contract-type']}
                                     onChange={(e) => {
-                                        setTeacherContract(
+                                        setContractType(
                                             e.target.value as string
                                         );
                                     }}

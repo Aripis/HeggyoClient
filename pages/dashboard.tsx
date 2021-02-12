@@ -226,6 +226,7 @@ const Dashboard: FunctionComponent = () => {
                     files,
                 }
             );
+            mutate();
             setAddDialog(false);
         } catch (error) {
             setError('Неизвестна грешка');

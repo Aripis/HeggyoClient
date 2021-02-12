@@ -33,7 +33,7 @@ import useSWR from 'swr';
 import { gql } from 'graphql-request';
 import Alert from '@material-ui/lab/Alert';
 import { Message } from 'utils/interfaces';
-import { getAssignmentType } from 'utils/helpers';
+import { getAssignmentType, getMessageStatus } from 'utils/helpers';
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { bg } from 'date-fns/locale';
@@ -84,11 +84,6 @@ const CalendarComponent: FunctionComponent = () => {
     if (!user) {
         return <Loader />;
     }
-
-    const asgStatus = [
-        { value: 'CREATED', content: 'Създадено' },
-        { value: 'PUBLISHED', content: 'Изпратено' },
-    ];
 
     const openDialog = async (id: string) => {
         try {
@@ -148,6 +143,7 @@ const CalendarComponent: FunctionComponent = () => {
             mutate();
             setEditDialog(null);
         } catch (error) {
+            console.log(error);
             setError('Неизвестна грешка');
         }
     };
@@ -212,6 +208,8 @@ const CalendarComponent: FunctionComponent = () => {
                                 endAccessor='end'
                                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                 onSelectEvent={(event: any) =>
+                                    (user?.role === 'ADMIN' ||
+                                        user?.role === 'TEACHER') &&
                                     openDialog(event.id)
                                 }
                             />
@@ -303,15 +301,16 @@ const CalendarComponent: FunctionComponent = () => {
                                             });
                                         }}
                                     >
-                                        {asgStatus &&
-                                            asgStatus.map((status) => (
+                                        {Object.values(MessageStatus).map(
+                                            (status) => (
                                                 <MenuItem
-                                                    key={status.value}
-                                                    value={status.value}
+                                                    key={status}
+                                                    value={status}
                                                 >
-                                                    {status.content}
+                                                    {getMessageStatus(status)}
                                                 </MenuItem>
-                                            ))}
+                                            )
+                                        )}
                                     </TextField>
                                 </div>
                             </DialogContent>

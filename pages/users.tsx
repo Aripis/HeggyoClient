@@ -346,28 +346,25 @@ const Users: FunctionComponent = () => {
                                     studentDossier={student?.dossier}
                                 />
                             ))}
-                            {data?.getAllTeachers &&
-                                data?.getAllTteachers?.map(
-                                    (teacher: Teacher, i: number) => (
-                                        <UsersComponent
-                                            key={i}
-                                            id={teacher?.id}
-                                            role={UserRole['TEACHER']}
-                                            firstName={teacher?.user?.firstName}
-                                            middleName={
-                                                teacher?.user?.middleName
-                                            }
-                                            lastName={teacher?.user?.lastName}
-                                            email={teacher?.user?.email}
-                                            status={teacher?.user?.status}
-                                            education={teacher?.education}
-                                            yearsExperience={
-                                                teacher?.yearsExperience
-                                            }
-                                            contractType={teacher?.contractType}
-                                        />
-                                    )
-                                )}
+                            {data?.getAllTeachers?.map(
+                                (teacher: Teacher, i: number) => (
+                                    <UsersComponent
+                                        key={i}
+                                        id={teacher?.id}
+                                        role={UserRole['TEACHER']}
+                                        firstName={teacher?.user?.firstName}
+                                        middleName={teacher?.user?.middleName}
+                                        lastName={teacher?.user?.lastName}
+                                        email={teacher?.user?.email}
+                                        status={teacher?.user?.status}
+                                        education={teacher?.education}
+                                        yearsExperience={
+                                            teacher?.yearsExperience
+                                        }
+                                        contractType={teacher?.contractType}
+                                    />
+                                )
+                            )}
                         </div>
                     )}
                 </div>

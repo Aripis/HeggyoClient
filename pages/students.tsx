@@ -56,8 +56,8 @@ import {
     getUserStatus,
     getUserRole,
     getGradeName,
-    getGradeForBackEnd,
     getGradeType,
+    getGradeEnum,
 } from 'utils/helpers';
 import graphQLClient from 'utils/graphqlclient';
 import AddOutlined from '@material-ui/icons/AddOutlined';
@@ -174,12 +174,12 @@ const UsersComponent: FunctionComponent<UsersProps> = (props) => {
     );
 };
 
-interface GradeDialog {
+interface GradeDialogProps {
     studentId: string | undefined;
     subjectId: string | undefined;
 }
 
-const GradeDialog: FunctionComponent<GradeDialog> = (props) => {
+const GradeDialog: FunctionComponent<GradeDialogProps> = (props) => {
     const [open, setOpen] = useState(false);
     const [message, setMessage] = useState('');
     const [grade, setGrade] = useState(6);
@@ -192,16 +192,16 @@ const GradeDialog: FunctionComponent<GradeDialog> = (props) => {
                 gql`
                     mutation(
                         $studentId: String!
-                        $subjectUUID: String!
+                        $subjectId: String!
                         $grade: Float!
                         $message: String!
-                        $gradeWithWords: String!
+                        $gradeWithWords: GradeWord!
                         $type: GradeType!
                     ) {
                         addGrade(
                             input: {
                                 studentId: $studentId
-                                subjectUUID: $subjectUUID
+                                subjectId: $subjectId
                                 message: $message
                                 grade: $grade
                                 gradeWithWords: $gradeWithWords
@@ -214,10 +214,10 @@ const GradeDialog: FunctionComponent<GradeDialog> = (props) => {
                 `,
                 {
                     studentId: props.studentId,
-                    subjectUUID: props.subjectId,
+                    subjectId: props.subjectId,
                     message,
                     grade,
-                    gradeWithWords: getGradeForBackEnd(grade),
+                    gradeWithWords: getGradeEnum(grade),
                     type: gradeType,
                 }
             );
@@ -276,24 +276,14 @@ const GradeDialog: FunctionComponent<GradeDialog> = (props) => {
                                         );
                                     }}
                                     renderValue={(selected) =>
-                                        ((getGradeName(
-                                            getGradeForBackEnd(
-                                                grade
-                                            )?.toUpperCase()
-                                        ) as string) +
+                                        (getGradeName(grade) +
                                             ' ' +
                                             selected) as string
                                     }
                                 >
                                     {[2, 3, 4, 5, 6].map((grade) => (
                                         <MenuItem key={grade} value={grade}>
-                                            {(getGradeName(
-                                                getGradeForBackEnd(
-                                                    grade
-                                                )?.toUpperCase()
-                                            ) as string) +
-                                                ' ' +
-                                                grade}
+                                            {getGradeName(grade) + ' ' + grade}
                                         </MenuItem>
                                     ))}
                                 </Select>
@@ -313,7 +303,7 @@ const GradeDialog: FunctionComponent<GradeDialog> = (props) => {
                                         setGradeType(e.target.value as string);
                                     }}
                                     renderValue={(selected) =>
-                                        selected as string
+                                        getGradeType(selected as string)
                                     }
                                 >
                                     {Object.values(GradeType).map(
@@ -322,9 +312,7 @@ const GradeDialog: FunctionComponent<GradeDialog> = (props) => {
                                                 key={gradeType}
                                                 value={gradeType}
                                             >
-                                                {getGradeType(
-                                                    gradeType.toString()
-                                                )}
+                                                {getGradeType(gradeType)}
                                             </MenuItem>
                                         )
                                     )}
@@ -464,7 +452,7 @@ const GradeTable: FunctionComponent<GradeTableProps> = (props) => {
                                             }
                                             key={grade.id}
                                         >{`${getGradeName(
-                                            grade.gradeWithWords?.toUpperCase(),
+                                            grade.gradeWithWords,
                                             true
                                         )} ${grade.grade}`}</span>
                                         <Popover

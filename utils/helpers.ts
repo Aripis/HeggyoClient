@@ -34,45 +34,50 @@ export const getGradeType = (type: string): string | undefined => {
         case 'TURM_2':
             return '2 срок';
         case 'ONGOING':
-            return 'текуща';
+            return 'Текуща';
         case 'YEAR':
-            return 'годишна';
+            return 'Годишна';
         default:
             return undefined;
     }
 };
 
-export const getGradeForBackEnd = (grade: number): string | undefined => {
+export const getGradeEnum = (grade: number): string | undefined => {
     switch (grade) {
         case 2:
-            return 'bad';
+            return 'BAD';
         case 3:
-            return 'average';
+            return 'AVERAGE';
         case 4:
-            return 'good';
+            return 'GOOD';
         case 5:
-            return 'very good';
+            return 'VERY GOOD';
         case 6:
-            return 'excellent';
+            return 'EXCELLENT';
         default:
             return undefined;
     }
 };
 
 export const getGradeName = (
-    name: string | undefined,
+    name: string | number | undefined,
     short = false
 ): string | undefined => {
     switch (name) {
         case 'BAD':
+        case 2:
             return short ? 'сл.' : 'слаб';
         case 'AVERAGE':
+        case 3:
             return short ? 'ср.' : 'среден';
         case 'GOOD':
+        case 4:
             return short ? 'доб.' : 'добър';
         case 'VERY GOOD':
+        case 5:
             return short ? 'мн. доб.' : 'мн. добър';
         case 'EXCELLENT':
+        case 6:
             return short ? 'отл.' : 'отличен';
         default:
             return undefined;

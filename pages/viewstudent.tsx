@@ -97,7 +97,7 @@ const ViewStudent: FunctionComponent = () => {
     const [subjectId, setSubjectId] = useState('');
     const [error, setError] = useState('');
 
-    const { data } = useSWR([
+    const { data, mutate } = useSWR([
         gql`
             query($studentId: String!) {
                 getStudent(id: $studentId) {
@@ -161,7 +161,7 @@ const ViewStudent: FunctionComponent = () => {
         if (status === 'REDIRECT') {
             router.push('/login');
         }
-        if (user && user?.role !== 'ADMIN') {
+        if (user && user?.role !== 'ADMIN' && user?.role !== 'TEACHER') {
             router.back();
         }
     }, [data, status, router]);
@@ -195,6 +195,7 @@ const ViewStudent: FunctionComponent = () => {
                     message,
                 }
             );
+            mutate();
             setAddDialog(false);
         } catch (error) {
             console.log(error);
