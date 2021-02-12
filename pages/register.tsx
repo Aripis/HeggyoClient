@@ -66,6 +66,7 @@ const Register: FunctionComponent = () => {
             );
             router.replace('/login');
         } catch (error) {
+            console.log(error);
             setError('Неизвестна грешка');
         }
     };

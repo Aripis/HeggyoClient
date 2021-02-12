@@ -327,6 +327,7 @@ const Users: FunctionComponent = () => {
                             />
                         </div>
                     </form>
+                    {console.log(data)}
                     {data && (
                         <div className={styles['users-container']}>
                             {data?.getAllStudents?.map((student: Student) => (

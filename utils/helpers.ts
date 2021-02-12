@@ -6,6 +6,7 @@ import {
     ContractType,
     AssignmentType,
     MessageType,
+    MessageStatus,
 } from './enums';
 
 export const getGradeType = (gradeType: string): string | undefined => {
@@ -60,14 +61,27 @@ export const getGradeName = (
     }
 };
 
+export const getMessageStatus = (
+    status: MessageStatus | string | undefined
+): string | undefined => {
+    switch (status) {
+        case 'CREATED':
+            return 'Създадено';
+        case 'PUBLISHED':
+            return 'Изпратено';
+        default:
+            return undefined;
+    }
+};
+
 export const getMessageType = (
     type: MessageType | string | undefined
 ): string | undefined => {
     switch (type) {
-        case 'MESSAGE':
-            return 'Съобщениe';
         case 'ASSIGNMENT':
             return 'Заданиe';
+        case 'MESSAGE':
+            return 'Съобщениe';
         default:
             return undefined;
     }

@@ -584,7 +584,6 @@ const Students: FunctionComponent = () => {
         if (user && user.role !== 'ADMIN' && user.role !== 'TEACHER') {
             router.back();
         }
-        console.log(data);
     }, [user, status, data]);
 
     if (!user) {

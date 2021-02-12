@@ -56,6 +56,7 @@ import {
     getInstitutionType,
     getEducationStage,
     getMessageType,
+    getMessageStatus,
     getAssignmentType,
 } from 'utils/helpers';
 import Alert from '@material-ui/lab/Alert';
@@ -63,7 +64,7 @@ import Alert from '@material-ui/lab/Alert';
 import { format } from 'date-fns';
 import { bg } from 'date-fns/locale';
 import graphQLClient from 'utils/graphqlclient';
-import { AssignmentType, MessageType } from 'utils/enums';
+import { AssignmentType, MessageType, MessageStatus } from 'utils/enums';
 import {
     KeyboardDateTimePicker,
     MuiPickersUtilsProvider,
@@ -94,15 +95,6 @@ const Dashboard: FunctionComponent = () => {
     );
 
     const [error, setError] = useState('');
-
-    const messageTypes = [
-        { value: 'MESSAGE', content: 'Съобщения' },
-        { value: 'ASSIGNMENT', content: 'Задания' },
-    ];
-    const messageStatus = [
-        { value: 'CREATED', content: 'Създадени' },
-        { value: 'PUBLISHED', content: 'Изпратени' },
-    ];
 
     const { data, mutate } = useSWR([
         gql`
@@ -277,15 +269,16 @@ const Dashboard: FunctionComponent = () => {
                                         <MenuItem value={undefined}>
                                             Без
                                         </MenuItem>
-                                        {messageTypes &&
-                                            messageTypes.map((type) => (
+                                        {Object.values(MessageType).map(
+                                            (type) => (
                                                 <MenuItem
-                                                    key={type.value}
-                                                    value={type.value}
+                                                    key={type}
+                                                    value={type}
                                                 >
-                                                    {type.content}
+                                                    {getMessageType(type)}
                                                 </MenuItem>
-                                            ))}
+                                            )
+                                        )}
                                     </TextField>
                                     <TextField
                                         select
@@ -300,18 +293,20 @@ const Dashboard: FunctionComponent = () => {
                                             mutate();
                                         }}
                                     >
+                                        messageSta
                                         <MenuItem value={undefined}>
                                             Без
                                         </MenuItem>
-                                        {messageStatus &&
-                                            messageStatus.map((status) => (
+                                        {Object.values(MessageStatus).map(
+                                            (status) => (
                                                 <MenuItem
-                                                    key={status.value}
-                                                    value={status.value}
+                                                    key={status}
+                                                    value={status}
                                                 >
-                                                    {status.content}
+                                                    {getMessageStatus(status)}
                                                 </MenuItem>
-                                            ))}
+                                            )
+                                        )}
                                     </TextField>
                                     <Button
                                         disableElevation
@@ -790,7 +785,7 @@ const Dashboard: FunctionComponent = () => {
                                                         <ListItemText
                                                             primary={getEducationStage(
                                                                 data
-                                                                    ?.institution
+                                                                    ?.getInstitution
                                                                     ?.educationalStage
                                                             )}
                                                             secondary='Тип'
@@ -805,7 +800,7 @@ const Dashboard: FunctionComponent = () => {
                                                         <ListItemText
                                                             primary={getInstitutionType(
                                                                 data
-                                                                    ?.institution
+                                                                    ?.getInstitution
                                                                     ?.type
                                                             )}
                                                             secondary='Вид'
