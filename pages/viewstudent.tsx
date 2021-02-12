@@ -46,7 +46,7 @@ interface DossierProps {
     fromUser: User | undefined;
     subject?: Subject | undefined;
     message?: string | undefined;
-    studentFiles: UploadFile[];
+    files: UploadFile[];
     date: Date | undefined;
 }
 
@@ -73,7 +73,7 @@ const StudentsComponent: FunctionComponent<DossierProps> = (props) => {
                 <Typography>{`${props.message || ''}`}</Typography>
                 <br />
                 <Typography>
-                    {props.studentFiles?.map((file, i: number) => (
+                    {props.files?.map((file, i: number) => (
                         <Fragment key={i}>
                             <Link href={file.publicUrl} target='_blank'>
                                 {`${file.filename}`}
@@ -133,13 +133,14 @@ const ViewStudent: FunctionComponent = () => {
                             name
                         }
                         message
-                        studentFiles {
+                        files {
                             filename
                             publicUrl
                         }
                     }
                 }
-                subjects {
+
+                getAllSubjects {
                     id
                     name
                     description
@@ -183,7 +184,7 @@ const ViewStudent: FunctionComponent = () => {
                                 message: $message
                             }
                         ) {
-                            dossierId
+                            studentDossierId
                         }
                     }
                 `,
@@ -223,9 +224,9 @@ const ViewStudent: FunctionComponent = () => {
                         <div className={styles['profile-info']}>
                             <Typography className={styles['name']} variant='h4'>
                                 {data &&
-                                    data?.student &&
-                                    data?.student?.user &&
-                                    `${data.student.user.firstName} ${data.student.user.middleName} ${data.student.user.lastName}`}
+                                    data?.getStudent &&
+                                    data?.getStudent?.user &&
+                                    `${data.getStudent.user.firstName} ${data.getStudent.user.middleName} ${data.getStudent.user.lastName}`}
                             </Typography>
                             <Breadcrumbs className={styles['additional-info']}>
                                 <Typography
@@ -233,26 +234,26 @@ const ViewStudent: FunctionComponent = () => {
                                 >
                                     <PersonOutlineOutlined />
                                     {data &&
-                                        data?.student &&
-                                        data?.student?.user &&
-                                        getUserRole(data.student.user.role)}
+                                        data?.getStudent &&
+                                        data?.getStudent?.user &&
+                                        getUserRole(data.getStudent.user.role)}
                                 </Typography>
                                 {data &&
-                                    data?.student &&
-                                    data?.student?.class &&
-                                    data.student.class.number &&
-                                    data.student.class.letter && (
+                                    data?.getStudent &&
+                                    data?.getStudent?.class &&
+                                    data.getStudent.class.number &&
+                                    data.getStudent.class.letter && (
                                         <Typography>
-                                            {data.student.class.number}
-                                            {data.student.class.letter}
+                                            {data.getStudent.class.number}
+                                            {data.getStudent.class.letter}
                                         </Typography>
                                     )}
                             </Breadcrumbs>
                             <Typography className={styles['record-message']}>
                                 {data &&
-                                    data?.student &&
-                                    data?.student?.recordMessage &&
-                                    data.student.recordMessage}
+                                    data?.getStudent &&
+                                    data?.getStudent?.recordMessage &&
+                                    data.getStudent.recordMessage}
                             </Typography>
                             <Button
                                 className={styles['add-button']}
@@ -266,7 +267,7 @@ const ViewStudent: FunctionComponent = () => {
                             </Button>
                         </div>
                     </div>
-                    {data?.student?.dossier
+                    {data?.getStudent?.dossier
                         .sort((a: StudentDossier, b: StudentDossier) =>
                             (a.updatedAt as Date) > (b.updatedAt as Date)
                                 ? -1
@@ -277,13 +278,13 @@ const ViewStudent: FunctionComponent = () => {
                         .map((dossier: StudentDossier, i: number) => (
                             <StudentsComponent
                                 key={i}
-                                id={data.student.id}
+                                id={data.getStudent.id}
                                 createdAt={new Date(dossier?.createdAt as Date)}
                                 updatedAt={new Date(dossier?.updatedAt as Date)}
                                 fromUser={dossier.fromUser}
                                 message={dossier.message}
                                 subject={dossier.subject}
-                                studentFiles={dossier.files}
+                                files={dossier.files}
                                 date={dossier.updatedAt}
                             ></StudentsComponent>
                         ))}
@@ -327,7 +328,7 @@ const ViewStudent: FunctionComponent = () => {
                                     renderValue={(selected) => {
                                         const selectedSubject:
                                             | Subject
-                                            | undefined = data?.subjects.find(
+                                            | undefined = data?.getAllSubjects.find(
                                             (subject: Subject) =>
                                                 subject.id === selected
                                         );
@@ -335,11 +336,11 @@ const ViewStudent: FunctionComponent = () => {
                                     }}
                                 >
                                     <MenuItem value=''>Без</MenuItem>
-                                    {data?.subjects
+                                    {data?.getAllSubjects
                                         ?.filter(
                                             (subject: Subject) =>
                                                 subject.class?.id ===
-                                                data?.student?.class?.id
+                                                data?.getStudent?.class?.id
                                         )
                                         .map((subject: Subject) => (
                                             <MenuItem

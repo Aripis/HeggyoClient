@@ -82,11 +82,13 @@ const EditClass: FunctionComponent = () => {
                         id: router.query.id,
                     }
                 );
-                setClassNumber(classData.class.number);
-                setClassLetter(classData.class.letter);
-                setTotalStudentCount(classData.class.totalStudentCount);
+                setClassNumber(classData.getClass.number);
+                setClassLetter(classData.getClass.letter);
+                setTotalStudentCount(classData.getClass.totalStudentCount);
                 setTeacherId(
-                    classData.class.teacher ? classData.class.teacher.id : ''
+                    classData.getClass.teacher
+                        ? classData.getClass.teacher.id
+                        : ''
                 );
             } catch (error) {
                 setError('Неизвестна грешка');

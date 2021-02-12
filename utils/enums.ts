@@ -76,3 +76,10 @@ export enum GradeWord {
     VERY_GOOD = 'VERY_GOOD',
     EXCELLENT = 'EXCELLENT',
 }
+
+export enum StatusType {
+    ACTIVE = 'ACTIVE',
+    INACTIVE = 'INACTIVE',
+    BLOCKED = 'BLOCKED',
+    UNVERIFIED = 'UNVERIFIED',
+}

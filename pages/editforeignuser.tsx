@@ -21,18 +21,19 @@ import styles from 'styles/EditForeignUser.module.scss';
 import { EditOutlined, PersonOutlineOutlined } from '@material-ui/icons';
 import { getUserRole } from 'utils/helpers';
 import graphQLClient from 'utils/graphqlclient';
+import { ContractType, StatusType } from 'utils/enums';
+import { getContractType, getStatusType } from 'utils/helpers';
 
 const EditForeignUser: FunctionComponent = () => {
     const router = useRouter();
     const { user, status } = useAuth();
-    const [id, setId] = useState('');
-    const [role, setRole] = useState('');
     const [error, setError] = useState('');
     const [userStatus, setUserStatus] = useState('');
     const [userId, setUserId] = useState('');
 
     const [recordMessage, setRecordMessage] = useState('');
     const [teacherContract, setTeacherContract] = useState('');
+    const { r: role, id } = router.query;
 
     const forStudent = gql`
         query($id: String!) {
@@ -75,26 +76,11 @@ const EditForeignUser: FunctionComponent = () => {
             }
         }
     `;
-    const [swrReq, setSwrReq] = useState(gql`
-        query {
-            profile {
-                id
-            }
-        }
-    `);
-    const { data } = useSWR([swrReq, JSON.stringify({ id })]);
 
-    const contractTypes = [
-        { value: 'PART_TIME', content: 'Хоноруван' },
-        { value: 'FULL_TIME', content: 'На договор' },
-    ];
-
-    const statusTypes = [
-        { value: 'ACTIVE', content: 'Активен' },
-        { value: 'INACTIVE', content: 'Неактивен' },
-        { value: 'BLOCKED', content: 'Блокиран' },
-        { value: 'UNVERIFIED', content: 'Непотвърден' },
-    ];
+    const { data } = useSWR([
+        role === 'STUDENT' ? forStudent : forTeacher,
+        JSON.stringify({ id }),
+    ]);
 
     useEffect(() => {
         if (status === 'REDIRECT') {
@@ -103,15 +89,11 @@ const EditForeignUser: FunctionComponent = () => {
         if (user && user?.role !== 'ADMIN') {
             router.back();
         }
-        setRole(router.query.r as string);
-        setId(router.query.id as string);
-        if (router.query.r === 'TEACHER') {
-            setSwrReq(forTeacher);
+        if (role === 'TEACHER') {
             setUserStatus(data?.getTeacher?.user?.status as string);
             setTeacherContract(data?.getTeacher?.contractType as string);
             setUserId(data?.getTeacher?.user?.id as string);
-        } else if (router.query.r === 'STUDENT') {
-            setSwrReq(forStudent);
+        } else if (role === 'STUDENT') {
             setUserStatus(data?.getStudent?.user?.status as string);
             setUserId(data?.getStudent?.user?.id as string);
             setRecordMessage(data?.getStudent?.recordMessage as string);
@@ -143,7 +125,7 @@ const EditForeignUser: FunctionComponent = () => {
                     }
                 `,
                 {
-                    stId: router.query.id,
+                    stId: id,
                     recordMessage,
                     userId,
                     userStatus,
@@ -180,7 +162,7 @@ const EditForeignUser: FunctionComponent = () => {
                     }
                 `,
                 {
-                    tchId: router.query.id,
+                    tchId: id,
                     contractType: teacherContract,
                     userId,
                     userStatus,
@@ -322,15 +304,11 @@ const EditForeignUser: FunctionComponent = () => {
                                         );
                                     }}
                                 >
-                                    {contractTypes &&
-                                        contractTypes.map((type) => (
-                                            <MenuItem
-                                                key={type.value}
-                                                value={type.value}
-                                            >
-                                                {type.content}
-                                            </MenuItem>
-                                        ))}
+                                    {Object.values(ContractType).map((type) => (
+                                        <MenuItem key={type} value={type}>
+                                            {getContractType(type)}
+                                        </MenuItem>
+                                    ))}
                                 </TextField>
                             </>
                         )}
@@ -345,15 +323,11 @@ const EditForeignUser: FunctionComponent = () => {
                                     setUserStatus(e.target.value as string);
                                 }}
                             >
-                                {statusTypes &&
-                                    statusTypes.map((type) => (
-                                        <MenuItem
-                                            key={type.value}
-                                            value={type.value}
-                                        >
-                                            {type.content}
-                                        </MenuItem>
-                                    ))}
+                                {Object.values(StatusType).map((type) => (
+                                    <MenuItem key={type} value={type}>
+                                        {getStatusType(type)}
+                                    </MenuItem>
+                                ))}
                             </TextField>
                         )}
                     </div>

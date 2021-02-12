@@ -7,10 +7,28 @@ import {
     AssignmentType,
     MessageType,
     MessageStatus,
+    StatusType,
 } from './enums';
 
-export const getGradeType = (gradeType: string): string | undefined => {
-    switch (gradeType) {
+export const getStatusType = (
+    status: StatusType | string | undefined
+): string | undefined => {
+    switch (status) {
+        case 'ACTIVE':
+            return 'Активен';
+        case 'INACTIVE':
+            return 'Неактивен';
+        case 'BLOCKED':
+            return 'Блокиран';
+        case 'UNVERIFIED':
+            return 'Непотвърден';
+        default:
+            return undefined;
+    }
+};
+
+export const getGradeType = (type: string): string | undefined => {
+    switch (type) {
         case 'TURM_1':
             return '1 срок';
         case 'TURM_2':
