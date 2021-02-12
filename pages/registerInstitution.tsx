@@ -146,7 +146,6 @@ const Register: FunctionComponent = () => {
             sessionStorage.setItem('activeStep', (activeStep + 1).toString());
             setActiveStep(activeStep + 1);
         } catch (error) {
-            console.log(error);
             setError('Неизвестна грешка');
         }
     };

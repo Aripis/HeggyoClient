@@ -51,7 +51,7 @@ export const getGradeEnum = (grade: number): string | undefined => {
         case 4:
             return 'GOOD';
         case 5:
-            return 'VERY GOOD';
+            return 'VERY_GOOD';
         case 6:
             return 'EXCELLENT';
         default:

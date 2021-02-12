@@ -74,7 +74,6 @@ const CalendarComponent: FunctionComponent = () => {
         `,
         JSON.stringify({ filterByType: 'ASSIGNMENT' }),
     ]);
-
     useEffect(() => {
         if (status === 'REDIRECT') {
             router.push('/login');
@@ -143,7 +142,6 @@ const CalendarComponent: FunctionComponent = () => {
             mutate();
             setEditDialog(null);
         } catch (error) {
-            console.log(error);
             setError('Неизвестна грешка');
         }
     };
@@ -246,7 +244,7 @@ const CalendarComponent: FunctionComponent = () => {
                             <DialogContent className={styles['dialog-content']}>
                                 <DialogContentText>
                                     <TextField
-                                        label='Описани на заданието'
+                                        label='Описаниe на заданието'
                                         variant='outlined'
                                         fullWidth
                                         value={editDialog.data}

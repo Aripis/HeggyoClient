@@ -198,7 +198,6 @@ const ViewStudent: FunctionComponent = () => {
             mutate();
             setAddDialog(false);
         } catch (error) {
-            console.log(error);
             setError('Неизвестна грешка');
         }
     };
