@@ -2,12 +2,14 @@ import {
     InstitutionType,
     EducationStage,
     UserStatus,
-    UserRoles,
+    UserRole,
     ContractType,
     AssignmentType,
     MessageType,
     MessageStatus,
     WeekDays,
+    GradeType,
+    GradeWord,
 } from './enums';
 
 export interface Institution {
@@ -15,7 +17,6 @@ export interface Institution {
     name?: string;
     email?: string;
     type: InstitutionType;
-    capacityPerClass?: number;
     educationalStage?: EducationStage;
     alias?: string;
     user?: User[];
@@ -27,7 +28,7 @@ export interface User {
     middleName?: string;
     lastName?: string;
     email?: string;
-    userRole?: UserRoles;
+    role?: UserRole;
     status?: UserStatus;
     institution?: Institution[];
 }
@@ -64,13 +65,19 @@ export interface Student {
 
 export interface Class {
     id?: string;
+    subjects?: Subject[];
     institution?: Institution;
     startYear?: number;
     endYear?: number;
     totalStudentCount?: number;
-    classTeacher?: Teacher;
-    classLetter?: string;
-    classNumber?: number;
+    teacher?: Teacher;
+    letter?: string;
+    number?: number;
+}
+
+export interface UploadFile {
+    filename?: string;
+    publicUrl?: string;
 }
 
 export interface Message {
@@ -78,12 +85,12 @@ export interface Message {
     createdAt?: Date;
     updatedAt?: Date;
     assignmentDueDate?: Date;
-    from?: User;
-    toUser?: User[];
+    fromUser?: User;
+    toUsers?: User[];
     toClasses?: Class[];
     data?: string;
-    filePath?: string;
-    type?: MessageType;
+    files?: UploadFile[];
+    messageType?: MessageType;
     assignmentType?: AssignmentType;
     status?: MessageStatus;
     subject?: Subject;
@@ -98,6 +105,7 @@ export interface Schedule {
     class?: Class;
     teachers?: Teacher[];
     institution?: Institution;
+    room?: string;
 }
 
 export interface StudentDossier {
@@ -106,5 +114,20 @@ export interface StudentDossier {
     updatedAt?: Date;
     fromUser?: User;
     subject?: Subject;
-    dossierMessage?: string;
+    student?: Student;
+    message?: string;
+    files: UploadFile[];
+}
+
+export interface Grade {
+    id?: string;
+    createdAt?: Date;
+    updatedAt?: Date;
+    message?: string;
+    type?: GradeType;
+    grade?: number;
+    gradeWithWords?: GradeWord;
+    fromUser?: User;
+    student?: Student;
+    subject?: Subject;
 }

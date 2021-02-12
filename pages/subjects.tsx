@@ -23,6 +23,7 @@ import useSWR from 'swr';
 import { gql } from 'graphql-request';
 import { Subject } from 'utils/interfaces';
 import { Class } from 'utils/interfaces';
+import { UserRole } from 'utils/enums';
 
 interface SubjectCardProps {
     id?: string;
@@ -31,6 +32,7 @@ interface SubjectCardProps {
     startYear?: number;
     endYear?: number;
     class?: Class;
+    role?: UserRole;
 }
 
 const SubjectCard: FunctionComponent<SubjectCardProps> = (props) => {
@@ -46,28 +48,30 @@ const SubjectCard: FunctionComponent<SubjectCardProps> = (props) => {
                         <MoreHorizOutlined />
                     </IconButton>
                 }
-                title={`${props.class?.classNumber}${props.class?.classLetter} ${props.name}`}
+                title={`${props.class?.number}${props.class?.letter} ${props.name}`}
                 subheader={`${props.startYear} - ${props.endYear}`}
             />
-            <Menu
-                anchorEl={menu}
-                keepMounted
-                open={Boolean(menu)}
-                onClose={() => setMenu(null)}
-            >
-                <MenuItem onClick={() => setMenu(null)}>
-                    <Link
-                        color='textPrimary'
-                        underline='none'
-                        href={{
-                            pathname: '/editsubject',
-                            query: { id: props.id },
-                        }}
-                    >
-                        Редактирай
-                    </Link>
-                </MenuItem>
-            </Menu>
+            {props.role === 'ADMIN' && (
+                <Menu
+                    anchorEl={menu}
+                    keepMounted
+                    open={Boolean(menu)}
+                    onClose={() => setMenu(null)}
+                >
+                    <MenuItem onClick={() => setMenu(null)}>
+                        <Link
+                            color='textPrimary'
+                            underline='none'
+                            href={{
+                                pathname: '/editsubject',
+                                query: { id: props.id },
+                            }}
+                        >
+                            Редактирай
+                        </Link>
+                    </MenuItem>
+                </Menu>
+            )}
         </Card>
     );
 };
@@ -77,15 +81,15 @@ const Subjects: FunctionComponent = () => {
     const { user, status } = useAuth();
     const { data } = useSWR(gql`
         query {
-            subjects {
+            getAllSubjects {
                 id
                 name
                 description
                 startYear
                 endYear
                 class {
-                    classNumber
-                    classLetter
+                    number
+                    letter
                 }
             }
         }
@@ -115,7 +119,7 @@ const Subjects: FunctionComponent = () => {
                 <Navbar title='Предмети' />
                 <div className={styles.content}>
                     <div className={styles['actions-container']}>
-                        {user && (user?.userRole as string) === 'ADMIN' && (
+                        {user.role === 'ADMIN' && (
                             <Link
                                 className={styles['subject-add']}
                                 underline='none'
@@ -134,12 +138,16 @@ const Subjects: FunctionComponent = () => {
                     </div>
                     <div className={styles['subjects-container']}>
                         {data &&
-                            data.subjects?.map(
+                            data.getAllSubjects?.map(
                                 (subject: Subject, i: number) => (
-                                    <SubjectCard key={i} {...subject} />
+                                    <SubjectCard
+                                        key={i}
+                                        role={user.role}
+                                        {...subject}
+                                    />
                                 )
                             )}
-                        {data && !data.subjects && (
+                        {data && !data.getAllSubjects && (
                             <div className={styles['no-subjects']}>
                                 <Typography color='textSecondary'>
                                     Няма съществуващи предмети. За да добавите

@@ -34,7 +34,7 @@ const ViewSchedule: FunctionComponent = () => {
     const { data } = useSWR([
         gql`
             query($classId: String!) {
-                schedulesByClass(classId: $classId) {
+                getAllSchedulesByClass(classId: $classId) {
                     id
                     startTime
                     endTime
@@ -42,6 +42,7 @@ const ViewSchedule: FunctionComponent = () => {
                     subject {
                         name
                     }
+                    room
                 }
             }
         `,
@@ -79,8 +80,8 @@ const ViewSchedule: FunctionComponent = () => {
                                 views={['week']}
                                 localizer={localizer}
                                 events={
-                                    data.schedulesByClass &&
-                                    data.schedulesByClass?.map(
+                                    data.getAllSchedulesByClass &&
+                                    data.getAllSchedulesByClass?.map(
                                         (event: Schedule) => {
                                             const startTime = new Date(
                                                 event.startTime as Date
@@ -90,7 +91,7 @@ const ViewSchedule: FunctionComponent = () => {
                                             );
                                             return {
                                                 id: event.id,
-                                                title: event.subject?.name,
+                                                title: `${event.subject?.name} (${event.room})`,
                                                 start: setDay(
                                                     set(new Date(), {
                                                         hours: startTime.getHours(),

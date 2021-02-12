@@ -29,8 +29,8 @@ interface ClassCardProps {
     id?: string;
     startYear?: number;
     endYear?: number;
-    classNumber?: number;
-    classLetter?: string;
+    number?: number;
+    letter?: string;
 }
 
 const ClassCard: FunctionComponent<ClassCardProps> = (props) => {
@@ -40,13 +40,13 @@ const ClassCard: FunctionComponent<ClassCardProps> = (props) => {
         <Card className={styles['card']}>
             <CardHeader
                 className={styles['card-header']}
-                avatar={<Avatar>{props.classLetter}</Avatar>}
+                avatar={<Avatar>{props.letter}</Avatar>}
                 action={
                     <IconButton onClick={(e) => setMenu(e.currentTarget)}>
                         <MoreHorizOutlined />
                     </IconButton>
                 }
-                title={`${props.classNumber}${props.classLetter}`}
+                title={`${props.number}${props.letter}`}
                 subheader={`${props.startYear} - ${props.endYear}`}
             />
             <Menu
@@ -77,12 +77,12 @@ const Classes: FunctionComponent = () => {
     const { user, status } = useAuth();
     const { data } = useSWR(gql`
         query {
-            classes {
+            getAllClasses {
                 id
-                startYear
                 endYear
-                classNumber
-                classLetter
+                startYear
+                number
+                letter
             }
         }
     `);
@@ -93,7 +93,7 @@ const Classes: FunctionComponent = () => {
         if (status === 'REDIRECT') {
             router.push('/login');
         }
-        if (user && (user?.userRole as string) !== 'ADMIN') {
+        if (user && user?.role !== 'ADMIN') {
             router.back();
         }
     }, [user, status]);
@@ -116,7 +116,7 @@ const Classes: FunctionComponent = () => {
                 <Navbar title='Класове' />
                 <div className={styles.content}>
                     <div className={styles['actions-container']}>
-                        {user && (user?.userRole as string) === 'ADMIN' && (
+                        {user.role === 'ADMIN' && (
                             <Link
                                 className={styles['class-add']}
                                 underline='none'
@@ -135,10 +135,12 @@ const Classes: FunctionComponent = () => {
                     </div>
                     <div className={styles['classes-container']}>
                         {data &&
-                            data.classes?.map((currClass: Class, i: number) => (
-                                <ClassCard key={i} {...currClass} />
-                            ))}
-                        {data && !data.classes && (
+                            data.getAllClasses?.map(
+                                (currClass: Class, i: number) => (
+                                    <ClassCard key={i} {...currClass} />
+                                )
+                            )}
+                        {data && !data.getAllClasses && (
                             <div className={styles['no-classes']}>
                                 <Typography color='textSecondary'>
                                     Няма съществуващи класове. За да добавите

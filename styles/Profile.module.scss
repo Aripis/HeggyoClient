@@ -41,6 +41,25 @@
             }
         }
     }
+
+    .additional-info {
+        display: flex;
+        flex-direction: column;
+
+        & > * {
+            margin-top: 20px;
+        }
+
+        .edit-button {
+            align-self: flex-start;
+        }
+
+        .actions-container {
+            & > *:not(:first-child) {
+                margin-left: 10px;
+            }
+        }
+    }
 }
 
 @media screen and (max-width: 730px) {

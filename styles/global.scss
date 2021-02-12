@@ -74,3 +74,26 @@ a {
     padding-left: 24px;
     padding-right: 24px;
 }
+
+.dropzone {
+    .upload-grid-container {
+        margin-top: 30px;
+        margin-bottom: 10px;
+
+        .upload-grid-item {
+            padding: 16px;
+
+            .MuiDropzonePreviewList-removeButton {
+                top: 0;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                margin: auto;
+            }
+        }
+    }
+}
+
+.grade-message {
+    padding: 10px;
+}

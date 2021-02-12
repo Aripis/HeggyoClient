@@ -48,8 +48,9 @@ interface ScheduleField {
     weekDay: string;
     startTime: Date | null;
     endTime: Date | null;
-    subjectUUID: string;
-    teachersUUIDs: string[];
+    subjectId: string;
+    teachersIds: string[];
+    room: string;
 }
 
 interface ScheduleFieldProps extends Partial<ScheduleField> {
@@ -72,8 +73,9 @@ const ScheduleField: FunctionComponent<ScheduleFieldProps> = (props) => {
     const [weekDay, setWeekDay] = useState('');
     const [startTime, setStartTime] = useState<Date | null>(new Date());
     const [endTime, setEndTime] = useState<Date | null>(new Date());
-    const [subjectUUID, setSubjectUUID] = useState('');
-    const [teachersUUIDs, setTeachersUUIDs] = useState<string[]>([]);
+    const [subjectId, setSubjectId] = useState('');
+    const [room, setRoom] = useState('');
+    const [teachersIds, setTeachersIds] = useState<string[]>([]);
     const weekDays = [
         { value: 'MONDAY', content: 'Понеделник' },
         { value: 'TUESDAY', content: 'Вторник' },
@@ -88,8 +90,9 @@ const ScheduleField: FunctionComponent<ScheduleFieldProps> = (props) => {
         setWeekDay(props.weekDay as string);
         setStartTime(props.startTime as Date);
         setEndTime(props.endTime as Date);
-        setSubjectUUID(props.subjectUUID as string);
-        setTeachersUUIDs(props.teachersUUIDs as string[]);
+        setSubjectId(props.subjectId as string);
+        setTeachersIds(props.teachersIds as string[]);
+        setRoom(props.room as string);
     }, []);
 
     return (
@@ -118,8 +121,9 @@ const ScheduleField: FunctionComponent<ScheduleFieldProps> = (props) => {
                         weekDay: e.target.value,
                         startTime: startTime,
                         endTime: endTime,
-                        subjectUUID: subjectUUID,
-                        teachersUUIDs: teachersUUIDs,
+                        subjectId: subjectId,
+                        teachersIds: teachersIds,
+                        room: room,
                     });
                 }}
                 variant='outlined'
@@ -148,8 +152,9 @@ const ScheduleField: FunctionComponent<ScheduleFieldProps> = (props) => {
                             weekDay: weekDay,
                             startTime: date && new Date(date.setSeconds(0, 0)),
                             endTime: endTime,
-                            subjectUUID: subjectUUID,
-                            teachersUUIDs: teachersUUIDs,
+                            subjectId: subjectId,
+                            teachersIds: teachersIds,
+                            room: room,
                         });
                     }}
                 />
@@ -169,8 +174,9 @@ const ScheduleField: FunctionComponent<ScheduleFieldProps> = (props) => {
                             weekDay: weekDay,
                             startTime: startTime,
                             endTime: date && new Date(date.setSeconds(0, 0)),
-                            subjectUUID: subjectUUID,
-                            teachersUUIDs: teachersUUIDs,
+                            subjectId: subjectId,
+                            teachersIds: teachersIds,
+                            room: room,
                         });
                     }}
                 />
@@ -184,16 +190,17 @@ const ScheduleField: FunctionComponent<ScheduleFieldProps> = (props) => {
                 <Select
                     label='Предмет'
                     labelId='subject-select-label'
-                    value={subjectUUID}
+                    value={subjectId}
                     onChange={(e) => {
-                        setSubjectUUID(e.target.value as string);
+                        setSubjectId(e.target.value as string);
                         updateSubject({
                             id: props.id,
                             weekDay: weekDay,
                             startTime: startTime,
                             endTime: endTime,
-                            subjectUUID: e.target.value as string,
-                            teachersUUIDs: teachersUUIDs,
+                            subjectId: e.target.value as string,
+                            teachersIds: teachersIds,
+                            room: room,
                         });
                     }}
                     renderValue={(selected) => {
@@ -202,13 +209,13 @@ const ScheduleField: FunctionComponent<ScheduleFieldProps> = (props) => {
                             | undefined = props.subjects.find(
                             (subject: Subject) => subject.id === selected
                         );
-                        return `${selectedSubject?.class?.classNumber}${selectedSubject?.class?.classLetter} ${selectedSubject?.name}`;
+                        return `${selectedSubject?.class?.number}${selectedSubject?.class?.letter} ${selectedSubject?.name}`;
                     }}
                 >
                     {props.subjects &&
                         props.subjects?.map((subject: Subject, i: number) => (
                             <MenuItem key={i} value={subject.id}>
-                                {`${subject?.class?.classNumber}${subject?.class?.classLetter} ${subject?.name}`}
+                                {`${subject?.class?.number}${subject?.class?.letter} ${subject?.name}`}
                             </MenuItem>
                         ))}
                 </Select>
@@ -225,16 +232,17 @@ const ScheduleField: FunctionComponent<ScheduleFieldProps> = (props) => {
                     label='Преподаватели'
                     labelId='teachers-select-label'
                     multiple
-                    value={teachersUUIDs}
+                    value={teachersIds}
                     onChange={(e) => {
-                        setTeachersUUIDs(e.target.value as string[]);
+                        setTeachersIds(e.target.value as string[]);
                         updateSubject({
                             id: props.id,
                             weekDay: weekDay,
                             startTime: startTime,
                             endTime: endTime,
-                            subjectUUID: subjectUUID,
-                            teachersUUIDs: e.target.value as string[],
+                            subjectId: subjectId,
+                            teachersIds: e.target.value as string[],
+                            room: room,
                         });
                     }}
                     renderValue={(selected) =>
@@ -252,14 +260,14 @@ const ScheduleField: FunctionComponent<ScheduleFieldProps> = (props) => {
                             .join(', ')
                     }
                 >
-                    {teachersUUIDs &&
+                    {teachersIds &&
                         props.teachers &&
                         props.teachers.map((teacher: Teacher, i: number) => (
                             <MenuItem key={i} value={teacher.id}>
                                 <Checkbox
                                     color='primary'
                                     checked={
-                                        teachersUUIDs.indexOf(
+                                        teachersIds.indexOf(
                                             teacher.id as string
                                         ) > -1
                                     }
@@ -271,6 +279,25 @@ const ScheduleField: FunctionComponent<ScheduleFieldProps> = (props) => {
                         ))}
                 </Select>
             </FormControl>
+            <TextField
+                className={styles['room-select']}
+                label='Зала'
+                required
+                value={room}
+                onChange={(e) => {
+                    setRoom(e.target.value);
+                    updateSubject({
+                        id: props.id,
+                        weekDay: weekDay,
+                        startTime: startTime,
+                        endTime: endTime,
+                        subjectId: subjectId,
+                        teachersIds: teachersIds,
+                        room: e.target.value,
+                    });
+                }}
+                variant='outlined'
+            />
         </div>
     );
 };
@@ -280,29 +307,31 @@ const EditSchedule: FunctionComponent = () => {
     const { user, status } = useAuth();
 
     const [error, setError] = useState('');
-    const [classUUID, setClassUUID] = useState('');
+    const [classId, setClassId] = useState('');
     const [fields, setFields] = useState<ScheduleField[]>([
         {
             id: 0,
             startTime: new Date(new Date().setSeconds(0, 0)),
             endTime: new Date(new Date().setSeconds(0, 0)),
             weekDay: '',
-            subjectUUID: '',
-            teachersUUIDs: [],
+            subjectId: '',
+            teachersIds: [],
+            room: '',
         },
     ]);
     const { data } = useSWR([
         gql`
             query($classId: String!) {
-                schedulesByClass(classId: $classId) {
+                getAllSchedulesByClass(classId: $classId) {
                     id
                     startTime
                     endTime
                     day
+                    room
                     class {
                         id
-                        classNumber
-                        classLetter
+                        number
+                        letter
                     }
                     subject {
                         id
@@ -312,14 +341,14 @@ const EditSchedule: FunctionComponent = () => {
                         id
                     }
                 }
-                teachers {
+                getAllTeachers {
                     id
                     user {
                         firstName
                         lastName
                     }
                 }
-                subjects {
+                getAllSubjects {
                     id
                     name
                     description
@@ -327,8 +356,8 @@ const EditSchedule: FunctionComponent = () => {
                     endYear
                     class {
                         id
-                        classNumber
-                        classLetter
+                        number
+                        letter
                     }
                 }
             }
@@ -340,19 +369,20 @@ const EditSchedule: FunctionComponent = () => {
         if (status === 'REDIRECT') {
             router.push('/login');
         }
-        if (user && (user?.userRole as string) !== 'ADMIN') {
+        if (user && user?.role !== 'ADMIN') {
             router.back();
         }
-        setClassUUID(router.query.classId as string);
+        setClassId(router.query.classId as string);
         if (data) {
             setFields(
-                data.schedulesByClass.map((field: Schedule) => ({
+                data.getAllSchedulesByClass.map((field: Schedule) => ({
                     id: field.id,
                     weekDay: field.day,
                     startTime: field.startTime,
                     endTime: field.endTime,
-                    subjectUUID: field.subject?.id,
-                    teachersUUIDs: field.teachers?.map((teacher) => teacher.id),
+                    subjectId: field.subject?.id,
+                    teachersIds: field.teachers?.map((teacher) => teacher.id),
+                    room: field.room,
                 }))
             );
         }
@@ -363,34 +393,35 @@ const EditSchedule: FunctionComponent = () => {
         try {
             await graphQLClient.request(
                 gql`
-                    mutation($classUUID: String!) {
-                        removeSchedulesByClass(classId: $classUUID)
+                    mutation($classId: String!) {
+                        removeSchedulesByClass(classId: $classId)
                     }
                 `,
                 {
-                    classUUID: classUUID,
+                    classId: classId,
                 }
             );
             for (const field of fields) {
-                console.log(field);
                 await graphQLClient.request(
                     gql`
                         mutation(
                             $startTime: Date!
                             $endTime: Date!
                             $day: WeekDays!
-                            $subjectUUID: String!
-                            $classUUID: String!
-                            $teachersUUIDs: [String!]!
+                            $subjectId: String!
+                            $classId: String!
+                            $teachersIds: [String!]!
+                            $room: String!
                         ) {
-                            createSchedule(
-                                createScheduleInput: {
+                            addSchedule(
+                                input: {
                                     startTime: $startTime
                                     endTime: $endTime
                                     day: $day
-                                    subjectUUID: $subjectUUID
-                                    classUUID: $classUUID
-                                    teachersUUIDs: $teachersUUIDs
+                                    subjectId: $subjectId
+                                    classId: $classId
+                                    teachersIds: $teachersIds
+                                    room: $room
                                 }
                             ) {
                                 scheduleId
@@ -401,9 +432,10 @@ const EditSchedule: FunctionComponent = () => {
                         startTime: field.startTime,
                         endTime: field.endTime,
                         day: field.weekDay,
-                        subjectUUID: field.subjectUUID,
-                        classUUID: classUUID,
-                        teachersUUIDs: field.teachersUUIDs,
+                        subjectId: field.subjectId,
+                        classId: classId,
+                        teachersIds: field.teachersIds,
+                        room: field.room,
                     }
                 );
             }
@@ -414,7 +446,6 @@ const EditSchedule: FunctionComponent = () => {
             ) {
                 setError('Има предмет вече на това място');
             }
-            console.log(response);
             setError('Неизвестна грешка');
         }
     };
@@ -431,8 +462,9 @@ const EditSchedule: FunctionComponent = () => {
                 startTime: new Date(),
                 endTime: new Date(),
                 weekDay: '',
-                subjectUUID: '',
-                teachersUUIDs: [],
+                subjectId: '',
+                teachersIds: [],
+                room: '',
             },
         ]);
     };
@@ -494,14 +526,13 @@ const EditSchedule: FunctionComponent = () => {
                             className={styles['editschedule-container']}
                             onSubmit={editSchedule}
                         >
-                            {data && classUUID && (
+                            {data && classId && (
                                 <>
                                     <MuiPickersUtilsProvider
                                         utils={DateFnsUtils}
                                     >
                                         {fields &&
                                             fields.map((field) => {
-                                                console.log(field);
                                                 return (
                                                     <ScheduleField
                                                         key={field.id}
@@ -511,23 +542,24 @@ const EditSchedule: FunctionComponent = () => {
                                                             field.startTime
                                                         }
                                                         endTime={field.endTime}
-                                                        subjectUUID={
-                                                            field.subjectUUID
+                                                        subjectId={
+                                                            field.subjectId
                                                         }
-                                                        teachersUUIDs={
-                                                            field.teachersUUIDs
+                                                        teachersIds={
+                                                            field.teachersIds
                                                         }
                                                         onDelete={removeSubject}
                                                         teachers={
-                                                            data?.teachers
+                                                            data?.getAllTeachers
                                                         }
-                                                        subjects={data?.subjects.filter(
+                                                        room={field.room}
+                                                        subjects={data?.getAllSubjects.filter(
                                                             (
                                                                 subject: Subject
                                                             ) =>
                                                                 subject.class
                                                                     ?.id ===
-                                                                classUUID
+                                                                classId
                                                         )}
                                                     />
                                                 );

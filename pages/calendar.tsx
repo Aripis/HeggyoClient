@@ -33,7 +33,7 @@ import useSWR from 'swr';
 import { gql } from 'graphql-request';
 import Alert from '@material-ui/lab/Alert';
 import { Message } from 'utils/interfaces';
-
+import { getAssignmentType, getMessageStatus } from 'utils/helpers';
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay } from 'date-fns';
 import { bg } from 'date-fns/locale';
@@ -59,25 +59,15 @@ const CalendarComponent: FunctionComponent = () => {
     const { data, mutate } = useSWR([
         gql`
             query($filterByType: MessageType) {
-                messagesByCriteria(criteria: { messageType: $filterByType }) {
+                getAllMessagesByCriteria(
+                    input: { messageType: $filterByType }
+                ) {
                     id
                     createdAt
                     assignmentType
                     assignmentDueDate
                     subject {
                         name
-                    }
-                }
-                classes {
-                    id
-                    classNumber
-                    classLetter
-                }
-                teachers {
-                    id
-                    user {
-                        firstName
-                        lastName
                     }
                 }
             }
@@ -89,39 +79,18 @@ const CalendarComponent: FunctionComponent = () => {
         if (status === 'REDIRECT') {
             router.push('/login');
         }
-        if (user && (user?.userRole as string) !== 'ADMIN') {
-            router.back();
-        }
     }, [user, status]);
 
     if (!user) {
         return <Loader />;
     }
 
-    const asgStatus = [
-        { value: 'CREATED', content: 'Създадено' },
-        { value: 'PUBLISHED', content: 'Изпратено' },
-    ];
-
-    const getAssignmentType = (type: string) => {
-        switch (type) {
-            case 'HOMEWORK':
-                return 'Домашно';
-            case 'CLASSWORK':
-                return 'Работа в клас';
-            case 'EXAM':
-                return 'Контролно';
-            default:
-                return undefined;
-        }
-    };
-
     const openDialog = async (id: string) => {
         try {
             const data = await graphQLClient.request(
                 gql`
                     query($id: String!) {
-                        message(id: $id) {
+                        getMessage(id: $id) {
                             id
                             createdAt
                             assignmentType
@@ -136,7 +105,7 @@ const CalendarComponent: FunctionComponent = () => {
                 `,
                 { id }
             );
-            setEditDialog(data.message);
+            setEditDialog(data.getMessage);
         } catch (error) {
             setError('Неизвестна грешка');
         }
@@ -153,7 +122,7 @@ const CalendarComponent: FunctionComponent = () => {
                         $status: MessageStatus!
                     ) {
                         updateMessage(
-                            updateMessageInput: {
+                            input: {
                                 id: $id
                                 data: $data
                                 assignmentDueDate: $assignmentDueDate
@@ -174,6 +143,7 @@ const CalendarComponent: FunctionComponent = () => {
             mutate();
             setEditDialog(null);
         } catch (error) {
+            console.log(error);
             setError('Неизвестна грешка');
         }
     };
@@ -215,8 +185,8 @@ const CalendarComponent: FunctionComponent = () => {
                             <Calendar
                                 localizer={localizer}
                                 events={
-                                    data.messagesByCriteria &&
-                                    data.messagesByCriteria?.map(
+                                    data.getAllMessagesByCriteria &&
+                                    data.getAllMessagesByCriteria?.map(
                                         (event: Message) => ({
                                             id: event.id,
                                             title: `${
@@ -238,6 +208,8 @@ const CalendarComponent: FunctionComponent = () => {
                                 endAccessor='end'
                                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                                 onSelectEvent={(event: any) =>
+                                    (user?.role === 'ADMIN' ||
+                                        user?.role === 'TEACHER') &&
                                     openDialog(event.id)
                                 }
                             />
@@ -329,15 +301,16 @@ const CalendarComponent: FunctionComponent = () => {
                                             });
                                         }}
                                     >
-                                        {asgStatus &&
-                                            asgStatus.map((status) => (
+                                        {Object.values(MessageStatus).map(
+                                            (status) => (
                                                 <MenuItem
-                                                    key={status.value}
-                                                    value={status.value}
+                                                    key={status}
+                                                    value={status}
                                                 >
-                                                    {status.content}
+                                                    {getMessageStatus(status)}
                                                 </MenuItem>
-                                            ))}
+                                            )
+                                        )}
                                     </TextField>
                                 </div>
                             </DialogContent>
@@ -374,7 +347,7 @@ const CalendarComponent: FunctionComponent = () => {
                                     </Button>
                                 </div>
                             </DialogActions>
-                        </Dialog>{' '}
+                        </Dialog>
                     </MuiPickersUtilsProvider>
                 )}
                 <Snackbar

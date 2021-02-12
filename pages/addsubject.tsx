@@ -35,16 +35,16 @@ const AddSubject: FunctionComponent = () => {
     const [startYear, setStartYear] = useState(new Date().getFullYear());
     const [endYear, setEndYear] = useState(new Date().getFullYear() + 1);
     const [error, setError] = useState('');
-    const [classUUID, setClassUUID] = useState('');
-    const [teachersUUIDs, setTeachersUUIDs] = useState<string[]>([]);
+    const [classId, setClassId] = useState('');
+    const [teachersIds, setTeachersIds] = useState<string[]>([]);
     const { data } = useSWR(gql`
         query {
-            classes {
+            getAllClasses {
                 id
-                classNumber
-                classLetter
+                number
+                letter
             }
-            teachers {
+            getAllTeachers {
                 id
                 user {
                     firstName
@@ -58,7 +58,7 @@ const AddSubject: FunctionComponent = () => {
         if (status === 'REDIRECT') {
             router.push('/login');
         }
-        if (user && (user?.userRole as string) !== 'ADMIN') {
+        if (user && user?.role !== 'ADMIN') {
             router.back();
         }
     }, [user, status]);
@@ -73,17 +73,17 @@ const AddSubject: FunctionComponent = () => {
                         $endYear: Int!
                         $name: String!
                         $description: String!
-                        $classUUID: String!
-                        $teachersUUIDs: [String!]
+                        $classId: String!
+                        $teachersIds: [String!]
                     ) {
-                        createSubject(
-                            createSubjectInput: {
+                        addSubject(
+                            input: {
                                 startYear: $startYear
                                 endYear: $endYear
                                 name: $name
                                 description: $description
-                                classUUID: $classUUID
-                                teachersUUIDs: $teachersUUIDs
+                                classId: $classId
+                                teachersIds: $teachersIds
                             }
                         ) {
                             subjectId
@@ -95,8 +95,8 @@ const AddSubject: FunctionComponent = () => {
                     endYear,
                     name,
                     description,
-                    classUUID,
-                    teachersUUIDs,
+                    classId,
+                    teachersIds,
                 }
             );
             router.push('/subjects');
@@ -175,9 +175,9 @@ const AddSubject: FunctionComponent = () => {
                                         label='Преподаватели'
                                         labelId='teachers-select-label'
                                         multiple
-                                        value={teachersUUIDs}
+                                        value={teachersIds}
                                         onChange={(e) =>
-                                            setTeachersUUIDs(
+                                            setTeachersIds(
                                                 e.target.value as string[]
                                             )
                                         }
@@ -195,7 +195,7 @@ const AddSubject: FunctionComponent = () => {
                                                 )
                                                 .map(
                                                     (user) =>
-                                                        `${user?.firstName} ${user?.lastName}`
+                                                        `${user.firstName} ${user.lastName}`
                                                 )
                                                 .join(', ')
                                         }
@@ -214,7 +214,7 @@ const AddSubject: FunctionComponent = () => {
                                                         <Checkbox
                                                             color='primary'
                                                             checked={
-                                                                teachersUUIDs.indexOf(
+                                                                teachersIds.indexOf(
                                                                     teacher.id as string
                                                                 ) > -1
                                                             }
@@ -233,20 +233,18 @@ const AddSubject: FunctionComponent = () => {
                                     label='Клас'
                                     required
                                     variant='outlined'
-                                    value={classUUID}
-                                    onChange={(e) =>
-                                        setClassUUID(e.target.value)
-                                    }
+                                    value={classId}
+                                    onChange={(e) => setClassId(e.target.value)}
                                 >
                                     {data &&
-                                        data?.classes &&
-                                        data?.classes?.map(
+                                        data?.getAllClasses &&
+                                        data?.getAllClasses?.map(
                                             (currClass: Class, i: number) => (
                                                 <MenuItem
                                                     key={i}
                                                     value={currClass.id}
                                                 >
-                                                    {`${currClass.classNumber} ${currClass.classLetter}`}
+                                                    {`${currClass.number} ${currClass.letter}`}
                                                 </MenuItem>
                                             )
                                         )}

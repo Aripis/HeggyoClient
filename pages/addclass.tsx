@@ -33,11 +33,11 @@ const AddClass: FunctionComponent = () => {
     const [totalStudentCount, setTotalStudentCount] = useState<number>();
     const [startYear, setStartYear] = useState(new Date().getFullYear());
     const [endYear, setEndYear] = useState(new Date().getFullYear() + 1);
-    const [teacherUUID, setTeacherUUID] = useState('');
+    const [teacherId, setTeacherId] = useState('');
     const [error, setError] = useState('');
     const { data } = useSWR(gql`
         query {
-            availableClassTeachers {
+            getAllAvailableClassTeachers {
                 id
                 user {
                     firstName
@@ -51,7 +51,7 @@ const AddClass: FunctionComponent = () => {
         if (status === 'REDIRECT') {
             router.push('/login');
         }
-        if (user && (user?.userRole as string) !== 'ADMIN') {
+        if (user && user?.role !== 'ADMIN') {
             router.back();
         }
     }, [user, status]);
@@ -67,16 +67,16 @@ const AddClass: FunctionComponent = () => {
                         $totalStudentCount: Int!
                         $classNumber: Int!
                         $classLetter: String!
-                        $teacherUUID: String
+                        $teacherId: String
                     ) {
                         addClass(
-                            createClassInput: {
+                            input: {
                                 startYear: $startYear
                                 endYear: $endYear
                                 totalStudentCount: $totalStudentCount
-                                classNumber: $classNumber
-                                classLetter: $classLetter
-                                teacherUUID: $teacherUUID
+                                number: $classNumber
+                                letter: $classLetter
+                                teacherId: $teacherId
                             }
                         ) {
                             classId
@@ -89,7 +89,7 @@ const AddClass: FunctionComponent = () => {
                     totalStudentCount,
                     classNumber,
                     classLetter,
-                    teacherUUID,
+                    teacherId,
                 }
             );
             router.push('/classes');
@@ -201,12 +201,12 @@ const AddClass: FunctionComponent = () => {
                                 <Select
                                     label='Класен ръководител'
                                     labelId='teacher-select-label'
-                                    value={teacherUUID}
+                                    value={teacherId}
                                     onChange={(e) =>
-                                        setTeacherUUID(e.target.value as string)
+                                        setTeacherId(e.target.value as string)
                                     }
                                     renderValue={(selected) => {
-                                        const selectedTeacher: Teacher = data?.availableClassTeachers.find(
+                                        const selectedTeacher: Teacher = data?.getAllAvailableClassTeachers.find(
                                             (teacher: Teacher) =>
                                                 teacher.id === selected
                                         );
@@ -215,8 +215,8 @@ const AddClass: FunctionComponent = () => {
                                 >
                                     <MenuItem value=''>Без</MenuItem>
                                     {data &&
-                                        data?.availableClassTeachers &&
-                                        data?.availableClassTeachers?.map(
+                                        data?.getAllAvailableClassTeachers &&
+                                        data?.getAllAvailableClassTeachers?.map(
                                             (teacher: Teacher, i: number) => (
                                                 <MenuItem
                                                     key={i}

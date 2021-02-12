@@ -1,4 +1,11 @@
-import { useEffect, useState, FunctionComponent } from 'react';
+import {
+    useEffect,
+    useState,
+    FunctionComponent,
+    ReactNode,
+    MouseEvent,
+    Fragment,
+} from 'react';
 import Head from 'next/head';
 import Navbar from 'components/Navbar';
 import Drawer from 'components/Drawer';
@@ -10,21 +17,54 @@ import {
     Accordion,
     AccordionSummary,
     AccordionDetails,
+    AppBar,
+    Tabs,
+    Tab,
+    Popover,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    TextField,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
+    DialogActions,
+    IconButton,
 } from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';
-import { ExpandMoreOutlined } from '@material-ui/icons';
+import {
+    CloseOutlined,
+    DoneOutlined,
+    ExpandMoreOutlined,
+} from '@material-ui/icons';
 import { useAuth } from 'utils/useAuth';
 import { useRouter } from 'next/router';
 import Loader from 'components/Loader';
-import styles from 'styles/Users.module.scss';
+import styles from 'styles/Students.module.scss';
 import { gql } from 'graphql-request';
-import { Student, StudentDossier, Teacher } from 'utils/interfaces';
+import {
+    Student,
+    StudentDossier,
+    Class,
+    Subject,
+    Grade,
+} from 'utils/interfaces';
 import useSWR from 'swr';
-import { ContractType, UserStatus, UserRoles } from 'utils/enums';
+import { ContractType, UserStatus, UserRole, GradeType } from 'utils/enums';
+import {
+    getUserStatus,
+    getUserRole,
+    getGradeName,
+    getGradeType,
+    getGradeEnum,
+} from 'utils/helpers';
+import graphQLClient from 'utils/graphqlclient';
+import AddOutlined from '@material-ui/icons/AddOutlined';
 
 interface UsersProps {
     id: string | undefined;
-    userRole: UserRoles | undefined;
+    role: UserRole | undefined;
     firstName: string | undefined;
     middleName: string | undefined;
     lastName: string | undefined;
@@ -40,34 +80,25 @@ interface UsersProps {
     studentDossier?: StudentDossier | undefined;
 }
 
+interface TabPanelProps {
+    children?: ReactNode;
+    index: number;
+    value: number;
+}
+
+const TabPanel = (props: TabPanelProps) => {
+    const { children, value, index, ...other } = props;
+
+    return (
+        <div hidden={value !== index} {...other}>
+            {value === index && <div>{children}</div>}
+        </div>
+    );
+};
+
 const UsersComponent: FunctionComponent<UsersProps> = (props) => {
     const [expanded, setExpanded] = useState(false);
     const router = useRouter();
-
-    const getStatus = (role: UserStatus | string | undefined) => {
-        switch (role) {
-            case 'UNVERIFIED':
-                return 'Непотвърден';
-            case 'ACTIVE':
-                return 'Активен';
-            case 'INACTIVE':
-                return 'Неактивен';
-            case 'BLOCKED':
-                return 'Блокиран';
-            default:
-                return undefined;
-        }
-    };
-    const getContract = (role: ContractType | string | undefined) => {
-        switch (role) {
-            case 'PART_TIME':
-                return 'Хоноруван';
-            case 'FULL_TIME':
-                return 'На договор';
-            default:
-                return undefined;
-        }
-    };
 
     return (
         <Accordion
@@ -82,8 +113,9 @@ const UsersComponent: FunctionComponent<UsersProps> = (props) => {
             >
                 <Typography variant='body1' className={styles['names']}>
                     <strong>Име: </strong>
-                    {props.firstName}
-                    {expanded && props.middleName} {props.lastName}
+                    {`${props.firstName} ${expanded ? props.middleName : ''} ${
+                        props.lastName
+                    }`}
                     {!props.firstName &&
                         !props.middleName &&
                         !props.lastName &&
@@ -91,11 +123,11 @@ const UsersComponent: FunctionComponent<UsersProps> = (props) => {
                 </Typography>
                 <Typography variant='body1' className={styles['role-text']}>
                     <strong>Роля: </strong>
-                    {props.userRole || '--'}
+                    {getUserRole(props.role) || '--'}
                 </Typography>
                 <Typography variant='body1' className={styles['status']}>
                     <strong>Статус: </strong>
-                    {props.status ? getStatus(props.status) : '--'}
+                    {props.status ? getUserStatus(props.status) : '--'}
                 </Typography>
             </AccordionSummary>
             <AccordionDetails className={styles['accordion-details']}>
@@ -107,7 +139,7 @@ const UsersComponent: FunctionComponent<UsersProps> = (props) => {
                         <strong>Имейл: </strong>
                         {props.email || '--'}
                     </Typography>
-                    {props.userRole === 'student' && (
+                    {props.role === 'STUDENT' && (
                         <>
                             <Typography className={styles['class']}>
                                 <strong>Клас: </strong>
@@ -123,26 +155,6 @@ const UsersComponent: FunctionComponent<UsersProps> = (props) => {
                             </Typography>
                         </>
                     )}
-                    {props.userRole === 'teacher' && (
-                        <>
-                            <Typography className={styles['years-experience']}>
-                                <strong>Стаж: </strong>
-                                {props.yearsExperience || '--'}
-                            </Typography>
-                            <Typography className={styles['contract-type']}>
-                                <strong>Вид договор: </strong>
-                                {props.contractType
-                                    ? getContract(
-                                          props.contractType.toUpperCase()
-                                      )
-                                    : '--'}
-                            </Typography>
-                            <Typography className={styles['education']}>
-                                <strong>Квалификация: </strong>
-                                {props.education || '--'}
-                            </Typography>
-                        </>
-                    )}
                 </div>
                 <Button
                     variant='contained'
@@ -151,7 +163,7 @@ const UsersComponent: FunctionComponent<UsersProps> = (props) => {
                     className={styles['button-view-more']}
                     onClick={() =>
                         router.push(
-                            `/viewstudent?r=${props.userRole}&id=${props.id}`
+                            `/viewstudent?r=${props.role}&id=${props.id}`
                         )
                     }
                 >
@@ -162,19 +174,343 @@ const UsersComponent: FunctionComponent<UsersProps> = (props) => {
     );
 };
 
+interface GradeDialogProps {
+    studentId: string | undefined;
+    subjectId: string | undefined;
+}
+
+const GradeDialog: FunctionComponent<GradeDialogProps> = (props) => {
+    const [open, setOpen] = useState(false);
+    const [message, setMessage] = useState('');
+    const [grade, setGrade] = useState(6);
+    const [gradeType, setGradeType] = useState('');
+
+    const addGrade = async () => {
+        try {
+            await graphQLClient.request(
+                gql`
+                    mutation(
+                        $studentId: String!
+                        $subjectId: String!
+                        $grade: Float!
+                        $message: String!
+                        $gradeWithWords: GradeWord!
+                        $type: GradeType!
+                    ) {
+                        addGrade(
+                            input: {
+                                studentId: $studentId
+                                subjectId: $subjectId
+                                message: $message
+                                grade: $grade
+                                gradeWithWords: $gradeWithWords
+                                type: $type
+                            }
+                        ) {
+                            gradeId
+                        }
+                    }
+                `,
+                {
+                    studentId: props.studentId,
+                    subjectId: props.subjectId,
+                    message,
+                    grade,
+                    gradeWithWords: getGradeEnum(grade),
+                    type: gradeType,
+                }
+            );
+            setOpen(false);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    return (
+        <>
+            <IconButton
+                className={styles['add-grade-button']}
+                onClick={() => setOpen(true)}
+                color='primary'
+            >
+                <AddOutlined />
+            </IconButton>
+            <Dialog
+                fullWidth
+                maxWidth='lg'
+                className={styles['dialog']}
+                open={open}
+                onClose={() => setOpen(false)}
+            >
+                <DialogTitle className={styles['dialog-title']}>
+                    Добави оценка
+                </DialogTitle>
+                <DialogContent className={styles['dialog-content']}>
+                    <div className={styles['input-container']}>
+                        <TextField
+                            label='Основание за оценката'
+                            variant='outlined'
+                            fullWidth
+                            value={message}
+                            multiline
+                            rows={7}
+                            rowsMax={9}
+                            onChange={(e) => setMessage(e.target.value)}
+                        />
+                        <div className={styles['grade-options']}>
+                            <FormControl
+                                variant='outlined'
+                                className={styles['grade-select']}
+                            >
+                                <InputLabel id='grade-select-label'>
+                                    Оценка
+                                </InputLabel>
+                                <Select
+                                    label='Оценка'
+                                    labelId='grade-select-label'
+                                    value={grade}
+                                    onChange={(e) => {
+                                        setGrade(
+                                            parseInt(e.target.value as string)
+                                        );
+                                    }}
+                                    renderValue={(selected) =>
+                                        (getGradeName(grade) +
+                                            ' ' +
+                                            selected) as string
+                                    }
+                                >
+                                    {[2, 3, 4, 5, 6].map((grade) => (
+                                        <MenuItem key={grade} value={grade}>
+                                            {getGradeName(grade) + ' ' + grade}
+                                        </MenuItem>
+                                    ))}
+                                </Select>
+                            </FormControl>
+                            <FormControl
+                                variant='outlined'
+                                className={styles['grade-type-select']}
+                            >
+                                <InputLabel id='grade-type-select-label'>
+                                    Вид на оценката
+                                </InputLabel>
+                                <Select
+                                    label='Оценка'
+                                    labelId='grade-type-select-label'
+                                    value={gradeType}
+                                    onChange={(e) => {
+                                        setGradeType(e.target.value as string);
+                                    }}
+                                    renderValue={(selected) =>
+                                        getGradeType(selected as string)
+                                    }
+                                >
+                                    {Object.values(GradeType).map(
+                                        (gradeType) => (
+                                            <MenuItem
+                                                key={gradeType}
+                                                value={gradeType}
+                                            >
+                                                {getGradeType(gradeType)}
+                                            </MenuItem>
+                                        )
+                                    )}
+                                </Select>
+                            </FormControl>
+                        </div>
+                    </div>
+                </DialogContent>
+                <DialogActions className={styles['dialog-actions']}>
+                    <Button
+                        onClick={() => setOpen(false)}
+                        disableElevation
+                        variant='outlined'
+                        color='secondary'
+                        endIcon={<CloseOutlined />}
+                    >
+                        Отказ
+                    </Button>
+
+                    <Button
+                        onClick={addGrade}
+                        disableElevation
+                        variant='contained'
+                        color='primary'
+                        endIcon={<DoneOutlined />}
+                    >
+                        Потвърди
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        </>
+    );
+};
+
+interface GradeTableProps {
+    students: Student[];
+    subjectId: string | undefined;
+    classId: string | undefined;
+}
+
+const GradeTable: FunctionComponent<GradeTableProps> = (props) => {
+    const [grades, setGrades] = useState<Grade[]>([]);
+    const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+
+    useEffect(() => {
+        (async () => {
+            try {
+                const data = await graphQLClient.request(
+                    gql`
+                        query($subjectId: String!, $classId: String!) {
+                            getAllGradesPerClassPerSubject(
+                                subjectId: $subjectId
+                                classId: $classId
+                            ) {
+                                id
+                                createdAt
+                                message
+                                grade
+                                gradeWithWords
+                                type
+                                student {
+                                    id
+                                }
+                            }
+                        }
+                    `,
+                    { subjectId: props.subjectId, classId: props.classId }
+                );
+                setGrades(data.getAllGradesPerClassPerSubject);
+            } catch (error) {
+                console.log(error);
+            }
+        })();
+    }, []);
+
+    return (
+        <div className={styles['grades-container']}>
+            <div className={styles['grade-row']}>
+                <div
+                    className={`${styles['grade-field']} ${styles['grade-field-name']}`}
+                >
+                    <span>
+                        <strong>Име</strong>
+                    </span>
+                </div>
+
+                <div
+                    className={`${styles['grade-field']} ${styles['grade-field-grades']}`}
+                >
+                    <span>
+                        <strong>Оценки</strong>
+                    </span>
+                </div>
+            </div>
+            {props.students.map((student) => (
+                <Fragment key={student.id}>
+                    <div className={styles['grade-row']}>
+                        <div
+                            className={`${styles['grade-field']} ${styles['grade-field-name']}`}
+                        >
+                            <span>{`${
+                                student?.user?.firstName
+                            } ${student?.user?.middleName?.charAt(0)}. ${
+                                student?.user?.lastName
+                            }`}</span>
+                            <GradeDialog
+                                studentId={student.id}
+                                subjectId={props.subjectId}
+                            />
+                        </div>
+                        <div
+                            className={`${styles['grade-field']} ${styles['grade-field-grades']}`}
+                        >
+                            {grades
+                                .filter(
+                                    (grade) => grade?.student?.id === student.id
+                                )
+                                .sort((a: Grade, b: Grade) =>
+                                    (a.createdAt as Date) >
+                                    (b.createdAt as Date)
+                                        ? 1
+                                        : (a.createdAt as Date) <
+                                          (b.createdAt as Date)
+                                        ? -1
+                                        : 0
+                                )
+                                .map((grade) => (
+                                    <Fragment key={grade.id}>
+                                        <span
+                                            aria-haspopup='true'
+                                            className={styles.grade}
+                                            onMouseEnter={(
+                                                e: MouseEvent<HTMLButtonElement>
+                                            ) => setAnchorEl(e.currentTarget)}
+                                            onMouseLeave={() =>
+                                                setAnchorEl(null)
+                                            }
+                                            key={grade.id}
+                                        >{`${getGradeName(
+                                            grade.gradeWithWords,
+                                            true
+                                        )} ${grade.grade}`}</span>
+                                        <Popover
+                                            style={{ pointerEvents: 'none' }}
+                                            open={Boolean(anchorEl)}
+                                            anchorEl={anchorEl}
+                                            onClose={() => setAnchorEl(null)}
+                                            anchorOrigin={{
+                                                vertical: 'bottom',
+                                                horizontal: 'center',
+                                            }}
+                                            transformOrigin={{
+                                                vertical: 'top',
+                                                horizontal: 'center',
+                                            }}
+                                        >
+                                            <Typography className='grade-message'>
+                                                {grade.message}
+                                            </Typography>
+                                        </Popover>
+                                    </Fragment>
+                                ))}
+                        </div>
+                    </div>
+                </Fragment>
+            ))}
+        </div>
+    );
+};
+
 const Students: FunctionComponent = () => {
     const router = useRouter();
     const { user, status } = useAuth();
+
+    const [value, setValue] = useState(0);
+    const [innerValue, setInnerValue] = useState(0);
     const [error, setError] = useState('');
+
+    let tabCounter = 0;
+
     const { data } = useSWR(gql`
         query {
-            classes {
+            getAllClasses {
                 id
-                classNumber
-                classLetter
+                number
+                letter
+                subjects {
+                    id
+                    name
+                }
+                teacher {
+                    id
+                    user {
+                        id
+                    }
+                }
             }
 
-            students {
+            getAllStudents {
                 id
                 user {
                     firstName
@@ -184,8 +520,9 @@ const Students: FunctionComponent = () => {
                     status
                 }
                 class {
-                    classNumber
-                    classLetter
+                    id
+                    number
+                    letter
                 }
                 prevEducation
                 recordMessage
@@ -203,22 +540,8 @@ const Students: FunctionComponent = () => {
                         id
                         name
                     }
-                    dossierMessage
+                    message
                 }
-            }
-
-            teachers {
-                id
-                user {
-                    firstName
-                    middleName
-                    lastName
-                    email
-                    status
-                }
-                education
-                yearsExperience
-                contractType
             }
         }
     `);
@@ -227,12 +550,8 @@ const Students: FunctionComponent = () => {
         if (status === 'REDIRECT') {
             router.push('/login');
         }
-        if (user && (user?.userRole as string) !== 'ADMIN') {
+        if (user && user.role !== 'ADMIN' && user.role !== 'TEACHER') {
             router.back();
-        }
-
-        if (data) {
-            console.log(data);
         }
     }, [user, status, data]);
 
@@ -253,61 +572,263 @@ const Students: FunctionComponent = () => {
             >
                 <Navbar title='Ученици' />
                 <div className={styles.content}>
-                    {data && (
+                    {user.role === 'ADMIN' && (
                         <div className={styles['users-container']}>
-                            {data?.students &&
-                                data?.students?.map(
-                                    (student: Student, i: number) => (
-                                        <UsersComponent
-                                            key={i}
-                                            id={student?.id}
-                                            userRole={UserRoles['STUDENT']}
-                                            firstName={student?.user?.firstName}
-                                            middleName={
-                                                student?.user?.middleName
-                                            }
-                                            lastName={student?.user?.lastName}
-                                            email={student?.user?.email}
-                                            status={student?.user?.status}
-                                            recordMessage={
-                                                student?.recordMessage
-                                            }
-                                            prevEducation={
-                                                student?.prevEducation
-                                            }
-                                            classLetter={
-                                                student?.class?.classLetter
-                                            }
-                                            classNumber={
-                                                student?.class?.classNumber
-                                            }
-                                            studentDossier={student?.dossier}
-                                        />
-                                    )
-                                )}
-                            {data?.teachers &&
-                                data?.teachers?.map(
-                                    (teacher: Teacher, i: number) => (
-                                        <UsersComponent
-                                            key={i}
-                                            id={teacher?.id}
-                                            userRole={UserRoles['TEACHER']}
-                                            firstName={teacher?.user?.firstName}
-                                            middleName={
-                                                teacher?.user?.middleName
-                                            }
-                                            lastName={teacher?.user?.lastName}
-                                            email={teacher?.user?.email}
-                                            status={teacher?.user?.status}
-                                            education={teacher?.education}
-                                            yearsExperience={
-                                                teacher?.yearsExperience
-                                            }
-                                            contractType={teacher?.contractType}
-                                        />
-                                    )
-                                )}
+                            {data?.getAllStudents?.map(
+                                (student: Student, i: number) => (
+                                    <UsersComponent
+                                        key={i}
+                                        id={student?.id}
+                                        role={UserRole['STUDENT']}
+                                        firstName={student?.user?.firstName}
+                                        middleName={student?.user?.middleName}
+                                        lastName={student?.user?.lastName}
+                                        email={student?.user?.email}
+                                        status={student?.user?.status}
+                                        recordMessage={student?.recordMessage}
+                                        prevEducation={student?.prevEducation}
+                                        classLetter={student?.class?.letter}
+                                        classNumber={student?.class?.number}
+                                        studentDossier={student?.dossier}
+                                    />
+                                )
+                            )}
                         </div>
+                    )}
+
+                    {user?.role === 'TEACHER' && (
+                        <>
+                            <AppBar
+                                position='static'
+                                color='transparent'
+                                elevation={0}
+                            >
+                                <Tabs
+                                    indicatorColor='primary'
+                                    value={value}
+                                    onChange={(_e, newValue) =>
+                                        setValue(newValue)
+                                    }
+                                >
+                                    {data?.getAllClasses?.filter(
+                                        (cls: Class) =>
+                                            cls?.teacher?.user?.id === user?.id
+                                    ).length && (
+                                        <Tab disableRipple label='Моят клас' />
+                                    )}
+
+                                    {data?.getAllClasses?.map((cls: Class) =>
+                                        cls?.subjects?.map(
+                                            (subject: Subject) => (
+                                                <Tab
+                                                    disableRipple
+                                                    key={subject.id}
+                                                    label={`${cls.number}${cls.letter} ${subject.name}`}
+                                                />
+                                            )
+                                        )
+                                    )}
+                                </Tabs>
+                            </AppBar>
+                            <TabPanel value={value} index={0}>
+                                {data && (
+                                    <div className={styles['users-container']}>
+                                        {data.getAllStudents &&
+                                            data.getAllStudents
+                                                .filter((student: Student) => {
+                                                    if (
+                                                        data.getAllClasses
+                                                            .filter(
+                                                                (
+                                                                    cls: Class
+                                                                ) => {
+                                                                    if (
+                                                                        cls
+                                                                            ?.teacher
+                                                                            ?.user
+                                                                            ?.id ===
+                                                                        user?.id
+                                                                    ) {
+                                                                        tabCounter = 1;
+                                                                        return true;
+                                                                    }
+                                                                }
+                                                            )
+                                                            .map(
+                                                                (cls: Class) =>
+                                                                    cls.id
+                                                            )
+                                                            .includes(
+                                                                student?.class
+                                                                    ?.id
+                                                            )
+                                                    ) {
+                                                        return student;
+                                                    }
+                                                })
+                                                .map(
+                                                    (
+                                                        student: Student,
+                                                        i: number
+                                                    ) => (
+                                                        <UsersComponent
+                                                            key={i}
+                                                            id={student?.id}
+                                                            role={
+                                                                UserRole[
+                                                                    'STUDENT'
+                                                                ]
+                                                            }
+                                                            firstName={
+                                                                student?.user
+                                                                    ?.firstName
+                                                            }
+                                                            middleName={
+                                                                student?.user
+                                                                    ?.middleName
+                                                            }
+                                                            lastName={
+                                                                student?.user
+                                                                    ?.lastName
+                                                            }
+                                                            email={
+                                                                student?.user
+                                                                    ?.email
+                                                            }
+                                                            status={
+                                                                student?.user
+                                                                    ?.status
+                                                            }
+                                                            recordMessage={
+                                                                student?.recordMessage
+                                                            }
+                                                            prevEducation={
+                                                                student?.prevEducation
+                                                            }
+                                                            classLetter={
+                                                                student?.class
+                                                                    ?.letter
+                                                            }
+                                                            classNumber={
+                                                                student?.class
+                                                                    ?.number
+                                                            }
+                                                            studentDossier={
+                                                                student?.dossier
+                                                            }
+                                                        />
+                                                    )
+                                                )}
+                                    </div>
+                                )}
+                            </TabPanel>
+                            {data?.getAllClasses?.map((cls: Class) =>
+                                cls?.subjects?.map((subject: Subject) => (
+                                    <TabPanel
+                                        key={subject.id}
+                                        value={value}
+                                        index={tabCounter++}
+                                    >
+                                        <AppBar
+                                            position='static'
+                                            color='transparent'
+                                            elevation={0}
+                                        >
+                                            <Tabs
+                                                indicatorColor='primary'
+                                                value={innerValue}
+                                                onChange={(_e, newValue) =>
+                                                    setInnerValue(newValue)
+                                                }
+                                            >
+                                                <Tab
+                                                    disableRipple
+                                                    label='Ученици'
+                                                />
+                                                <Tab
+                                                    disableRipple
+                                                    label='Оценки'
+                                                />
+                                            </Tabs>
+                                        </AppBar>
+                                        <TabPanel value={innerValue} index={0}>
+                                            {' '}
+                                            <div
+                                                className={
+                                                    styles['users-container']
+                                                }
+                                            >
+                                                {data.getAllStudents
+                                                    .filter(
+                                                        (student: Student) =>
+                                                            student?.class
+                                                                ?.id === cls.id
+                                                    )
+                                                    .map((student: Student) => (
+                                                        <UsersComponent
+                                                            key={student?.id}
+                                                            id={student?.id}
+                                                            role={
+                                                                UserRole[
+                                                                    'STUDENT'
+                                                                ]
+                                                            }
+                                                            firstName={
+                                                                student?.user
+                                                                    ?.firstName
+                                                            }
+                                                            middleName={
+                                                                student?.user
+                                                                    ?.middleName
+                                                            }
+                                                            lastName={
+                                                                student?.user
+                                                                    ?.lastName
+                                                            }
+                                                            email={
+                                                                student?.user
+                                                                    ?.email
+                                                            }
+                                                            status={
+                                                                student?.user
+                                                                    ?.status
+                                                            }
+                                                            recordMessage={
+                                                                student?.recordMessage
+                                                            }
+                                                            prevEducation={
+                                                                student?.prevEducation
+                                                            }
+                                                            classLetter={
+                                                                student?.class
+                                                                    ?.letter
+                                                            }
+                                                            classNumber={
+                                                                student?.class
+                                                                    ?.number
+                                                            }
+                                                            studentDossier={
+                                                                student?.dossier
+                                                            }
+                                                        />
+                                                    ))}
+                                            </div>
+                                        </TabPanel>
+                                        <TabPanel value={innerValue} index={1}>
+                                            <GradeTable
+                                                students={data.getAllStudents.filter(
+                                                    (student: Student) =>
+                                                        student?.class?.id ===
+                                                        cls.id
+                                                )}
+                                                subjectId={subject.id}
+                                                classId={cls.id}
+                                            />
+                                        </TabPanel>
+                                    </TabPanel>
+                                ))
+                            )}
+                        </>
                     )}
                 </div>
                 <Snackbar

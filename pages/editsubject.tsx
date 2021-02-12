@@ -35,16 +35,16 @@ const EditSubject: FunctionComponent = () => {
     const [startYear, setStartYear] = useState(new Date().getFullYear());
     const [endYear, setEndYear] = useState(new Date().getFullYear() + 1);
     const [error, setError] = useState('');
-    const [classUUID, setClassUUID] = useState('');
-    const [teachersUUIDs, setTeachersUUIDs] = useState<string[]>([]);
+    const [classId, setClassId] = useState('');
+    const [teachersIds, setTeachersIds] = useState<string[]>([]);
     const { data } = useSWR(gql`
         query {
-            classes {
+            getAllClasses {
                 id
-                classNumber
-                classLetter
+                number
+                letter
             }
-            teachers {
+            getAllTeachers {
                 id
                 user {
                     firstName
@@ -58,7 +58,7 @@ const EditSubject: FunctionComponent = () => {
         if (status === 'REDIRECT') {
             router.push('/login');
         }
-        if (user && (user?.userRole as string) !== 'ADMIN') {
+        if (user && user?.role !== 'ADMIN') {
             router.back();
         }
     }, [user, status]);
@@ -69,7 +69,7 @@ const EditSubject: FunctionComponent = () => {
                 const subjectData = await graphQLClient.request(
                     gql`
                         query($id: String!) {
-                            subject(id: $id) {
+                            getSubject(id: $id) {
                                 id
                                 startYear
                                 endYear
@@ -84,8 +84,8 @@ const EditSubject: FunctionComponent = () => {
                                 }
                                 class {
                                     id
-                                    classNumber
-                                    classLetter
+                                    number
+                                    letter
                                 }
                             }
                         }
@@ -94,13 +94,13 @@ const EditSubject: FunctionComponent = () => {
                         id: router.query.id,
                     }
                 );
-                setName(subjectData.subject.name);
-                setDescription(subjectData.subject.description);
-                setStartYear(subjectData.subject.startYear);
-                setEndYear(subjectData.subject.endYear);
-                setClassUUID(subjectData.subject.class.id);
-                setTeachersUUIDs(
-                    subjectData.subject.teachers.map(
+                setName(subjectData.getSubject.name);
+                setDescription(subjectData.getSubject.description);
+                setStartYear(subjectData.getSubject.startYear);
+                setEndYear(subjectData.getSubject.endYear);
+                setClassId(subjectData.getSubject.class.id);
+                setTeachersIds(
+                    subjectData.getSubject.teachers.map(
                         (teacher: Teacher) => teacher.id
                     )
                 );
@@ -121,18 +121,18 @@ const EditSubject: FunctionComponent = () => {
                         $endYear: Int!
                         $name: String!
                         $description: String!
-                        $classUUID: String!
-                        $teachersUUIDs: [String!]
+                        $classId: String!
+                        $teachersIds: [String!]
                     ) {
                         updateSubject(
-                            updateSubjectInput: {
+                            input: {
                                 id: $id
                                 startYear: $startYear
                                 endYear: $endYear
                                 name: $name
                                 description: $description
-                                classUUID: $classUUID
-                                teachersUUIDs: $teachersUUIDs
+                                classId: $classId
+                                teachersIds: $teachersIds
                             }
                         ) {
                             subjectId
@@ -145,8 +145,8 @@ const EditSubject: FunctionComponent = () => {
                     endYear,
                     name,
                     description,
-                    classUUID,
-                    teachersUUIDs,
+                    classId,
+                    teachersIds,
                 }
             );
             router.push('/subjects');
@@ -225,9 +225,9 @@ const EditSubject: FunctionComponent = () => {
                                         label='Преподаватели'
                                         labelId='teachers-select-label'
                                         multiple
-                                        value={teachersUUIDs}
+                                        value={teachersIds}
                                         onChange={(e) =>
-                                            setTeachersUUIDs(
+                                            setTeachersIds(
                                                 e.target.value as string[]
                                             )
                                         }
@@ -235,7 +235,7 @@ const EditSubject: FunctionComponent = () => {
                                             (selected as string[])
                                                 .map(
                                                     (selection) =>
-                                                        data.teachers.find(
+                                                        data.getAllTeachers.find(
                                                             (
                                                                 teacher: Teacher
                                                             ) =>
@@ -245,14 +245,14 @@ const EditSubject: FunctionComponent = () => {
                                                 )
                                                 .map(
                                                     (user) =>
-                                                        `${user?.firstName} ${user?.lastName}`
+                                                        `${user.firstName} ${user.lastName}`
                                                 )
                                                 .join(', ')
                                         }
                                     >
                                         {data &&
-                                            data?.teachers &&
-                                            data?.teachers.map(
+                                            data?.getAllTeachers &&
+                                            data?.getAllTeachers.map(
                                                 (
                                                     teacher: Teacher,
                                                     i: number
@@ -264,7 +264,7 @@ const EditSubject: FunctionComponent = () => {
                                                         <Checkbox
                                                             color='primary'
                                                             checked={
-                                                                teachersUUIDs.indexOf(
+                                                                teachersIds.indexOf(
                                                                     teacher.id as string
                                                                 ) > -1
                                                             }
@@ -283,20 +283,18 @@ const EditSubject: FunctionComponent = () => {
                                     label='Клас'
                                     required
                                     variant='outlined'
-                                    value={classUUID}
-                                    onChange={(e) =>
-                                        setClassUUID(e.target.value)
-                                    }
+                                    value={classId}
+                                    onChange={(e) => setClassId(e.target.value)}
                                 >
                                     {data &&
-                                        data?.classes &&
-                                        data?.classes?.map(
+                                        data?.getAllClasses &&
+                                        data?.getAllClasses?.map(
                                             (currClass: Class, i: number) => (
                                                 <MenuItem
                                                     key={i}
                                                     value={currClass.id}
                                                 >
-                                                    {`${currClass.classNumber} ${currClass.classLetter}`}
+                                                    {`${currClass.number}${currClass.letter}`}
                                                 </MenuItem>
                                             )
                                         )}

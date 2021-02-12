@@ -25,19 +25,34 @@ const Navbar: FunctionComponent<NavbarProps> = (props) => {
                 <div className={styles.links}>
                     <span className={styles.separator}></span>
                     {!user ? (
-                        <Link
-                            underline='none'
-                            className={styles.link}
-                            href='/login'
-                        >
-                            <Button
-                                disableElevation
-                                color='primary'
-                                variant='contained'
+                        <>
+                            <Link
+                                underline='none'
+                                className={styles.link}
+                                href='/login'
                             >
-                                Влез
-                            </Button>
-                        </Link>
+                                <Button
+                                    disableElevation
+                                    color='primary'
+                                    variant='contained'
+                                >
+                                    Влез
+                                </Button>
+                            </Link>
+                            <Link
+                                underline='none'
+                                className={styles.link}
+                                href='/register'
+                            >
+                                <Button
+                                    disableElevation
+                                    color='primary'
+                                    variant='outlined'
+                                >
+                                    Регистрация
+                                </Button>
+                            </Link>
+                        </>
                     ) : (
                         <>
                             <Link

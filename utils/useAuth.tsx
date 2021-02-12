@@ -36,20 +36,19 @@ export const useAuth = (): Auth => {
             if (data.checkRefreshToken) {
                 const query = gql`
                     query {
-                        profile {
+                        getProfile {
                             id
                             firstName
                             middleName
                             lastName
                             email
-                            userRole
+                            role
                             status
                             institution {
                                 id
                                 name
                                 email
                                 type
-                                capacityPerClass
                                 educationalStage
                                 alias
                             }
@@ -58,7 +57,7 @@ export const useAuth = (): Auth => {
                 `;
                 try {
                     const user = await graphQLClient.request(query);
-                    setUser([user.profile, 'DONE']);
+                    setUser([user.getProfile, 'DONE']);
                 } catch {
                     await graphQLClient.request(gql`
                         query {
@@ -68,7 +67,7 @@ export const useAuth = (): Auth => {
                         }
                     `);
                     const user = await graphQLClient.request(query);
-                    setUser([user.profile, 'DONE']);
+                    setUser([user.getProfile, 'DONE']);
                 }
             } else {
                 setUser([null, 'REDIRECT']);

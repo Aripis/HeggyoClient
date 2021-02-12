@@ -23,11 +23,12 @@ import { gql } from 'graphql-request';
 import { Class, Student, StudentDossier, Teacher } from 'utils/interfaces';
 import graphQLClient from 'utils/graphqlclient';
 import useSWR from 'swr';
-import { ContractType, UserStatus, UserRoles } from 'utils/enums';
+import { ContractType, UserStatus, UserRole } from 'utils/enums';
+import { getUserRole, getContractType, getUserStatus } from 'utils/helpers';
 
 interface UsersProps {
     id: string | undefined;
-    userRole: UserRoles | undefined;
+    role: UserRole | undefined;
     firstName: string | undefined;
     middleName: string | undefined;
     lastName: string | undefined;
@@ -47,31 +48,6 @@ const UsersComponent: FunctionComponent<UsersProps> = (props) => {
     const [expanded, setExpanded] = useState(false);
     const router = useRouter();
 
-    const getStatus = (role: UserStatus | string | undefined) => {
-        switch (role) {
-            case 'UNVERIFIED':
-                return 'Непотвърден';
-            case 'ACTIVE':
-                return 'Активен';
-            case 'INACTIVE':
-                return 'Неактивен';
-            case 'BLOCKED':
-                return 'Блокиран';
-            default:
-                return undefined;
-        }
-    };
-    const getContract = (role: ContractType | string | undefined) => {
-        switch (role) {
-            case 'PART_TIME':
-                return 'Хоноруван';
-            case 'FULL_TIME':
-                return 'На договор';
-            default:
-                return undefined;
-        }
-    };
-
     return (
         <Accordion
             elevation={0}
@@ -85,8 +61,9 @@ const UsersComponent: FunctionComponent<UsersProps> = (props) => {
             >
                 <Typography variant='body1' className={styles['names']}>
                     <strong>Име: </strong>
-                    {props.firstName}
-                    {expanded && props.middleName} {props.lastName}
+                    {`${props.firstName} ${expanded ? props.middleName : ''} ${
+                        props.lastName
+                    }`}
                     {!props.firstName &&
                         !props.middleName &&
                         !props.lastName &&
@@ -94,11 +71,11 @@ const UsersComponent: FunctionComponent<UsersProps> = (props) => {
                 </Typography>
                 <Typography variant='body1' className={styles['role-text']}>
                     <strong>Роля: </strong>
-                    {props.userRole || '--'}
+                    {getUserRole(props.role) || '--'}
                 </Typography>
                 <Typography variant='body1' className={styles['status']}>
                     <strong>Статус: </strong>
-                    {props.status ? getStatus(props.status) : '--'}
+                    {getUserStatus(props.status) || '--'}
                 </Typography>
             </AccordionSummary>
             <AccordionDetails className={styles['accordion-details']}>
@@ -110,12 +87,11 @@ const UsersComponent: FunctionComponent<UsersProps> = (props) => {
                         <strong>Имейл: </strong>
                         {props.email || '--'}
                     </Typography>
-                    {props.userRole === 'student' && (
+                    {props.role === 'STUDENT' && (
                         <>
                             <Typography className={styles['class']}>
                                 <strong>Клас: </strong>
-                                {props.classNumber}
-                                {props.classLetter}
+                                {`${props.classNumber}${props.classLetter}`}
                                 {!props.classLetter &&
                                     !props.classNumber &&
                                     '--'}
@@ -126,7 +102,7 @@ const UsersComponent: FunctionComponent<UsersProps> = (props) => {
                             </Typography>
                         </>
                     )}
-                    {props.userRole === 'teacher' && (
+                    {props.role === 'TEACHER' && (
                         <>
                             <Typography className={styles['years-experience']}>
                                 <strong>Стаж: </strong>
@@ -134,11 +110,7 @@ const UsersComponent: FunctionComponent<UsersProps> = (props) => {
                             </Typography>
                             <Typography className={styles['contract-type']}>
                                 <strong>Вид договор: </strong>
-                                {props.contractType
-                                    ? getContract(
-                                          props.contractType.toUpperCase()
-                                      )
-                                    : '--'}
+                                {getContractType(props.contractType) || '--'}
                             </Typography>
                             <Typography className={styles['education']}>
                                 <strong>Квалификация: </strong>
@@ -154,7 +126,7 @@ const UsersComponent: FunctionComponent<UsersProps> = (props) => {
                     className={styles['button-view-more']}
                     onClick={() =>
                         router.push(
-                            `/editforeignuser?r=${props.userRole}&id=${props.id}`
+                            `/editforeignuser?r=${props.role}&id=${props.id}`
                         )
                     }
                 >
@@ -171,17 +143,17 @@ const Users: FunctionComponent = () => {
 
     const [role, setRole] = useState('');
     const [token, setToken] = useState('');
-    const [classUUID, setClassUUID] = useState('');
+    const [classId, setClassId] = useState('');
     const [error, setError] = useState('');
     const { data } = useSWR(gql`
         query {
-            classes {
+            getAllClasses {
                 id
-                classNumber
-                classLetter
+                number
+                letter
             }
 
-            students {
+            getAllStudents {
                 id
                 user {
                     firstName
@@ -191,8 +163,8 @@ const Users: FunctionComponent = () => {
                     status
                 }
                 class {
-                    classNumber
-                    classLetter
+                    number
+                    letter
                 }
                 prevEducation
                 recordMessage
@@ -210,11 +182,11 @@ const Users: FunctionComponent = () => {
                         id
                         name
                     }
-                    dossierMessage
+                    message
                 }
             }
 
-            teachers {
+            getAllTeachers {
                 id
                 user {
                     firstName
@@ -234,12 +206,8 @@ const Users: FunctionComponent = () => {
         if (status === 'REDIRECT') {
             router.push('/login');
         }
-        if (user && (user?.userRole as string) !== 'ADMIN') {
+        if (user && user?.role !== 'ADMIN') {
             router.back();
-        }
-
-        if (data) {
-            console.log(data);
         }
     }, [user, status, data]);
 
@@ -252,34 +220,24 @@ const Users: FunctionComponent = () => {
         try {
             const res = await graphQLClient.request(
                 gql`
-                    query($classUUID: String, $userRole: UserRoles!) {
+                    query($classId: String, $role: UserRole!) {
                         generateUserToken(
-                            tokenpreferences: {
-                                classUUID: $classUUID
-                                userRole: $userRole
-                            }
+                            input: { classId: $classId, role: $role }
                         ) {
-                            userRoleToken
+                            token
                         }
                     }
                 `,
                 {
-                    classUUID,
-                    userRole: role,
+                    classId,
+                    role: role,
                 }
             );
-            setToken(res.generateUserToken.userRoleToken);
+            setToken(res.generateUserToken.token);
         } catch (error) {
             setError('Неизвестна грешка');
         }
     };
-
-    const roles = [
-        { value: 'ADMIN', content: 'Администратор' },
-        { value: 'STUDENT', content: 'Ученик' },
-        { value: 'TEACHER', content: 'Учител' },
-        { value: 'PARENT', content: 'Родител' },
-    ];
 
     return (
         <>
@@ -322,16 +280,15 @@ const Users: FunctionComponent = () => {
                                 value={role}
                                 onChange={(e) => {
                                     setRole(e.target.value);
-                                    setClassUUID('');
+                                    setClassId('');
                                     setToken('');
                                 }}
                             >
-                                {roles &&
-                                    roles.map((role, i: number) => (
-                                        <MenuItem key={i} value={role.value}>
-                                            {role.content}
-                                        </MenuItem>
-                                    ))}
+                                {Object.values(UserRole).map((role) => (
+                                    <MenuItem key={role} value={role}>
+                                        {getUserRole(role)}
+                                    </MenuItem>
+                                ))}
                             </TextField>
                             {(role === 'STUDENT' || role === 'TEACHER') && (
                                 <TextField
@@ -344,24 +301,20 @@ const Users: FunctionComponent = () => {
                                     }
                                     required={role === 'STUDENT'}
                                     variant='outlined'
-                                    value={classUUID}
-                                    onChange={(e) =>
-                                        setClassUUID(e.target.value)
-                                    }
+                                    value={classId}
+                                    onChange={(e) => setClassId(e.target.value)}
                                 >
                                     <MenuItem value=''>Без</MenuItem>
-                                    {data &&
-                                        data?.classes &&
-                                        data?.classes?.map(
-                                            (currClass: Class, i: number) => (
-                                                <MenuItem
-                                                    key={i}
-                                                    value={currClass.id}
-                                                >
-                                                    {`${currClass.classNumber} ${currClass.classLetter}`}
-                                                </MenuItem>
-                                            )
-                                        )}
+                                    {data?.getAllClasses?.map(
+                                        (currClass: Class) => (
+                                            <MenuItem
+                                                key={currClass.id}
+                                                value={currClass.id}
+                                            >
+                                                {`${currClass.number}${currClass.letter}`}
+                                            </MenuItem>
+                                        )
+                                    )}
                                 </TextField>
                             )}
                             <TextField
@@ -376,58 +329,42 @@ const Users: FunctionComponent = () => {
                     </form>
                     {data && (
                         <div className={styles['users-container']}>
-                            {data?.students &&
-                                data?.students?.map(
-                                    (student: Student, i: number) => (
-                                        <UsersComponent
-                                            key={i}
-                                            id={student?.id}
-                                            userRole={UserRoles['STUDENT']}
-                                            firstName={student?.user?.firstName}
-                                            middleName={
-                                                student?.user?.middleName
-                                            }
-                                            lastName={student?.user?.lastName}
-                                            email={student?.user?.email}
-                                            status={student?.user?.status}
-                                            recordMessage={
-                                                student?.recordMessage
-                                            }
-                                            prevEducation={
-                                                student?.prevEducation
-                                            }
-                                            classLetter={
-                                                student?.class?.classLetter
-                                            }
-                                            classNumber={
-                                                student?.class?.classNumber
-                                            }
-                                            studentDossier={student?.dossier}
-                                        />
-                                    )
-                                )}
-                            {data?.teachers &&
-                                data?.teachers?.map(
-                                    (teacher: Teacher, i: number) => (
-                                        <UsersComponent
-                                            key={i}
-                                            id={teacher?.id}
-                                            userRole={UserRoles['TEACHER']}
-                                            firstName={teacher?.user?.firstName}
-                                            middleName={
-                                                teacher?.user?.middleName
-                                            }
-                                            lastName={teacher?.user?.lastName}
-                                            email={teacher?.user?.email}
-                                            status={teacher?.user?.status}
-                                            education={teacher?.education}
-                                            yearsExperience={
-                                                teacher?.yearsExperience
-                                            }
-                                            contractType={teacher?.contractType}
-                                        />
-                                    )
-                                )}
+                            {data?.getAllStudents?.map((student: Student) => (
+                                <UsersComponent
+                                    key={student?.id}
+                                    id={student?.id}
+                                    role={UserRole['STUDENT']}
+                                    firstName={student?.user?.firstName}
+                                    middleName={student?.user?.middleName}
+                                    lastName={student?.user?.lastName}
+                                    email={student?.user?.email}
+                                    status={student?.user?.status}
+                                    recordMessage={student?.recordMessage}
+                                    prevEducation={student?.prevEducation}
+                                    classLetter={student?.class?.letter}
+                                    classNumber={student?.class?.number}
+                                    studentDossier={student?.dossier}
+                                />
+                            ))}
+                            {data?.getAllTeachers?.map(
+                                (teacher: Teacher, i: number) => (
+                                    <UsersComponent
+                                        key={i}
+                                        id={teacher?.id}
+                                        role={UserRole['TEACHER']}
+                                        firstName={teacher?.user?.firstName}
+                                        middleName={teacher?.user?.middleName}
+                                        lastName={teacher?.user?.lastName}
+                                        email={teacher?.user?.email}
+                                        status={teacher?.user?.status}
+                                        education={teacher?.education}
+                                        yearsExperience={
+                                            teacher?.yearsExperience
+                                        }
+                                        contractType={teacher?.contractType}
+                                    />
+                                )
+                            )}
                         </div>
                     )}
                 </div>

@@ -1,71 +1,79 @@
-import { useState, useEffect, FormEvent, FunctionComponent } from 'react';
-import Head from 'next/head';
 import {
-    Container,
-    TextField,
     Button,
-    Snackbar,
-    InputAdornment,
+    Container,
     IconButton,
+    InputAdornment,
+    Snackbar,
+    TextField,
 } from '@material-ui/core';
 import { Visibility, VisibilityOff } from '@material-ui/icons';
 import Alert from '@material-ui/lab/Alert';
-import styles from 'styles/Login.module.scss';
-import { useRouter } from 'next/router';
-import Link from 'components/Link';
 import { gql } from 'graphql-request';
+import Head from 'next/head';
+import { useRouter } from 'next/router';
+import { FormEvent, FunctionComponent, useState } from 'react';
+//TODO: change styles file
+import styles from 'styles/RegisterInstitution.module.scss';
 import graphQLClient from 'utils/graphqlclient';
-import { useAuth } from 'utils/useAuth';
-import Loader from 'components/Loader';
 
-const Login: FunctionComponent = () => {
+const Register: FunctionComponent = () => {
     const router = useRouter();
-    const { user, status } = useAuth();
 
+    const [error, setError] = useState('');
+    const [firstName, setFirstName] = useState('');
+    const [middleName, setMiddleName] = useState('');
+    const [lastName, setLastName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [registerToken, setRegisterToken] = useState('');
     const [revealPassword, setRevealPassword] = useState(false);
-    const [error, setError] = useState('');
-
-    useEffect(() => {
-        if (status === 'DONE') {
-            router.push('/');
-        }
-    }, [user, status]);
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         try {
             await graphQLClient.request(
                 gql`
-                    query($email: String!, $password: String!) {
-                        login(input: { email: $email, password: $password }) {
-                            id
+                    mutation(
+                        $firstName: String!
+                        $middleName: String!
+                        $lastName: String!
+                        $email: String!
+                        $password: String!
+                        $registerToken: String!
+                    ) {
+                        register(
+                            input: {
+                                firstName: $firstName
+                                middleName: $middleName
+                                lastName: $lastName
+                                email: $email
+                                password: $password
+                                registerToken: $registerToken
+                            }
+                        ) {
+                            userId
                         }
                     }
                 `,
-                { email, password }
+                {
+                    firstName,
+                    middleName,
+                    lastName,
+                    email,
+                    password,
+                    registerToken,
+                }
             );
-            router.push('/dashboard');
-        } catch ({ response }) {
-            if (response.errors[0].message.includes('User not found')) {
-                setError('Невалиден имейл');
-            } else if (
-                response.errors[0].message.includes('Invalid password')
-            ) {
-                setError('Невалиден парола');
-            }
+            router.replace('/login');
+        } catch (error) {
+            console.log(error);
+            setError('Неизвестна грешка');
         }
     };
-
-    if (user) {
-        return <Loader />;
-    }
-
     return (
         <>
             <Head>
-                <title>Вход &#8226; Heggyo</title>
+                <title>Регистрация &#8226; Heggyo</title>
             </Head>
             <Container
                 maxWidth={false}
@@ -76,10 +84,34 @@ const Login: FunctionComponent = () => {
                 <form className={styles.form} onSubmit={handleSubmit}>
                     <div className={styles['input-container']}>
                         <span className={styles['sub-title']}>
-                            Влезте в своя акаунт
+                            Създай своя акаунт
                         </span>
                     </div>
                     <div className={styles['input-container']}>
+                        <TextField
+                            required
+                            className={styles.textfield}
+                            label='Първо име'
+                            value={firstName}
+                            onChange={(e) => setFirstName(e.target.value)}
+                            variant='outlined'
+                        />
+                        <TextField
+                            required
+                            className={styles.textfield}
+                            label='Презиме'
+                            value={middleName}
+                            onChange={(e) => setMiddleName(e.target.value)}
+                            variant='outlined'
+                        />
+                        <TextField
+                            required
+                            className={styles.textfield}
+                            label='Фамилия'
+                            value={lastName}
+                            onChange={(e) => setLastName(e.target.value)}
+                            variant='outlined'
+                        />
                         <TextField
                             label='Имейл'
                             className={styles.textfield}
@@ -88,6 +120,14 @@ const Login: FunctionComponent = () => {
                             value={email}
                             required
                             onChange={(e) => setEmail(e.target.value)}
+                        />
+                        <TextField
+                            label='Регистрационен код'
+                            className={styles.textfield}
+                            variant='outlined'
+                            value={registerToken}
+                            required
+                            onChange={(e) => setRegisterToken(e.target.value)}
                         />
                         <TextField
                             label='Парола'
@@ -125,19 +165,10 @@ const Login: FunctionComponent = () => {
                             color='primary'
                             variant='contained'
                         >
-                            Влез
+                            Регистрирай се
                         </Button>
                     </div>
-                    <div className={styles['input-container']}>
-                        <Link className={styles['text']} href='/'>
-                            Забравена парола?
-                        </Link>
-                    </div>
                 </form>
-                <div className={styles['register']}>
-                    <span>Нямате институция? </span>
-                    <Link href='/registerInstitution'>Регистрирайте</Link>
-                </div>
                 <Snackbar
                     open={Boolean(error)}
                     autoHideDuration={6000}
@@ -156,5 +187,4 @@ const Login: FunctionComponent = () => {
         </>
     );
 };
-
-export default Login;
+export default Register;

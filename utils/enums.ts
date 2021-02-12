@@ -1,64 +1,85 @@
 export enum InstitutionType {
-    TECHNOLOGICAL,
-    MATHEMATICAL,
-    NATURAL_MATHEMATICAL,
-    HUMANITARIAN,
-    ART,
-    LINGUISTICAL,
-    SU,
-    OU,
+    TECHNOLOGICAL = 'TECHNOLOGICAL',
+    MATHEMATICAL = 'MATHEMATICAL',
+    NATURAL_MATHEMATICAL = 'NATURAL_MATHEMATICAL',
+    HUMANITARIAN = 'HUMANITARIAN',
+    ART = 'ART',
+    LINGUISTICAL = 'LINGUISTICAL',
+    SU = 'SU',
+    OU = 'OU',
 }
 
 export enum EducationStage {
-    ELEMENTARY,
-    PRIMARY,
-    UNITED,
-    HIGH,
-    SECONDARY,
+    ELEMENTARY = 'ELEMENTARY',
+    PRIMARY = 'PRIMARY',
+    UNITED = 'UNITED',
+    HIGH = 'HIGH',
 }
 
 export enum UserStatus {
-    ACTIVE = 'active',
-    INACTIVE = 'inactive',
-    BLOCKED = 'blocked',
-    UNVERIFIED = 'unverified',
+    ACTIVE = 'ACTIVE',
+    INACTIVE = 'INACTIVE',
+    BLOCKED = 'BLOCKED',
+    UNVERIFIED = 'UNVERIFIED',
 }
 
-export enum UserRoles {
-    ADMIN = 'admin',
-    PARENT = 'parent',
-    STUDENT = 'student',
-    TEACHER = 'teacher',
-    VIEWER = 'viewer',
+export enum UserRole {
+    ADMIN = 'ADMIN',
+    PARENT = 'PARENT',
+    STUDENT = 'STUDENT',
+    TEACHER = 'TEACHER',
+    VIEWER = 'VIEWER',
 }
 
 export enum ContractType {
-    PART_TIME = 'part_time',
-    FULL_TIME = 'full_time',
+    PART_TIME = 'PART_TIME',
+    FULL_TIME = 'FULL_TIME',
 }
 
 export enum WeekDays {
-    MONDAY = 'monday',
-    TUESDAY = 'tuesday',
-    WEDNESDAY = 'wednesday',
-    THURSDAY = 'thursday',
-    FRIDAY = 'friday',
-    SATURDAY = 'saturday',
-    SUNDAY = 'sunday',
+    MONDAY = 'MONDAY',
+    TUESDAY = 'TUESDAY',
+    WEDNESDAY = 'WEDNESDAY',
+    THURSDAY = 'THURSDAY',
+    FRIDAY = 'FRIDAY',
+    SATURDAY = 'SATURDAY',
+    SUNDAY = 'SUNDAY',
 }
 
 export enum MessageType {
-    ASSIGNMENT = 'assignment',
-    MESSAGE = 'message',
+    ASSIGNMENT = 'ASSIGNMENT',
+    MESSAGE = 'MESSAGE',
 }
 
 export enum MessageStatus {
-    CREATED = 'created',
-    PUBLISHED = 'published',
+    CREATED = 'CREATED',
+    PUBLISHED = 'PUBLISHED',
 }
 
 export enum AssignmentType {
-    HOMEWORK = 'homework',
-    CLASSWORK = 'classwork',
-    EXAM = 'exam',
+    HOMEWORK = 'HOMEWORK',
+    CLASSWORK = 'CLASSWORK',
+    EXAM = 'EXAM',
+}
+
+export enum GradeType {
+    YEAR = 'YEAR',
+    TURM_1 = 'TURM_1',
+    TURM_2 = 'TURM_2',
+    ONGOING = 'ONGOING',
+}
+
+export enum GradeWord {
+    BAD = 'BAD',
+    AVERAGE = 'AVERAGE',
+    GOOD = 'GOOD',
+    VERY_GOOD = 'VERY_GOOD',
+    EXCELLENT = 'EXCELLENT',
+}
+
+export enum StatusType {
+    ACTIVE = 'ACTIVE',
+    INACTIVE = 'INACTIVE',
+    BLOCKED = 'BLOCKED',
+    UNVERIFIED = 'UNVERIFIED',
 }
