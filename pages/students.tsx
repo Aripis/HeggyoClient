@@ -184,7 +184,6 @@ const GradeDialog: FunctionComponent<GradeDialogProps> = (props) => {
     const [message, setMessage] = useState('');
     const [grade, setGrade] = useState(6);
     const [gradeType, setGradeType] = useState('');
-    const [gradeWithWords, setGradeWithWords] = useState('');
 
     const addGrade = async () => {
         try {
