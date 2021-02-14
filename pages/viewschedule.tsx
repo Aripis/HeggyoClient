@@ -76,9 +76,9 @@ const ViewSchedule: FunctionComponent = () => {
                     <div className={styles['calendar-container']}>
                         {data && (
                             <Calendar
-                                // toolbar={false}
-                                // defaultView='week'
-                                // views={['week']}
+                                toolbar={false}
+                                defaultView='week'
+                                views={['week']}
                                 localizer={localizer}
                                 events={
                                     data.getAllSchedulesByClass &&
