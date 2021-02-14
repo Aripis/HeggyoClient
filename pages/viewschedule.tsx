@@ -76,9 +76,9 @@ const ViewSchedule: FunctionComponent = () => {
                     <div className={styles['calendar-container']}>
                         {data && (
                             <Calendar
-                                toolbar={false}
-                                defaultView='week'
-                                views={['week']}
+                                // toolbar={false}
+                                // defaultView='week'
+                                // views={['week']}
                                 localizer={localizer}
                                 events={
                                     data.getAllSchedulesByClass &&
@@ -102,7 +102,8 @@ const ViewSchedule: FunctionComponent = () => {
                                                     }),
                                                     getDayByWord(
                                                         event.day
-                                                    ) as number
+                                                    ) as number,
+                                                    { weekStartsOn: 1 }
                                                 ),
                                                 end: setDay(
                                                     set(new Date(), {
@@ -113,7 +114,8 @@ const ViewSchedule: FunctionComponent = () => {
                                                     }),
                                                     getDayByWord(
                                                         event.day
-                                                    ) as number
+                                                    ) as number,
+                                                    { weekStartsOn: 1 }
                                                 ),
                                             };
                                         }
