@@ -96,7 +96,7 @@ export const getGradeName = (
         case 'GOOD':
         case 4:
             return short ? 'доб.' : 'добър';
-        case 'VERY GOOD':
+        case 'VERY_GOOD':
         case 5:
             return short ? 'мн. доб.' : 'мн. добър';
         case 'EXCELLENT':

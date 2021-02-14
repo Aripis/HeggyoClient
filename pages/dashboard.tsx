@@ -588,6 +588,7 @@ const Dashboard: FunctionComponent = () => {
                                                         </TextField>
                                                         <MuiPickersUtilsProvider
                                                             utils={DateFnsUtils}
+                                                            locale={bg}
                                                         >
                                                             <KeyboardDateTimePicker
                                                                 fullWidth
@@ -611,6 +612,7 @@ const Dashboard: FunctionComponent = () => {
                                                                         date
                                                                     );
                                                                 }}
+                                                                format='do MMM yyyy HH:mm'
                                                             />
                                                         </MuiPickersUtilsProvider>
                                                     </>
