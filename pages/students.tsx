@@ -222,7 +222,7 @@ const GradeDialog: FunctionComponent<GradeDialogProps> = (props) => {
             );
             setOpen(false);
         } catch (error) {
-            console.log(error);
+            throw new Error(error);
         }
     };
 
@@ -382,7 +382,7 @@ const GradeTable: FunctionComponent<GradeTableProps> = (props) => {
                 );
                 setGrades(data.getAllGradesPerClassPerSubject);
             } catch (error) {
-                console.log(error);
+                throw new Error(error);
             }
         })();
     }, []);

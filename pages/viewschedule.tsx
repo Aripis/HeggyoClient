@@ -11,6 +11,7 @@ import useSWR from 'swr';
 import { gql } from 'graphql-request';
 import Alert from '@material-ui/lab/Alert';
 import { Schedule } from 'utils/interfaces';
+import { getDayByWord } from 'utils/helpers';
 
 import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
 import { format, parse, startOfWeek, getDay, set, setDay } from 'date-fns';
@@ -99,7 +100,10 @@ const ViewSchedule: FunctionComponent = () => {
                                                         seconds: startTime.getSeconds(),
                                                         milliseconds: startTime.getMilliseconds(),
                                                     }),
-                                                    startTime.getDay()
+                                                    getDayByWord(
+                                                        event.day
+                                                    ) as number,
+                                                    { weekStartsOn: 1 }
                                                 ),
                                                 end: setDay(
                                                     set(new Date(), {
@@ -108,7 +112,10 @@ const ViewSchedule: FunctionComponent = () => {
                                                         seconds: endTime.getSeconds(),
                                                         milliseconds: endTime.getMilliseconds(),
                                                     }),
-                                                    endTime.getDay()
+                                                    getDayByWord(
+                                                        event.day
+                                                    ) as number,
+                                                    { weekStartsOn: 1 }
                                                 ),
                                             };
                                         }

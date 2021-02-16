@@ -394,7 +394,9 @@ const EditSchedule: FunctionComponent = () => {
             await graphQLClient.request(
                 gql`
                     mutation($classId: String!) {
-                        removeSchedulesByClass(classId: $classId)
+                        removeSchedulesByClass(classId: $classId) {
+                            scheduleId
+                        }
                     }
                 `,
                 {

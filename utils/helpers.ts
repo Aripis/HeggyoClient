@@ -10,6 +10,29 @@ import {
     StatusType,
 } from './enums';
 
+export const getDayByWord = (
+    dayAsWord: string | undefined
+): number | undefined => {
+    switch (dayAsWord?.toUpperCase()) {
+        case 'SUNDAY':
+            return 7;
+        case 'MONDAY':
+            return 1;
+        case 'TUESDAY':
+            return 2;
+        case 'WEDNESDAY':
+            return 3;
+        case 'THURSDAY':
+            return 4;
+        case 'FRIDAY':
+            return 5;
+        case 'SATURDAY':
+            return 6;
+        default:
+            return undefined;
+    }
+};
+
 export const getStatusType = (
     status: StatusType | string | undefined
 ): string | undefined => {
@@ -51,7 +74,7 @@ export const getGradeEnum = (grade: number): string | undefined => {
         case 4:
             return 'GOOD';
         case 5:
-            return 'VERY GOOD';
+            return 'VERY_GOOD';
         case 6:
             return 'EXCELLENT';
         default:
@@ -73,7 +96,7 @@ export const getGradeName = (
         case 'GOOD':
         case 4:
             return short ? 'доб.' : 'добър';
-        case 'VERY GOOD':
+        case 'VERY_GOOD':
         case 5:
             return short ? 'мн. доб.' : 'мн. добър';
         case 'EXCELLENT':
