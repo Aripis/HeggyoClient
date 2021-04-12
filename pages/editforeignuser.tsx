@@ -290,13 +290,6 @@ const EditForeignUser: FunctionComponent = () => {
                                         );
                                     }}
                                 />
-                                <TextField
-                                    label='Файлове'
-                                    value=''
-                                    variant='outlined'
-                                    className={styles['record-files']}
-                                    onChange={() => null}
-                                />
                             </>
                         )}
                         {role === 'TEACHER' && (

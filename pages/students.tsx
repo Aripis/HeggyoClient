@@ -177,6 +177,7 @@ const UsersComponent: FunctionComponent<UsersProps> = (props) => {
 interface GradeDialogProps {
     studentId: string | undefined;
     subjectId: string | undefined;
+    mutate: () => void;
 }
 
 const GradeDialog: FunctionComponent<GradeDialogProps> = (props) => {
@@ -221,6 +222,7 @@ const GradeDialog: FunctionComponent<GradeDialogProps> = (props) => {
                 }
             );
             setOpen(false);
+            props.mutate();
         } catch (error) {
             throw new Error(error);
         }
@@ -353,39 +355,35 @@ interface GradeTableProps {
 }
 
 const GradeTable: FunctionComponent<GradeTableProps> = (props) => {
-    const [grades, setGrades] = useState<Grade[]>([]);
-    const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+    const [anchorEl, setAnchorEl] = useState<(HTMLButtonElement | null)[]>([]);
 
-    useEffect(() => {
-        (async () => {
-            try {
-                const data = await graphQLClient.request(
-                    gql`
-                        query($subjectId: String!, $classId: String!) {
-                            getAllGradesPerClassPerSubject(
-                                subjectId: $subjectId
-                                classId: $classId
-                            ) {
-                                id
-                                createdAt
-                                message
-                                grade
-                                gradeWithWords
-                                type
-                                student {
-                                    id
-                                }
-                            }
-                        }
-                    `,
-                    { subjectId: props.subjectId, classId: props.classId }
-                );
-                setGrades(data.getAllGradesPerClassPerSubject);
-            } catch (error) {
-                throw new Error(error);
+    const { data, mutate } = useSWR([
+        gql`
+            query($subjectId: String!, $classId: String!) {
+                getAllGradesPerClassPerSubject(
+                    subjectId: $subjectId
+                    classId: $classId
+                ) {
+                    id
+                    createdAt
+                    message
+                    grade
+                    gradeWithWords
+                    type
+                    student {
+                        id
+                    }
+                }
             }
-        })();
-    }, []);
+        `,
+        JSON.stringify({ subjectId: props.subjectId, classId: props.classId }),
+    ]);
+
+    const onGradeHover = (index: number, value: HTMLButtonElement | null) => {
+        const temp = anchorEl;
+        temp[index] = value;
+        setAnchorEl([...temp]);
+    };
 
     return (
         <div className={styles['grades-container']}>
@@ -418,6 +416,7 @@ const GradeTable: FunctionComponent<GradeTableProps> = (props) => {
                                 student?.user?.lastName
                             }`}</span>
                             <GradeDialog
+                                mutate={mutate}
                                 studentId={student.id}
                                 subjectId={props.subjectId}
                             />
@@ -425,9 +424,10 @@ const GradeTable: FunctionComponent<GradeTableProps> = (props) => {
                         <div
                             className={`${styles['grade-field']} ${styles['grade-field-grades']}`}
                         >
-                            {grades
-                                .filter(
-                                    (grade) => grade?.student?.id === student.id
+                            {data?.getAllGradesPerClassPerSubject
+                                ?.filter(
+                                    (grade: Grade) =>
+                                        grade?.student?.id === student.id
                                 )
                                 .sort((a: Grade, b: Grade) =>
                                     (a.createdAt as Date) >
@@ -438,16 +438,18 @@ const GradeTable: FunctionComponent<GradeTableProps> = (props) => {
                                         ? -1
                                         : 0
                                 )
-                                .map((grade) => (
+                                .map((grade: Grade, i: number) => (
                                     <Fragment key={grade.id}>
                                         <span
                                             aria-haspopup='true'
                                             className={styles.grade}
                                             onMouseEnter={(
                                                 e: MouseEvent<HTMLButtonElement>
-                                            ) => setAnchorEl(e.currentTarget)}
+                                            ) =>
+                                                onGradeHover(i, e.currentTarget)
+                                            }
                                             onMouseLeave={() =>
-                                                setAnchorEl(null)
+                                                onGradeHover(i, null)
                                             }
                                             key={grade.id}
                                         >{`${getGradeName(
@@ -456,9 +458,11 @@ const GradeTable: FunctionComponent<GradeTableProps> = (props) => {
                                         )} ${grade.grade}`}</span>
                                         <Popover
                                             style={{ pointerEvents: 'none' }}
-                                            open={Boolean(anchorEl)}
-                                            anchorEl={anchorEl}
-                                            onClose={() => setAnchorEl(null)}
+                                            open={Boolean(anchorEl[i])}
+                                            anchorEl={anchorEl[i]}
+                                            onClose={() =>
+                                                onGradeHover(i, null)
+                                            }
                                             anchorOrigin={{
                                                 vertical: 'bottom',
                                                 horizontal: 'center',
@@ -469,7 +473,7 @@ const GradeTable: FunctionComponent<GradeTableProps> = (props) => {
                                             }}
                                         >
                                             <Typography className='grade-message'>
-                                                {grade.message}
+                                                {grade.message || 'Оценка'}
                                             </Typography>
                                         </Popover>
                                     </Fragment>
