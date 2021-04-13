@@ -1,0 +1,161 @@
+@import 'variables';
+
+.content {
+    .section {
+        min-height: 100vh;
+
+        &.hero-section {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+
+            .quote-container {
+                padding-top: 200px;
+                display: flex;
+                align-items: center;
+                flex-direction: column;
+
+                .quote-author {
+                    color: grey;
+                    font-size: 24px;
+                }
+
+                .quote {
+                    font-size: 64px;
+                    font-weight: bold;
+                    background-image: radial-gradient(
+                        ellipse at center,
+                        #000 10%,
+                        #eff1ff 130%
+                    );
+                    background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                }
+            }
+
+            .scroll-container {
+                display: flex;
+                flex-direction: column;
+                animation: scrollmove 3s linear infinite alternate;
+                color: $secondary-color;
+            }
+
+            @keyframes scrollmove {
+                from {
+                    transform: translateY(-130px);
+                }
+                to {
+                    transform: translateY(-110px);
+                }
+            }
+        }
+
+        &.feature-section {
+            display: flex;
+            flex-direction: column;
+
+            .feature-container {
+                padding-top: 100px;
+                width: 1000px;
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+                margin: 0 auto;
+
+                &.reversed {
+                    flex-direction: row-reverse;
+                }
+
+                .text-container {
+                    width: 550px;
+                    display: flex;
+                    flex-direction: column;
+
+                    .subheader {
+                        text-transform: uppercase;
+                        font-weight: bold;
+                        font-size: 14px;
+                    }
+
+                    .header {
+                        font-size: 36px;
+                    }
+
+                    .features {
+                        position: relative;
+                        margin-bottom: 0;
+                        list-style: none;
+                        padding-left: 21px;
+
+                        hr {
+                            width: 2px;
+                            background-color: rgba(0, 0, 0, 0.3);
+                            margin-left: 14px;
+                        }
+
+                        li {
+                            margin-top: 10px;
+
+                            &::before {
+                                content: '\2022';
+                                transform: scale(3);
+                                font-weight: bold;
+                                display: inline-block;
+                                width: 1em;
+                                color: $primary-color;
+                            }
+                        }
+                    }
+                }
+
+                .icons-container {
+                    svg {
+                        font-size: 150px;
+                        color: $secondary-color;
+                    }
+                }
+            }
+        }
+
+        &.credentials-section {
+            min-height: auto;
+            padding: 100px 0;
+
+            .heading {
+                font-size: 36px;
+                margin: 0 auto;
+                text-align: center;
+                margin-bottom: 80px;
+                font-weight: bold;
+            }
+
+            .card-container {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-evenly;
+
+                .card {
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    border-radius: 10px;
+                    box-shadow: $card-shadow;
+                    padding: 20px;
+                    width: 400px;
+
+                    .header {
+                        font-weight: bold;
+                        font-size: 24px;
+                    }
+
+                    .credentials-container {
+                        margin-top: 20px;
+                        font-size: 16px;
+                    }
+                }
+            }
+        }
+    }
+}

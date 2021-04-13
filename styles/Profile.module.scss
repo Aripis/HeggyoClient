@@ -8,6 +8,43 @@
     box-shadow: $card-shadow;
     border-radius: 10px;
 
+    .grades-container {
+        margin-top: 15px;
+        margin-left: 7px;
+        display: flex;
+        flex-direction: column;
+
+        .grade-row {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            height: 35px;
+
+            .grade-field {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                overflow-x: auto;
+
+                &.grade-field-name {
+                    width: 280px;
+                    font-size: 16px;
+                }
+
+                &.grade-field-grades {
+                    width: 100%;
+                    font-size: 16px;
+
+                    .grade {
+                        cursor: default;
+                        padding: 5px;
+                        margin-right: 15px;
+                    }
+                }
+            }
+        }
+    }
+
     .profile-container {
         display: flex;
         flex-direction: row;

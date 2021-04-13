@@ -92,8 +92,6 @@ const GradeTable: FunctionComponent<GradeTableProps> = (props) => {
         JSON.stringify({ subjectId: props.subjectId, classId: props.classId }),
     ]);
 
-    console.log(data);
-
     const onGradeHover = (index: number, value: HTMLButtonElement | null) => {
         const temp = anchorEl;
         temp[index] = value;
@@ -104,15 +102,6 @@ const GradeTable: FunctionComponent<GradeTableProps> = (props) => {
         <div className={styles['grades-container']}>
             <Fragment key={props.student.id}>
                 <div className={styles['grade-row']}>
-                    <div
-                        className={`${styles['grade-field']} ${styles['grade-field-name']}`}
-                    >
-                        <span>{`${
-                            props.student?.user?.firstName
-                        } ${props.student?.user?.middleName?.charAt(0)}. ${
-                            props.student?.user?.lastName
-                        }`}</span>
-                    </div>
                     <div
                         className={`${styles['grade-field']} ${styles['grade-field-grades']}`}
                     >
@@ -176,17 +165,13 @@ const Profile: FunctionComponent<User> = () => {
     const router = useRouter();
     const { user, status } = useAuth();
     const [value, setValue] = useState(0);
+    const [innerValue, setInnerValue] = useState(0);
     const [edit, setEdit] = useState(false);
     const [firstName, setFirstName] = useState<string | undefined>('');
     const [middleName, setMiddleName] = useState<string | undefined>('');
     const [lastName, setLastName] = useState<string | undefined>('');
     const [email, setEmail] = useState<string | undefined>('');
     const [error, setError] = useState('');
-    const [anchorEl, setAnchorEl] = useState<(HTMLButtonElement | null)[]>([]);
-    // const [subjectId, setSubjectId] = useState('');
-    // const [asd, setClassId] = useState('');
-    const [innerValue, setInnerValue] = useState(0);
-    // const tabCounter = 0;
 
     const { data } = useSWR(
         gql`
@@ -210,6 +195,7 @@ const Profile: FunctionComponent<User> = () => {
                 getAllStudents {
                     id
                     user {
+                        id
                         firstName
                         middleName
                         lastName
@@ -244,28 +230,6 @@ const Profile: FunctionComponent<User> = () => {
         `
     );
 
-    // const { data: grades } = useSWR([
-    //     gql`
-    //         query($subjectId: String!, $classId: String!) {
-    //             getAllGradesPerClassPerSubject(
-    //                 subjectId: $subjectId
-    //                 classId: $classId
-    //             ) {
-    //                 id
-    //                 createdAt
-    //                 message
-    //                 grade
-    //                 gradeWithWords
-    //                 type
-    //                 student {
-    //                     id
-    //                 }
-    //             }
-    //         }
-    //     `,
-    //     JSON.stringify({ classId: asd, subjectId }),
-    // ]);
-
     useEffect(() => {
         if (status === 'REDIRECT') {
             router.push('/login');
@@ -281,12 +245,6 @@ const Profile: FunctionComponent<User> = () => {
     if (!user) {
         return <Loader />;
     }
-
-    const onGradeHover = (index: number, value: HTMLButtonElement | null) => {
-        const temp = anchorEl;
-        temp[index] = value;
-        setAnchorEl([...temp]);
-    };
 
     const updateProfile = async (e: FormEvent) => {
         e.preventDefault();
@@ -318,6 +276,8 @@ const Profile: FunctionComponent<User> = () => {
             setError('Неизвестна грешка');
         }
     };
+
+    let tabCounter = 0;
 
     return (
         <>
@@ -493,35 +453,18 @@ const Profile: FunctionComponent<User> = () => {
                                 )}
                             </Tabs>
                         </AppBar>
-                        <div className={styles['grade-row']}>
-                            <div
-                                className={`${styles['grade-field']} ${styles['grade-field-name']}`}
-                            >
-                                <span>
-                                    <strong>Име</strong>
-                                </span>
-                            </div>
-
-                            <div
-                                className={`${styles['grade-field']} ${styles['grade-field-grades']}`}
-                            >
-                                <span>
-                                    <strong>Оценки</strong>
-                                </span>
-                            </div>
-                        </div>
                         {data?.getAllClasses?.map((cls: Class) =>
                             cls?.subjects?.map(
                                 (subject: Subject, i: number) => (
                                     <TabPanel
                                         key={i}
                                         value={innerValue}
-                                        index={innerValue}
+                                        index={tabCounter++}
                                     >
                                         <GradeTable
                                             subjectId={subject.id}
                                             classId={cls.id}
-                                            student={data?.getAllStudents.filter(
+                                            student={data?.getAllStudents.find(
                                                 (st: Student | undefined) =>
                                                     st?.user?.id === user.id
                                             )}
