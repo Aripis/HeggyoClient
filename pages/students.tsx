@@ -300,6 +300,7 @@ const GradeDialog: FunctionComponent<GradeDialogProps> = (props) => {
                                     label='Оценка'
                                     labelId='grade-type-select-label'
                                     value={gradeType}
+                                    required
                                     onChange={(e) => {
                                         setGradeType(e.target.value as string);
                                     }}

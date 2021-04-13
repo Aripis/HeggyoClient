@@ -4,6 +4,8 @@ import {
     FunctionComponent,
     ReactNode,
     FormEvent,
+    Fragment,
+    MouseEvent,
 } from 'react';
 import Head from 'next/head';
 import {
@@ -17,11 +19,12 @@ import {
     Button,
     TextField,
     Snackbar,
+    Popover,
 } from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';
 import styles from 'styles/Profile.module.scss';
 import { useRouter } from 'next/router';
-import { User } from 'utils/interfaces';
+import { Class, Grade, Student, Subject, User } from 'utils/interfaces';
 import Navbar from 'components/Navbar';
 import Drawer from 'components/Drawer';
 import { useAuth } from 'utils/useAuth';
@@ -33,9 +36,10 @@ import {
     DoneOutlined,
     CloseOutlined,
 } from '@material-ui/icons';
-import { getUserStatus, getUserRole } from 'utils/helpers';
+import { getUserStatus, getUserRole, getGradeName } from 'utils/helpers';
 import graphQLClient from 'utils/graphqlclient';
 import { gql } from 'graphql-request';
+import useSWR from 'swr';
 
 interface TabPanelProps {
     children?: ReactNode;
@@ -67,6 +71,89 @@ const Profile: FunctionComponent<User> = () => {
     const [lastName, setLastName] = useState<string | undefined>('');
     const [email, setEmail] = useState<string | undefined>('');
     const [error, setError] = useState('');
+    const [anchorEl, setAnchorEl] = useState<(HTMLButtonElement | null)[]>([]);
+    const [subjectId, setSubjectId] = useState('');
+    const [asd, setClassId] = useState('');
+    const [innerValue, setInnerValue] = useState(0);
+    let tabCounter = 1;
+
+    const { data } = useSWR(
+        gql`
+            query {
+                getAllClasses {
+                    id
+                    number
+                    letter
+                    subjects {
+                        id
+                        name
+                    }
+                    teacher {
+                        id
+                        user {
+                            id
+                        }
+                    }
+                }
+
+                getAllStudents {
+                    id
+                    user {
+                        firstName
+                        middleName
+                        lastName
+                        email
+                        status
+                    }
+                    class {
+                        id
+                        number
+                        letter
+                    }
+                    prevEducation
+                    recordMessage
+                    dossier {
+                        id
+                        createdAt
+                        updatedAt
+                        fromUser {
+                            id
+                            firstName
+                            middleName
+                            lastName
+                        }
+                        subject {
+                            id
+                            name
+                        }
+                        message
+                    }
+                }
+            }
+        `
+    );
+
+    const { data: grades } = useSWR([
+        gql`
+            query($subjectId: String!, $classId: String!) {
+                getAllGradesPerClassPerSubject(
+                    subjectId: $subjectId
+                    classId: $classId
+                ) {
+                    id
+                    createdAt
+                    message
+                    grade
+                    gradeWithWords
+                    type
+                    student {
+                        id
+                    }
+                }
+            }
+        `,
+        JSON.stringify({ classId: asd, subjectId }),
+    ]);
 
     useEffect(() => {
         if (status === 'REDIRECT') {
@@ -83,6 +170,12 @@ const Profile: FunctionComponent<User> = () => {
     if (!user) {
         return <Loader />;
     }
+
+    const onGradeHover = (index: number, value: HTMLButtonElement | null) => {
+        const temp = anchorEl;
+        temp[index] = value;
+        setAnchorEl([...temp]);
+    };
 
     const updateProfile = async (e: FormEvent) => {
         e.preventDefault();
@@ -263,7 +356,168 @@ const Profile: FunctionComponent<User> = () => {
                         </form>
                     </TabPanel>
                     <TabPanel value={value} index={1}>
-                        Оценки
+                        <AppBar
+                            position='static'
+                            color='transparent'
+                            elevation={0}
+                        >
+                            <Tabs
+                                indicatorColor='primary'
+                                value={innerValue}
+                                onChange={(_e, newValue) => {
+                                    console.log(newValue);
+                                    setInnerValue(newValue);
+                                }}
+                            >
+                                {data?.getAllClasses?.map((cls: Class) =>
+                                    cls?.subjects?.map((subject: Subject) => (
+                                        <Tab
+                                            key={subject.id}
+                                            disableRipple
+                                            label={`
+                                                ${cls.number}${cls.letter} 
+                                                ${subject.name}
+                                            `}
+                                        />
+                                    ))
+                                )}
+                            </Tabs>
+                        </AppBar>
+                        <TabPanel value={innerValue} index={tabCounter++}>
+                            <div className={styles['grades-container']}>
+                                <div className={styles['grade-row']}>
+                                    <div
+                                        className={`${styles['grade-field']} ${styles['grade-field-name']}`}
+                                    >
+                                        <span>
+                                            <strong>Име</strong>
+                                        </span>
+                                    </div>
+
+                                    <div
+                                        className={`${styles['grade-field']} ${styles['grade-field-grades']}`}
+                                    >
+                                        <span>
+                                            <strong>Оценки</strong>
+                                        </span>
+                                    </div>
+                                </div>
+                                {grades?.getAllGradesPerClassPerSubject.map(
+                                    (student: Student) => (
+                                        <Fragment key={student.id}>
+                                            <div
+                                                className={styles['grade-row']}
+                                            >
+                                                <div
+                                                    className={`${styles['grade-field']} ${styles['grade-field-grades']}`}
+                                                >
+                                                    {data?.getAllGradesPerClassPerSubject
+                                                        ?.filter(
+                                                            (grade: Grade) =>
+                                                                grade?.student
+                                                                    ?.id ===
+                                                                student.id
+                                                        )
+                                                        .sort(
+                                                            (
+                                                                a: Grade,
+                                                                b: Grade
+                                                            ) =>
+                                                                (a.createdAt as Date) >
+                                                                (b.createdAt as Date)
+                                                                    ? 1
+                                                                    : (a.createdAt as Date) <
+                                                                      (b.createdAt as Date)
+                                                                    ? -1
+                                                                    : 0
+                                                        )
+                                                        .map(
+                                                            (
+                                                                grade: Grade,
+                                                                i: number
+                                                            ) => (
+                                                                <Fragment
+                                                                    key={
+                                                                        grade.id
+                                                                    }
+                                                                >
+                                                                    <span
+                                                                        aria-haspopup='true'
+                                                                        className={
+                                                                            styles.grade
+                                                                        }
+                                                                        onMouseEnter={(
+                                                                            e: MouseEvent<HTMLButtonElement>
+                                                                        ) =>
+                                                                            onGradeHover(
+                                                                                i,
+                                                                                e.currentTarget
+                                                                            )
+                                                                        }
+                                                                        onMouseLeave={() =>
+                                                                            onGradeHover(
+                                                                                i,
+                                                                                null
+                                                                            )
+                                                                        }
+                                                                        key={
+                                                                            grade.id
+                                                                        }
+                                                                    >{`${getGradeName(
+                                                                        grade.gradeWithWords,
+                                                                        true
+                                                                    )} ${
+                                                                        grade.grade
+                                                                    }`}</span>
+                                                                    <Popover
+                                                                        style={{
+                                                                            pointerEvents:
+                                                                                'none',
+                                                                        }}
+                                                                        open={Boolean(
+                                                                            anchorEl[
+                                                                                i
+                                                                            ]
+                                                                        )}
+                                                                        anchorEl={
+                                                                            anchorEl[
+                                                                                i
+                                                                            ]
+                                                                        }
+                                                                        onClose={() =>
+                                                                            onGradeHover(
+                                                                                i,
+                                                                                null
+                                                                            )
+                                                                        }
+                                                                        anchorOrigin={{
+                                                                            vertical:
+                                                                                'bottom',
+                                                                            horizontal:
+                                                                                'center',
+                                                                        }}
+                                                                        transformOrigin={{
+                                                                            vertical:
+                                                                                'top',
+                                                                            horizontal:
+                                                                                'center',
+                                                                        }}
+                                                                    >
+                                                                        <Typography className='grade-message'>
+                                                                            {grade.message ||
+                                                                                'Оценка'}
+                                                                        </Typography>
+                                                                    </Popover>
+                                                                </Fragment>
+                                                            )
+                                                        )}
+                                                </div>
+                                            </div>
+                                        </Fragment>
+                                    )
+                                )}
+                            </div>
+                        </TabPanel>
                     </TabPanel>
                 </div>
                 <Snackbar
