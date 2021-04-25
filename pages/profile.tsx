@@ -4,6 +4,8 @@ import {
     FunctionComponent,
     ReactNode,
     FormEvent,
+    Fragment,
+    MouseEvent,
 } from 'react';
 import Head from 'next/head';
 import {
@@ -17,11 +19,12 @@ import {
     Button,
     TextField,
     Snackbar,
+    Popover,
 } from '@material-ui/core';
 import Alert from '@material-ui/lab/Alert';
 import styles from 'styles/Profile.module.scss';
 import { useRouter } from 'next/router';
-import { User } from 'utils/interfaces';
+import { Class, Grade, Student, Subject, User } from 'utils/interfaces';
 import Navbar from 'components/Navbar';
 import Drawer from 'components/Drawer';
 import { useAuth } from 'utils/useAuth';
@@ -33,9 +36,10 @@ import {
     DoneOutlined,
     CloseOutlined,
 } from '@material-ui/icons';
-import { getUserStatus, getUserRole } from 'utils/helpers';
+import { getUserStatus, getUserRole, getGradeName } from 'utils/helpers';
 import graphQLClient from 'utils/graphqlclient';
 import { gql } from 'graphql-request';
+import useSWR from 'swr';
 
 interface TabPanelProps {
     children?: ReactNode;
@@ -57,16 +61,174 @@ const TabPanel = (props: TabPanelProps) => {
     );
 };
 
+interface GradeTableProps {
+    student: Student;
+    subjectId: string | undefined;
+    classId: string | undefined;
+}
+
+const GradeTable: FunctionComponent<GradeTableProps> = (props) => {
+    const [anchorEl, setAnchorEl] = useState<(HTMLButtonElement | null)[]>([]);
+
+    const { data } = useSWR([
+        gql`
+            query($subjectId: String!, $classId: String!) {
+                getAllGradesPerClassPerSubject(
+                    subjectId: $subjectId
+                    classId: $classId
+                ) {
+                    id
+                    createdAt
+                    message
+                    grade
+                    gradeWithWords
+                    type
+                    student {
+                        id
+                    }
+                }
+            }
+        `,
+        JSON.stringify({ subjectId: props.subjectId, classId: props.classId }),
+    ]);
+
+    const onGradeHover = (index: number, value: HTMLButtonElement | null) => {
+        const temp = anchorEl;
+        temp[index] = value;
+        setAnchorEl([...temp]);
+    };
+
+    return (
+        <div className={styles['grades-container']}>
+            <Fragment key={props.student.id}>
+                <div className={styles['grade-row']}>
+                    <div
+                        className={`${styles['grade-field']} ${styles['grade-field-grades']}`}
+                    >
+                        {data?.getAllGradesPerClassPerSubject
+                            ?.filter(
+                                (grade: Grade) =>
+                                    grade?.student?.id === props.student.id
+                            )
+                            .sort((a: Grade, b: Grade) =>
+                                (a.createdAt as Date) > (b.createdAt as Date)
+                                    ? 1
+                                    : (a.createdAt as Date) <
+                                      (b.createdAt as Date)
+                                    ? -1
+                                    : 0
+                            )
+                            .map((grade: Grade, i: number) => (
+                                <Fragment key={grade.id}>
+                                    <span
+                                        aria-haspopup='true'
+                                        className={styles.grade}
+                                        onMouseEnter={(
+                                            e: MouseEvent<HTMLButtonElement>
+                                        ) => onGradeHover(i, e.currentTarget)}
+                                        onMouseLeave={() =>
+                                            onGradeHover(i, null)
+                                        }
+                                        key={grade.id}
+                                    >{`${getGradeName(
+                                        grade.gradeWithWords,
+                                        true
+                                    )} ${grade.grade}`}</span>
+                                    <Popover
+                                        style={{ pointerEvents: 'none' }}
+                                        open={Boolean(anchorEl[i])}
+                                        anchorEl={anchorEl[i]}
+                                        onClose={() => onGradeHover(i, null)}
+                                        anchorOrigin={{
+                                            vertical: 'bottom',
+                                            horizontal: 'center',
+                                        }}
+                                        transformOrigin={{
+                                            vertical: 'top',
+                                            horizontal: 'center',
+                                        }}
+                                    >
+                                        <Typography className='grade-message'>
+                                            {grade.message || 'Оценка'}
+                                        </Typography>
+                                    </Popover>
+                                </Fragment>
+                            ))}
+                    </div>
+                </div>
+            </Fragment>
+        </div>
+    );
+};
+
 const Profile: FunctionComponent<User> = () => {
     const router = useRouter();
     const { user, status } = useAuth();
     const [value, setValue] = useState(0);
+    const [innerValue, setInnerValue] = useState(0);
     const [edit, setEdit] = useState(false);
     const [firstName, setFirstName] = useState<string | undefined>('');
     const [middleName, setMiddleName] = useState<string | undefined>('');
     const [lastName, setLastName] = useState<string | undefined>('');
     const [email, setEmail] = useState<string | undefined>('');
     const [error, setError] = useState('');
+
+    const { data } = useSWR(
+        gql`
+            query {
+                getAllClasses {
+                    id
+                    number
+                    letter
+                    subjects {
+                        id
+                        name
+                    }
+                    teacher {
+                        id
+                        user {
+                            id
+                        }
+                    }
+                }
+
+                getAllStudents {
+                    id
+                    user {
+                        id
+                        firstName
+                        middleName
+                        lastName
+                        email
+                        status
+                    }
+                    class {
+                        id
+                        number
+                        letter
+                    }
+                    prevEducation
+                    recordMessage
+                    dossier {
+                        id
+                        createdAt
+                        updatedAt
+                        fromUser {
+                            id
+                            firstName
+                            middleName
+                            lastName
+                        }
+                        subject {
+                            id
+                            name
+                        }
+                        message
+                    }
+                }
+            }
+        `
+    );
 
     useEffect(() => {
         if (status === 'REDIRECT') {
@@ -114,6 +276,8 @@ const Profile: FunctionComponent<User> = () => {
             setError('Неизвестна грешка');
         }
     };
+
+    let tabCounter = 0;
 
     return (
         <>
@@ -263,7 +427,52 @@ const Profile: FunctionComponent<User> = () => {
                         </form>
                     </TabPanel>
                     <TabPanel value={value} index={1}>
-                        Оценки
+                        <AppBar
+                            position='static'
+                            color='transparent'
+                            elevation={0}
+                        >
+                            <Tabs
+                                indicatorColor='primary'
+                                value={innerValue}
+                                onChange={(_e, newValue) => {
+                                    setInnerValue(newValue);
+                                }}
+                            >
+                                {data?.getAllClasses?.map((cls: Class) =>
+                                    cls?.subjects?.map((subject: Subject) => (
+                                        <Tab
+                                            key={subject.id}
+                                            disableRipple
+                                            label={`
+                                                ${cls.number}${cls.letter} 
+                                                ${subject.name}
+                                            `}
+                                        />
+                                    ))
+                                )}
+                            </Tabs>
+                        </AppBar>
+                        {data?.getAllClasses?.map((cls: Class) =>
+                            cls?.subjects?.map(
+                                (subject: Subject, i: number) => (
+                                    <TabPanel
+                                        key={i}
+                                        value={innerValue}
+                                        index={tabCounter++}
+                                    >
+                                        <GradeTable
+                                            subjectId={subject.id}
+                                            classId={cls.id}
+                                            student={data?.getAllStudents.find(
+                                                (st: Student | undefined) =>
+                                                    st?.user?.id === user.id
+                                            )}
+                                        />
+                                    </TabPanel>
+                                )
+                            )
+                        )}
                     </TabPanel>
                 </div>
                 <Snackbar

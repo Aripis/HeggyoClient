@@ -305,6 +305,7 @@ const ViewStudent: FunctionComponent = () => {
                                 label='Коментар под бележката'
                                 variant='outlined'
                                 fullWidth
+                                required
                                 value={message}
                                 multiline
                                 rows={7}

@@ -104,7 +104,10 @@ const Schedule: FunctionComponent = () => {
         if (status === 'REDIRECT') {
             router.push('/login');
         }
-    }, [user, status]);
+        if (user?.role === 'STUDENT' && data?.getAllClasses?.length === 1) {
+            router.push(`/viewschedule?classId=${data?.getAllClasses[0]?.id}`);
+        }
+    }, [user, status, data]);
 
     if (!user) {
         return <Loader />;

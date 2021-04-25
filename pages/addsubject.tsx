@@ -109,6 +109,8 @@ const AddSubject: FunctionComponent = () => {
         return <Loader />;
     }
 
+    console.log(data);
+
     return (
         <>
             <Head>
@@ -185,7 +187,7 @@ const AddSubject: FunctionComponent = () => {
                                             (selected as string[])
                                                 .map(
                                                     (selection) =>
-                                                        data.teachers.find(
+                                                        data.getAllTeachers.find(
                                                             (
                                                                 teacher: Teacher
                                                             ) =>
@@ -201,8 +203,8 @@ const AddSubject: FunctionComponent = () => {
                                         }
                                     >
                                         {data &&
-                                            data?.teachers &&
-                                            data?.teachers.map(
+                                            data?.getAllTeachers &&
+                                            data?.getAllTeachers.map(
                                                 (
                                                     teacher: Teacher,
                                                     i: number
