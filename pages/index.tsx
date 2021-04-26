@@ -24,7 +24,7 @@ const Index: FunctionComponent = () => {
         }
     }, [user, status]);
 
-    if (user) {
+    if (status === 'FETCHING') {
         return <Loader />;
     }
 
@@ -132,60 +132,6 @@ const Index: FunctionComponent = () => {
                             <div className={styles['icons-container']}>
                                 <SchoolOutlined />
                             </div>
-                        </div>
-                    </section>
-                    <section
-                        className={`${styles.section} ${styles['credentials-section']}`}
-                    >
-                        <div className={styles.heading}>
-                            Изпробвайте нашата система с предоставените тестови
-                            акаунти!
-                        </div>
-                        <div className={styles['card-container']}>
-                            <div className={styles.card}>
-                                <span className={styles.header}>
-                                    Администратор
-                                </span>
-                                <div
-                                    className={styles['credentials-container']}
-                                >
-                                    <div>
-                                        Username:{' '}
-                                        <strong>idimitrov@gmail.com</strong>
-                                    </div>
-                                    <div>
-                                        Password: <strong>root</strong>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className={styles.card}>
-                                <span className={styles.header}>Учител</span>
-                                <div
-                                    className={styles['credentials-container']}
-                                >
-                                    <div>
-                                        Username:{' '}
-                                        <strong>vhristova@gmail.com</strong>
-                                    </div>
-                                    <div>
-                                        Password: <strong>root</strong>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className={styles.card}>
-                                <span className={styles.header}>Ученик</span>
-                                <div
-                                    className={styles['credentials-container']}
-                                >
-                                    <div>
-                                        Username:{' '}
-                                        <strong>ddimitrov@gmail.com</strong>
-                                    </div>
-                                    <div>
-                                        Password: <strong>root</strong>
-                                    </div>
-                                </div>
-                            </div>{' '}
                         </div>
                     </section>
                 </div>
