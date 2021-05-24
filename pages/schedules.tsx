@@ -27,6 +27,8 @@ import { gql } from 'graphql-request';
 
 interface ScheduleCardProps {
     id?: string;
+    teacherSchedule: boolean;
+    title?: string;
     startYear?: number;
     endYear?: number;
     number?: number;
@@ -51,12 +53,22 @@ const ScheduleCard: FunctionComponent<ScheduleCardProps> = (props) => {
                             underline='none'
                             color='initial'
                             className={styles['viewschedule-link']}
-                            href={`/viewschedule?classId=${props.id}`}
+                            href={
+                                props.teacherSchedule
+                                    ? `/viewschedule?teacherId=${props.id}`
+                                    : `/viewschedule?classId=${props.id}`
+                            }
                         ></Link>
                     </>
                 }
-                title={`Програма на ${props.number}${props.letter}`}
-                subheader={`${props.startYear} - ${props.endYear}`}
+                title={
+                    props.title || `Програма на ${props.number}${props.letter}`
+                }
+                subheader={
+                    props.startYear && props.endYear
+                        ? `${props.startYear} - ${props.endYear}`
+                        : 'Седмична'
+                }
             />
             {props.role === 'ADMIN' && (
                 <Menu
@@ -145,11 +157,20 @@ const Schedule: FunctionComponent = () => {
                         )}
                     </div>
                     <div className={styles['schedules-container']}>
+                        {user.role === 'TEACHER' && (
+                            <ScheduleCard
+                                id={user.id}
+                                teacherSchedule
+                                role={user.role}
+                                title='Моята програма'
+                            />
+                        )}
                         {data &&
                             data.getAllClasses?.map(
                                 (currClass: Class, i: number) => (
                                     <ScheduleCard
                                         key={i}
+                                        teacherSchedule={false}
                                         role={user.role}
                                         {...currClass}
                                     />

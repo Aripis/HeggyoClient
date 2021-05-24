@@ -182,6 +182,15 @@ const CalendarComponent: FunctionComponent = () => {
                         {data && (
                             <Calendar
                                 localizer={localizer}
+                                messages={{
+                                    next: 'Напред',
+                                    previous: 'Назад',
+                                    today: 'Днес',
+                                    month: 'Месец',
+                                    week: 'Седмица',
+                                    day: 'Ден',
+                                    agenda: 'График',
+                                }}
                                 events={
                                     data.getAllMessagesByCriteria &&
                                     data.getAllMessagesByCriteria?.map(

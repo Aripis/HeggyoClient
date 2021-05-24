@@ -34,8 +34,11 @@ const ViewSchedule: FunctionComponent = () => {
     const [error, setError] = useState('');
     const { data } = useSWR([
         gql`
-            query($classId: String!) {
-                getAllSchedulesByClass(classId: $classId) {
+            query($classId: String!, $teacherId: String!) {
+                getAllSchedulesByCriteria(
+                    classId: $classId
+                    teacherId: $teacherId
+                ) {
                     id
                     startTime
                     endTime
@@ -47,7 +50,10 @@ const ViewSchedule: FunctionComponent = () => {
                 }
             }
         `,
-        JSON.stringify({ classId: router.query.classId }),
+        JSON.stringify({
+            classId: router.query.classId || '',
+            teacherId: router.query.teacherId || '',
+        }),
     ]);
 
     useEffect(() => {
@@ -81,8 +87,8 @@ const ViewSchedule: FunctionComponent = () => {
                                 views={['week']}
                                 localizer={localizer}
                                 events={
-                                    data.getAllSchedulesByClass &&
-                                    data.getAllSchedulesByClass?.map(
+                                    data.getAllSchedulesByCriteria &&
+                                    data.getAllSchedulesByCriteria?.map(
                                         (event: Schedule) => {
                                             const startTime = new Date(
                                                 event.startTime as Date

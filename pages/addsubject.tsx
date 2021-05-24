@@ -109,8 +109,6 @@ const AddSubject: FunctionComponent = () => {
         return <Loader />;
     }
 
-    console.log(data);
-
     return (
         <>
             <Head>
