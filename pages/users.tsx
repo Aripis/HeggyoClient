@@ -220,7 +220,7 @@ const Users: FunctionComponent = () => {
         try {
             const res = await graphQLClient.request(
                 gql`
-                    query($classId: String, $role: UserRole!) {
+                    query ($classId: String, $role: UserRole!) {
                         generateUserToken(
                             input: { classId: $classId, role: $role }
                         ) {

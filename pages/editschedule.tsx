@@ -204,11 +204,10 @@ const ScheduleField: FunctionComponent<ScheduleFieldProps> = (props) => {
                         });
                     }}
                     renderValue={(selected) => {
-                        const selectedSubject:
-                            | Subject
-                            | undefined = props.subjects.find(
-                            (subject: Subject) => subject.id === selected
-                        );
+                        const selectedSubject: Subject | undefined =
+                            props.subjects.find(
+                                (subject: Subject) => subject.id === selected
+                            );
                         return `${selectedSubject?.class?.number}${selectedSubject?.class?.letter} ${selectedSubject?.name}`;
                     }}
                 >
@@ -321,7 +320,7 @@ const EditSchedule: FunctionComponent = () => {
     ]);
     const { data } = useSWR([
         gql`
-            query($classId: String!) {
+            query ($classId: String!) {
                 getAllSchedulesByClass(classId: $classId) {
                     id
                     startTime
@@ -393,7 +392,7 @@ const EditSchedule: FunctionComponent = () => {
         try {
             await graphQLClient.request(
                 gql`
-                    mutation($classId: String!) {
+                    mutation ($classId: String!) {
                         removeSchedulesByClass(classId: $classId) {
                             scheduleId
                         }
@@ -406,7 +405,7 @@ const EditSchedule: FunctionComponent = () => {
             for (const field of fields) {
                 await graphQLClient.request(
                     gql`
-                        mutation(
+                        mutation (
                             $startTime: Date!
                             $endTime: Date!
                             $day: WeekDays!

@@ -61,7 +61,7 @@ const AddClass: FunctionComponent = () => {
         try {
             await graphQLClient.request(
                 gql`
-                    mutation(
+                    mutation (
                         $startYear: Int!
                         $endYear: Int!
                         $totalStudentCount: Int!
@@ -206,10 +206,11 @@ const AddClass: FunctionComponent = () => {
                                         setTeacherId(e.target.value as string)
                                     }
                                     renderValue={(selected) => {
-                                        const selectedTeacher: Teacher = data?.getAllAvailableClassTeachers.find(
-                                            (teacher: Teacher) =>
-                                                teacher.id === selected
-                                        );
+                                        const selectedTeacher: Teacher =
+                                            data?.getAllAvailableClassTeachers.find(
+                                                (teacher: Teacher) =>
+                                                    teacher.id === selected
+                                            );
                                         return `${selectedTeacher?.user?.firstName} ${selectedTeacher?.user?.lastName}`;
                                     }}
                                 >

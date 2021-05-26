@@ -35,7 +35,7 @@ const EditClass: FunctionComponent = () => {
     const [error, setError] = useState('');
     const { data } = useSWR([
         gql`
-            query($classId: String) {
+            query ($classId: String) {
                 getAllAvailableClassTeachers(classId: $classId) {
                     id
                     user {
@@ -62,7 +62,7 @@ const EditClass: FunctionComponent = () => {
             try {
                 const classData = await graphQLClient.request(
                     gql`
-                        query($id: String!) {
+                        query ($id: String!) {
                             getClass(id: $id) {
                                 id
                                 totalStudentCount
@@ -101,7 +101,7 @@ const EditClass: FunctionComponent = () => {
         try {
             await graphQLClient.request(
                 gql`
-                    mutation(
+                    mutation (
                         $id: String!
                         $totalStudentCount: Int!
                         $teacherId: String!
@@ -243,10 +243,11 @@ const EditClass: FunctionComponent = () => {
                                         setTeacherId(e.target.value as string)
                                     }
                                     renderValue={(selected) => {
-                                        const selectedTeacher: Teacher = data?.getAllAvailableClassTeachers.find(
-                                            (teacher: Teacher) =>
-                                                teacher.id === selected
-                                        );
+                                        const selectedTeacher: Teacher =
+                                            data?.getAllAvailableClassTeachers.find(
+                                                (teacher: Teacher) =>
+                                                    teacher.id === selected
+                                            );
                                         return `${selectedTeacher?.user?.firstName} ${selectedTeacher?.user?.lastName}`;
                                     }}
                                 >

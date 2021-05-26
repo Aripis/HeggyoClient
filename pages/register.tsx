@@ -33,7 +33,7 @@ const Register: FunctionComponent = () => {
         try {
             await graphQLClient.request(
                 gql`
-                    mutation(
+                    mutation (
                         $firstName: String!
                         $middleName: String!
                         $lastName: String!

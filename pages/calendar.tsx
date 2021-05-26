@@ -58,7 +58,7 @@ const CalendarComponent: FunctionComponent = () => {
     const [error, setError] = useState('');
     const { data, mutate } = useSWR([
         gql`
-            query($filterByType: MessageType) {
+            query ($filterByType: MessageType) {
                 getAllMessagesByCriteria(
                     input: { messageType: $filterByType }
                 ) {
@@ -88,7 +88,7 @@ const CalendarComponent: FunctionComponent = () => {
         try {
             const data = await graphQLClient.request(
                 gql`
-                    query($id: String!) {
+                    query ($id: String!) {
                         getMessage(id: $id) {
                             id
                             createdAt
@@ -114,7 +114,7 @@ const CalendarComponent: FunctionComponent = () => {
         try {
             await graphQLClient.request(
                 gql`
-                    mutation(
+                    mutation (
                         $id: String!
                         $data: String!
                         $assignmentDueDate: Date!
@@ -150,7 +150,7 @@ const CalendarComponent: FunctionComponent = () => {
         try {
             await graphQLClient.request(
                 gql`
-                    mutation($id: String!) {
+                    mutation ($id: String!) {
                         removeMessage(id: $id) {
                             messageId
                         }

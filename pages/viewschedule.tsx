@@ -34,7 +34,7 @@ const ViewSchedule: FunctionComponent = () => {
     const [error, setError] = useState('');
     const { data } = useSWR([
         gql`
-            query($classId: String!, $teacherId: String!) {
+            query ($classId: String!, $teacherId: String!) {
                 getAllSchedulesByCriteria(
                     classId: $classId
                     teacherId: $teacherId
@@ -102,9 +102,12 @@ const ViewSchedule: FunctionComponent = () => {
                                                 start: setDay(
                                                     set(new Date(), {
                                                         hours: startTime.getHours(),
-                                                        minutes: startTime.getMinutes(),
-                                                        seconds: startTime.getSeconds(),
-                                                        milliseconds: startTime.getMilliseconds(),
+                                                        minutes:
+                                                            startTime.getMinutes(),
+                                                        seconds:
+                                                            startTime.getSeconds(),
+                                                        milliseconds:
+                                                            startTime.getMilliseconds(),
                                                     }),
                                                     getDayByWord(
                                                         event.day
@@ -114,9 +117,12 @@ const ViewSchedule: FunctionComponent = () => {
                                                 end: setDay(
                                                     set(new Date(), {
                                                         hours: endTime.getHours(),
-                                                        minutes: endTime.getMinutes(),
-                                                        seconds: endTime.getSeconds(),
-                                                        milliseconds: endTime.getMilliseconds(),
+                                                        minutes:
+                                                            endTime.getMinutes(),
+                                                        seconds:
+                                                            endTime.getSeconds(),
+                                                        milliseconds:
+                                                            endTime.getMilliseconds(),
                                                     }),
                                                     getDayByWord(
                                                         event.day

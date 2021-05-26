@@ -68,7 +68,7 @@ const EditSubject: FunctionComponent = () => {
             try {
                 const subjectData = await graphQLClient.request(
                     gql`
-                        query($id: String!) {
+                        query ($id: String!) {
                             getSubject(id: $id) {
                                 id
                                 startYear
@@ -115,7 +115,7 @@ const EditSubject: FunctionComponent = () => {
         try {
             await graphQLClient.request(
                 gql`
-                    mutation(
+                    mutation (
                         $id: String!
                         $startYear: Int!
                         $endYear: Int!

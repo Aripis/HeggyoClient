@@ -99,7 +99,7 @@ const ViewStudent: FunctionComponent = () => {
 
     const { data, mutate } = useSWR([
         gql`
-            query($studentId: String!) {
+            query ($studentId: String!) {
                 getStudent(id: $studentId) {
                     id
                     user {
@@ -170,7 +170,7 @@ const ViewStudent: FunctionComponent = () => {
         try {
             await graphQLClient.request(
                 gql`
-                    mutation(
+                    mutation (
                         $studentId: String!
                         $subjectId: String!
                         $files: [Upload!]

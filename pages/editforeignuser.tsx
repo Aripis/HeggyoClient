@@ -36,7 +36,7 @@ const EditForeignUser: FunctionComponent = () => {
     const { r: role, id } = router.query;
 
     const forStudent = gql`
-        query($id: String!) {
+        query ($id: String!) {
             getStudent(id: $id) {
                 id
                 user {
@@ -58,7 +58,7 @@ const EditForeignUser: FunctionComponent = () => {
         }
     `;
     const forTeacher = gql`
-        query($id: String!) {
+        query ($id: String!) {
             getTeacher(id: $id) {
                 id
                 user {
@@ -115,7 +115,7 @@ const EditForeignUser: FunctionComponent = () => {
         try {
             await graphQLClient.request(
                 gql`
-                    mutation(
+                    mutation (
                         $stId: String!
                         $userId: String!
                         $recordMessage: String!
@@ -152,7 +152,7 @@ const EditForeignUser: FunctionComponent = () => {
         try {
             await graphQLClient.request(
                 gql`
-                    mutation(
+                    mutation (
                         $tchId: String!
                         $userId: String!
                         $userStatus: UserStatus!

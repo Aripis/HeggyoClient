@@ -190,7 +190,7 @@ const GradeDialog: FunctionComponent<GradeDialogProps> = (props) => {
         try {
             await graphQLClient.request(
                 gql`
-                    mutation(
+                    mutation (
                         $studentId: String!
                         $subjectId: String!
                         $grade: Float!
@@ -360,7 +360,7 @@ const GradeTable: FunctionComponent<GradeTableProps> = (props) => {
 
     const { data, mutate } = useSWR([
         gql`
-            query($subjectId: String!, $classId: String!) {
+            query ($subjectId: String!, $classId: String!) {
                 getAllGradesPerClassPerSubject(
                     subjectId: $subjectId
                     classId: $classId

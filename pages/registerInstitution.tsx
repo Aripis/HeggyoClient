@@ -72,7 +72,7 @@ const Register: FunctionComponent = () => {
         try {
             await graphQLClient.request(
                 gql`
-                    mutation(
+                    mutation (
                         $name: String!
                         $email: String!
                         $type: InstitutionType!
@@ -110,7 +110,7 @@ const Register: FunctionComponent = () => {
         try {
             await graphQLClient.request(
                 gql`
-                    mutation(
+                    mutation (
                         $firstName: String!
                         $middleName: String!
                         $lastName: String!

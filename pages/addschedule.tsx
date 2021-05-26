@@ -195,11 +195,10 @@ const ScheduleField: FunctionComponent<ScheduleFieldProps> = (props) => {
                         });
                     }}
                     renderValue={(selected) => {
-                        const selectedSubject:
-                            | Subject
-                            | undefined = props.subjects.find(
-                            (subject: Subject) => subject.id === selected
-                        );
+                        const selectedSubject: Subject | undefined =
+                            props.subjects.find(
+                                (subject: Subject) => subject.id === selected
+                            );
                         return `${selectedSubject?.class?.number}${selectedSubject?.class?.letter} ${selectedSubject?.name}`;
                     }}
                 >
@@ -355,7 +354,7 @@ const AddSchedule: FunctionComponent = () => {
             for (const field of fields) {
                 await graphQLClient.request(
                     gql`
-                        mutation(
+                        mutation (
                             $startTime: Date!
                             $endTime: Date!
                             $day: WeekDays!
@@ -494,10 +493,12 @@ const AddSchedule: FunctionComponent = () => {
                                             setClassId(e.target.value as string)
                                         }
                                         renderValue={(selected) => {
-                                            const selectedClass: Class = data.getAllClasses.find(
-                                                (currClass: Class) =>
-                                                    currClass.id === selected
-                                            );
+                                            const selectedClass: Class =
+                                                data.getAllClasses.find(
+                                                    (currClass: Class) =>
+                                                        currClass.id ===
+                                                        selected
+                                                );
                                             return `${selectedClass.number} ${selectedClass.letter}`;
                                         }}
                                     >

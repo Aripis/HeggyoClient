@@ -75,12 +75,10 @@ import { DropzoneArea } from 'material-ui-dropzone';
 const Dashboard: FunctionComponent = () => {
     const router = useRouter();
     const { user, status } = useAuth();
-    const [filterByStatus, setFilterByStatus] = useState<string | undefined>(
-        undefined
-    );
-    const [filterByType, setFilterByType] = useState<string | undefined>(
-        undefined
-    );
+    const [filterByStatus, setFilterByStatus] =
+        useState<string | undefined>(undefined);
+    const [filterByType, setFilterByType] =
+        useState<string | undefined>(undefined);
     const [messagesByCriteria, setMessagesByCriteria] = useState([]);
     const [toUserIds, setToUserIds] = useState<string[]>([]);
     const [toClassIds, setToClassUUIDs] = useState<string[]>([]);
@@ -98,7 +96,7 @@ const Dashboard: FunctionComponent = () => {
 
     const { data, mutate } = useSWR([
         gql`
-            query($filterByStatus: MessageStatus, $filterByType: MessageType) {
+            query ($filterByStatus: MessageStatus, $filterByType: MessageType) {
                 getAllMessagesByCriteria(
                     input: {
                         messageStatus: $filterByStatus
@@ -189,7 +187,7 @@ const Dashboard: FunctionComponent = () => {
         try {
             await graphQLClient.request(
                 gql`
-                    mutation(
+                    mutation (
                         $toUserIds: [String!]
                         $toClassIds: [String!]
                         $data: String
