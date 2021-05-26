@@ -398,6 +398,30 @@ const GradeTable: FunctionComponent<GradeTableProps> = (props) => {
                 </div>
 
                 <div
+                    className={`${styles['grade-field']} ${styles['grade-field-turm-1']}`}
+                >
+                    <span>
+                        <strong>1 срок</strong>
+                    </span>
+                </div>
+
+                <div
+                    className={`${styles['grade-field']} ${styles['grade-field-turm-2']}`}
+                >
+                    <span>
+                        <strong>2 срок</strong>
+                    </span>
+                </div>
+
+                <div
+                    className={`${styles['grade-field']} ${styles['grade-field-year']}`}
+                >
+                    <span>
+                        <strong>Годишна</strong>
+                    </span>
+                </div>
+
+                <div
                     className={`${styles['grade-field']} ${styles['grade-field-grades']}`}
                 >
                     <span>
@@ -405,7 +429,7 @@ const GradeTable: FunctionComponent<GradeTableProps> = (props) => {
                     </span>
                 </div>
             </div>
-            {props.students.map((student) => (
+            {props.students.map((student: Student) => (
                 <Fragment key={student.id}>
                     <div className={styles['grade-row']}>
                         <div
@@ -423,62 +447,318 @@ const GradeTable: FunctionComponent<GradeTableProps> = (props) => {
                             />
                         </div>
                         <div
+                            className={`${styles['grade-field']} ${styles['grade-field-turm-1']}`}
+                        >
+                            {data?.getAllGradesPerClassPerSubject?.filter(
+                                (grade: Grade) =>
+                                    grade?.student?.id === student.id &&
+                                    (grade.type as string) === 'TURM_1'
+                            ).length > 0 ? (
+                                data?.getAllGradesPerClassPerSubject
+                                    ?.filter(
+                                        (grade: Grade) =>
+                                            grade?.student?.id === student.id &&
+                                            (grade.type as string) === 'TURM_1'
+                                    )
+                                    .sort((a: Grade, b: Grade) =>
+                                        (a.createdAt as Date) >
+                                        (b.createdAt as Date)
+                                            ? 1
+                                            : (a.createdAt as Date) <
+                                              (b.createdAt as Date)
+                                            ? -1
+                                            : 0
+                                    )
+                                    .map((grade: Grade, i: number) => (
+                                        <Fragment key={grade.id}>
+                                            <span
+                                                aria-haspopup='true'
+                                                className={styles.grade}
+                                                onMouseEnter={(
+                                                    e: MouseEvent<HTMLButtonElement>
+                                                ) =>
+                                                    onGradeHover(
+                                                        i,
+                                                        e.currentTarget
+                                                    )
+                                                }
+                                                onMouseLeave={() =>
+                                                    onGradeHover(i, null)
+                                                }
+                                                key={grade.id}
+                                            >{`${getGradeName(
+                                                grade.gradeWithWords,
+                                                true
+                                            )} ${grade.grade}`}</span>
+                                            <Popover
+                                                style={{
+                                                    pointerEvents: 'none',
+                                                }}
+                                                open={Boolean(anchorEl[i])}
+                                                anchorEl={anchorEl[i]}
+                                                onClose={() =>
+                                                    onGradeHover(i, null)
+                                                }
+                                                anchorOrigin={{
+                                                    vertical: 'bottom',
+                                                    horizontal: 'center',
+                                                }}
+                                                transformOrigin={{
+                                                    vertical: 'top',
+                                                    horizontal: 'center',
+                                                }}
+                                            >
+                                                <Typography className='grade-message'>
+                                                    {grade.message || 'Оценка'}
+                                                </Typography>
+                                            </Popover>
+                                        </Fragment>
+                                    ))
+                            ) : (
+                                <span
+                                    aria-haspopup='true'
+                                    className={styles.grade}
+                                >
+                                    Няма
+                                </span>
+                            )}
+                        </div>
+                        <div
+                            className={`${styles['grade-field']} ${styles['grade-field-turm-2']}`}
+                        >
+                            {data?.getAllGradesPerClassPerSubject?.filter(
+                                (grade: Grade) =>
+                                    grade?.student?.id === student.id &&
+                                    (grade.type as string) === 'TURM_2'
+                            ).length > 0 ? (
+                                data?.getAllGradesPerClassPerSubject
+                                    ?.filter(
+                                        (grade: Grade) =>
+                                            grade?.student?.id === student.id &&
+                                            (grade.type as string) === 'TURM_2'
+                                    )
+                                    .sort((a: Grade, b: Grade) =>
+                                        (a.createdAt as Date) >
+                                        (b.createdAt as Date)
+                                            ? 1
+                                            : (a.createdAt as Date) <
+                                              (b.createdAt as Date)
+                                            ? -1
+                                            : 0
+                                    )
+                                    .map((grade: Grade, i: number) => (
+                                        <Fragment key={grade.id}>
+                                            <span
+                                                aria-haspopup='true'
+                                                className={styles.grade}
+                                                onMouseEnter={(
+                                                    e: MouseEvent<HTMLButtonElement>
+                                                ) =>
+                                                    onGradeHover(
+                                                        i,
+                                                        e.currentTarget
+                                                    )
+                                                }
+                                                onMouseLeave={() =>
+                                                    onGradeHover(i, null)
+                                                }
+                                                key={grade.id}
+                                            >{`${getGradeName(
+                                                grade.gradeWithWords,
+                                                true
+                                            )} ${grade.grade}`}</span>
+                                            <Popover
+                                                style={{
+                                                    pointerEvents: 'none',
+                                                }}
+                                                open={Boolean(anchorEl[i])}
+                                                anchorEl={anchorEl[i]}
+                                                onClose={() =>
+                                                    onGradeHover(i, null)
+                                                }
+                                                anchorOrigin={{
+                                                    vertical: 'bottom',
+                                                    horizontal: 'center',
+                                                }}
+                                                transformOrigin={{
+                                                    vertical: 'top',
+                                                    horizontal: 'center',
+                                                }}
+                                            >
+                                                <Typography className='grade-message'>
+                                                    {grade.message || 'Оценка'}
+                                                </Typography>
+                                            </Popover>
+                                        </Fragment>
+                                    ))
+                            ) : (
+                                <span
+                                    aria-haspopup='true'
+                                    className={styles.grade}
+                                >
+                                    Няма
+                                </span>
+                            )}
+                        </div>
+                        <div
+                            className={`${styles['grade-field']} ${styles['grade-field-year']}`}
+                        >
+                            {data?.getAllGradesPerClassPerSubject?.filter(
+                                (grade: Grade) =>
+                                    grade?.student?.id === student.id &&
+                                    (grade.type as string) === 'YEAR'
+                            ).length > 0 ? (
+                                data?.getAllGradesPerClassPerSubject
+                                    ?.filter(
+                                        (grade: Grade) =>
+                                            grade?.student?.id === student.id &&
+                                            (grade.type as string) === 'YEAR'
+                                    )
+                                    .sort((a: Grade, b: Grade) =>
+                                        (a.createdAt as Date) >
+                                        (b.createdAt as Date)
+                                            ? 1
+                                            : (a.createdAt as Date) <
+                                              (b.createdAt as Date)
+                                            ? -1
+                                            : 0
+                                    )
+                                    .map((grade: Grade, i: number) => (
+                                        <Fragment key={grade.id}>
+                                            <span
+                                                aria-haspopup='true'
+                                                className={styles.grade}
+                                                onMouseEnter={(
+                                                    e: MouseEvent<HTMLButtonElement>
+                                                ) =>
+                                                    onGradeHover(
+                                                        i,
+                                                        e.currentTarget
+                                                    )
+                                                }
+                                                onMouseLeave={() =>
+                                                    onGradeHover(i, null)
+                                                }
+                                                key={grade.id}
+                                            >{`${getGradeName(
+                                                grade.gradeWithWords,
+                                                true
+                                            )} ${grade.grade}`}</span>
+                                            <Popover
+                                                style={{
+                                                    pointerEvents: 'none',
+                                                }}
+                                                open={Boolean(anchorEl[i])}
+                                                anchorEl={anchorEl[i]}
+                                                onClose={() =>
+                                                    onGradeHover(i, null)
+                                                }
+                                                anchorOrigin={{
+                                                    vertical: 'bottom',
+                                                    horizontal: 'center',
+                                                }}
+                                                transformOrigin={{
+                                                    vertical: 'top',
+                                                    horizontal: 'center',
+                                                }}
+                                            >
+                                                <Typography className='grade-message'>
+                                                    {grade.message || 'Оценка'}
+                                                </Typography>
+                                            </Popover>
+                                        </Fragment>
+                                    ))
+                            ) : (
+                                <span
+                                    aria-haspopup='true'
+                                    className={styles.grade}
+                                >
+                                    Няма
+                                </span>
+                            )}
+                        </div>
+                        <div
                             className={`${styles['grade-field']} ${styles['grade-field-grades']}`}
                         >
-                            {data?.getAllGradesPerClassPerSubject
-                                ?.filter(
-                                    (grade: Grade) =>
-                                        grade?.student?.id === student.id
-                                )
-                                .sort((a: Grade, b: Grade) =>
-                                    (a.createdAt as Date) >
-                                    (b.createdAt as Date)
-                                        ? 1
-                                        : (a.createdAt as Date) <
-                                          (b.createdAt as Date)
-                                        ? -1
-                                        : 0
-                                )
-                                .map((grade: Grade, i: number) => (
-                                    <Fragment key={grade.id}>
-                                        <span
-                                            aria-haspopup='true'
-                                            className={styles.grade}
-                                            onMouseEnter={(
-                                                e: MouseEvent<HTMLButtonElement>
-                                            ) =>
-                                                onGradeHover(i, e.currentTarget)
-                                            }
-                                            onMouseLeave={() =>
-                                                onGradeHover(i, null)
-                                            }
-                                            key={grade.id}
-                                        >{`${getGradeName(
-                                            grade.gradeWithWords,
-                                            true
-                                        )} ${grade.grade}`}</span>
-                                        <Popover
-                                            style={{ pointerEvents: 'none' }}
-                                            open={Boolean(anchorEl[i])}
-                                            anchorEl={anchorEl[i]}
-                                            onClose={() =>
-                                                onGradeHover(i, null)
-                                            }
-                                            anchorOrigin={{
-                                                vertical: 'bottom',
-                                                horizontal: 'center',
-                                            }}
-                                            transformOrigin={{
-                                                vertical: 'top',
-                                                horizontal: 'center',
-                                            }}
-                                        >
-                                            <Typography className='grade-message'>
-                                                {grade.message || 'Оценка'}
-                                            </Typography>
-                                        </Popover>
-                                    </Fragment>
-                                ))}
+                            {data?.getAllGradesPerClassPerSubject?.filter(
+                                (grade: Grade) =>
+                                    grade?.student?.id === student.id &&
+                                    (grade?.type as string) !== 'TURM_1' &&
+                                    (grade?.type as string) !== 'TURM_2' &&
+                                    (grade?.type as string) !== 'YEAR'
+                            ).length > 0 ? (
+                                data?.getAllGradesPerClassPerSubject
+                                    ?.filter(
+                                        (grade: Grade) =>
+                                            grade?.student?.id === student.id &&
+                                            (grade?.type as string) !==
+                                                'TURM_1' &&
+                                            (grade?.type as string) !==
+                                                'TURM_2' &&
+                                            (grade?.type as string) !== 'YEAR'
+                                    )
+                                    .sort((a: Grade, b: Grade) =>
+                                        (a.createdAt as Date) >
+                                        (b.createdAt as Date)
+                                            ? 1
+                                            : (a.createdAt as Date) <
+                                              (b.createdAt as Date)
+                                            ? -1
+                                            : 0
+                                    )
+                                    .map((grade: Grade, i: number) => (
+                                        <Fragment key={grade.id}>
+                                            <span
+                                                aria-haspopup='true'
+                                                className={styles.grade}
+                                                onMouseEnter={(
+                                                    e: MouseEvent<HTMLButtonElement>
+                                                ) =>
+                                                    onGradeHover(
+                                                        i,
+                                                        e.currentTarget
+                                                    )
+                                                }
+                                                onMouseLeave={() =>
+                                                    onGradeHover(i, null)
+                                                }
+                                                key={grade.id}
+                                            >{`${getGradeName(
+                                                grade.gradeWithWords,
+                                                true
+                                            )} ${grade.grade}`}</span>
+                                            <Popover
+                                                style={{
+                                                    pointerEvents: 'none',
+                                                }}
+                                                open={Boolean(anchorEl[i])}
+                                                anchorEl={anchorEl[i]}
+                                                onClose={() =>
+                                                    onGradeHover(i, null)
+                                                }
+                                                anchorOrigin={{
+                                                    vertical: 'bottom',
+                                                    horizontal: 'center',
+                                                }}
+                                                transformOrigin={{
+                                                    vertical: 'top',
+                                                    horizontal: 'center',
+                                                }}
+                                            >
+                                                <Typography className='grade-message'>
+                                                    {grade.message || 'Оценка'}
+                                                </Typography>
+                                            </Popover>
+                                        </Fragment>
+                                    ))
+                            ) : (
+                                <span
+                                    aria-haspopup='true'
+                                    className={styles.grade}
+                                >
+                                    Няма
+                                </span>
+                            )}
                         </div>
                     </div>
                 </Fragment>
