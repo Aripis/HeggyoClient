@@ -154,6 +154,17 @@ const Drawer: FunctionComponent = () => {
                                 : 'Учебни програми'}
                         </Button>
                     </Link>
+                    {user?.role === 'PARENT' && (
+                        <Link
+                            underline='none'
+                            className={styles.link}
+                            href='/grades'
+                        >
+                            <Button>
+                                <DescriptionOutlined /> Оценки
+                            </Button>
+                        </Link>
+                    )}
                 </SwipeableDrawer>
             </Container>
         </>

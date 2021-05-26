@@ -63,6 +63,12 @@ export interface Student {
     dossier?: StudentDossier;
 }
 
+export interface Parent {
+    id?: string;
+    user?: User;
+    students?: Student[];
+}
+
 export interface Class {
     id?: string;
     subjects?: Subject[];
