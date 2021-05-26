@@ -114,6 +114,10 @@
         flex-direction: row;
         flex-wrap: wrap;
 
+        &.parent {
+            margin-top: 25px;
+        }
+
         .no-classes {
             width: 100%;
             padding: 25px;
