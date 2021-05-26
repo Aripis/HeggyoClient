@@ -49,8 +49,6 @@ const Grades: FunctionComponent = () => {
     const router = useRouter();
     const [value, setValue] = useState(0);
     const { user, status } = useAuth();
-    const [studentIds, setStudentIds] = useState([]);
-    const [error, setError] = useState('');
     const [anchorEl, setAnchorEl] = useState<(HTMLButtonElement | null)[]>([]);
 
     let tabCounter = 0;
